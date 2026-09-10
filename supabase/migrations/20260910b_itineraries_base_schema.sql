@@ -69,8 +69,7 @@ alter table itinerary_operators enable row level security;
 
 -- Public catalog: anyone (including signed-out visitors) can browse
 -- published itineraries and their day-by-day plan/media. Draft/archived
--- itineraries are admin-only (no policy here grants access to them —
--- the admin panel is expected to use the service role, which bypasses RLS).
+-- itineraries are admin-only via the policies further down.
 drop policy if exists "Anyone can view published itineraries" on itineraries;
 create policy "Anyone can view published itineraries"
   on itineraries for select
@@ -113,6 +112,52 @@ create policy "Operators can apply to itineraries"
   on itinerary_operators for insert
   with check (auth.uid() = operator_id);
 
--- No update/delete policy for operators: withdrawing an application or
--- admin approval/rejection isn't built in the app yet (admin approval
--- screens are build order step 8, on the website).
+-- No update/delete policy for operators: withdrawing an application isn't
+-- built in the app yet. Approval/rejection is an admin action (below).
+
+-- Admin access: the website's admin pages run as the logged-in admin's own
+-- session (not a service role) and rely on RLS admin policies elsewhere
+-- (confirmed in app/lib/verification.ts — "ADMIN ONLY (enforced by RLS)"
+-- on plain table updates). These four mirror that same pattern rather than
+-- assuming a service-role bypass, so build order step 8 (admin itinerary
+-- authoring + operator-application approval, on the website) can use the
+-- ordinary client.
+drop policy if exists "Admins can manage itineraries" on itineraries;
+create policy "Admins can manage itineraries"
+  on itineraries for all
+  using (exists (
+    select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true
+  ))
+  with check (exists (
+    select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true
+  ));
+
+drop policy if exists "Admins can manage itinerary days" on itinerary_days;
+create policy "Admins can manage itinerary days"
+  on itinerary_days for all
+  using (exists (
+    select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true
+  ))
+  with check (exists (
+    select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true
+  ));
+
+drop policy if exists "Admins can manage itinerary media" on itinerary_media;
+create policy "Admins can manage itinerary media"
+  on itinerary_media for all
+  using (exists (
+    select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true
+  ))
+  with check (exists (
+    select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true
+  ));
+
+drop policy if exists "Admins can manage operator applications" on itinerary_operators;
+create policy "Admins can manage operator applications"
+  on itinerary_operators for all
+  using (exists (
+    select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true
+  ))
+  with check (exists (
+    select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true
+  ));
