@@ -8,16 +8,15 @@ same storage buckets — and evolves alongside it rather than replacing it.
 ## Status
 
 Project setup, shared theme, Supabase bootstrap, the app's Google sign-in
-gate, itinerary browsing, and the booking request flow are in place. Chat
-is still a "coming soon" placeholder in the bottom-nav tab, in build
-order:
+gate, itinerary browsing, the booking request flow, and direct-message
+chat are in place, in build order:
 
 1. ~~Website auth rework~~ (out of scope for this repo — see note below)
 2. Schema additions for itineraries (website + app)
 3. **Flutter: Google sign-in + profile — done**
 4. **Flutter: itinerary browsing + detail screens — done**
 5. **Flutter: booking flow — done (request-only; see below)**
-6. Flutter: chat
+6. **Flutter: chat — done (direct messages only; see below)**
 7. Flutter: operator/guide dashboards
 8. Website: admin itinerary authoring + approval screens
 9. Reviews, notifications, polish
@@ -43,17 +42,36 @@ signed-in tourist's own requests with a status chip (requested / confirmed
 / declined / cancelled); nothing yet acts on a request beyond creating it
 — operator/admin confirmation is step 7.
 
-> **Note on scope for this session:** this session only has access to the
-> `cjzang03-dev/chojay` (this) repo. The website repo
-> `cjzang03-dev/taledesti-quest` and the live Supabase schema were **not
-> accessible**, so the `profiles.user_type` values and table shapes used
-> here (`tourist` / `guide` / `operator`, `itineraries`, `itinerary_operators`)
-> are taken directly from the product spec's schema sketch, not verified
-> against the actual database. Before wiring up real screens against these
-> tables (build order steps 4+), confirm the live schema matches — in
-> particular the exact `profiles` columns and the `payments.guide_id`
-> naming bug mentioned in the spec, so this app doesn't write data the
-> website's existing logic won't expect.
+Step 6 (`lib/features/chat/`) reuses the website's existing direct-message
+schema exactly as-is (`conversations`: `participant_1`/`participant_2`,
+`last_message`, `last_message_at`; `messages`: `conversation_id`,
+`sender_id`, `receiver_id`, `content`, `read`), plus its
+`get_public_profile(s)_by_id(s)` RPCs for reading another user's public
+profile fields under RLS — confirmed by reading
+`app/dashboard/page.tsx`'s `MessagingTab` in the website repo, not
+guessed. A message sent from the app lands in the same conversation the
+operator sees on the website, and vice versa. Chat threads are reached
+from a booking's "Message" button, and submitting a booking request
+auto-starts (or reuses) the conversation with a summary message — this is
+literally where the product decision says exact group/room pricing gets
+confirmed. **Deliberately deferred** (the website has these; not silently
+dropped, flagging for a decision): message reactions, in-app report/block
+inside the app's chat UI, and group chat (the website's `group_messages` /
+`group_conversations` tables exist but per the product scope-cut list,
+direct messaging alone covers the core trust loop — say if you want group
+chat built too).
+
+> **Note on scope:** this session has access to both
+> `cjzang03-dev/chojay` (this repo) and, as of the chat feature,
+> `cjzang03-dev/taledesti-quest` (the website) — so the chat schema above
+> is verified against real source, not guessed. The itinerary/booking work
+> earlier (steps 4-5) predates that access: `profiles.user_type` values
+> and the `itineraries`/`itinerary_operators` shape there still follow the
+> product spec's schema sketch rather than a read of the live database.
+> Now that the website repo is reachable, that's worth double-checking
+> against its actual schema (or Supabase directly) before those screens
+> see real data — in particular the exact `profiles` columns and the
+> `payments.guide_id` naming bug mentioned in the spec.
 
 ## Product decisions this scaffold builds to
 

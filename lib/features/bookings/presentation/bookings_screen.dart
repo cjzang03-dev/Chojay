@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/coming_soon.dart';
 import '../../../core/widgets/error_state.dart';
+import '../../chat/data/chat_providers.dart';
+import '../../chat/presentation/chat_thread_screen.dart';
 import '../data/bookings_providers.dart';
 import '../domain/booking_request.dart';
 
@@ -60,13 +62,47 @@ class BookingsScreen extends ConsumerWidget {
   }
 }
 
-class _BookingTile extends StatelessWidget {
+class _BookingTile extends ConsumerStatefulWidget {
   const _BookingTile({required this.booking});
 
   final BookingRequest booking;
 
   @override
+  ConsumerState<_BookingTile> createState() => _BookingTileState();
+}
+
+class _BookingTileState extends ConsumerState<_BookingTile> {
+  bool _openingChat = false;
+
+  Future<void> _openChat() async {
+    setState(() => _openingChat = true);
+    try {
+      final conversationId = await ref
+          .read(chatRepositoryProvider)
+          .startOrGetConversation(widget.booking.operatorId);
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ChatThreadScreen(
+            conversationId: conversationId,
+            otherUserId: widget.booking.operatorId,
+            otherDisplayName: widget.booking.operatorName ?? 'Operator',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Couldn\'t open chat: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _openingChat = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final booking = widget.booking;
     final date = booking.travelStartDate;
     final dateLabel =
         '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
@@ -106,6 +142,15 @@ class _BookingTile extends StatelessWidget {
                 Text('${booking.travelerCount}',
                     style: TextStyle(color: AppColors.stoneGrey)),
               ],
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: _openingChat ? null : _openChat,
+                icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                label: const Text('Message'),
+              ),
             ),
           ],
         ),

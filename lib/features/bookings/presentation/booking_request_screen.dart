@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../chat/data/chat_providers.dart';
+import '../../chat/presentation/chat_thread_screen.dart';
 import '../../itineraries/domain/itinerary.dart';
 import '../data/bookings_providers.dart';
 
 /// Build order step 5: pick an operator from the approved list (already
 /// done on the detail screen), show the itinerary's indicative price as-is
-/// (never recalculated here), and submit a booking *request* — exact
-/// terms, including group/room pricing, are confirmed with the operator
-/// once chat (step 6) exists.
+/// (never recalculated here), and submit a booking *request*. Submitting
+/// also starts (or reuses) a chat thread with the operator and drops in a
+/// summary message — per product decision, exact terms including
+/// group/room pricing are confirmed there, not auto-calculated here.
 class BookingRequestScreen extends ConsumerStatefulWidget {
   const BookingRequestScreen({
     super.key,
@@ -71,15 +74,46 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
           );
       ref.invalidate(myBookingsProvider);
       if (!mounted) return;
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Request sent to ${widget.operator.displayName}. '
-            'Track it in the Bookings tab.',
+
+      // Best-effort: the booking request itself already succeeded above, so
+      // a hiccup here shouldn't block the user — fall back to a plain
+      // confirmation instead of opening the thread.
+      try {
+        final chatRepository = ref.read(chatRepositoryProvider);
+        final conversationId =
+            await chatRepository.startOrGetConversation(widget.operator.profileId);
+        final dateLabel =
+            '${travelStartDate.year}-${travelStartDate.month.toString().padLeft(2, '0')}-${travelStartDate.day.toString().padLeft(2, '0')}';
+        await chatRepository.sendMessage(
+          conversationId: conversationId,
+          receiverId: widget.operator.profileId,
+          content: 'New booking request: "${widget.itinerary.title}" — '
+              '$dateLabel, $_travelerCount traveler(s). '
+              '${widget.itinerary.indicativePrice ?? ''} indicative price — '
+              'let\'s confirm exact details here.',
+        );
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => ChatThreadScreen(
+              conversationId: conversationId,
+              otherUserId: widget.operator.profileId,
+              otherDisplayName: widget.operator.displayName,
+            ),
           ),
-        ),
-      );
+        );
+      } catch (_) {
+        if (!mounted) return;
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Request sent to ${widget.operator.displayName}. '
+              'Track it in the Bookings tab.',
+            ),
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
