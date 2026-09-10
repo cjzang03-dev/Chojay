@@ -7,20 +7,27 @@ same storage buckets — and evolves alongside it rather than replacing it.
 
 ## Status
 
-This is the initial scaffold: project setup, shared theme, Supabase
-bootstrap, and the app's Google sign-in gate (build order step 3). No
-itinerary/booking/chat data screens yet — those are stubbed as
-"coming soon" placeholders in the bottom-nav tabs, in build order:
+Project setup, shared theme, Supabase bootstrap, the app's Google sign-in
+gate, and read-only itinerary browsing are in place. Booking and chat are
+still stubbed as "coming soon" placeholders in the bottom-nav tabs, in
+build order:
 
 1. ~~Website auth rework~~ (out of scope for this repo — see note below)
 2. Schema additions for itineraries (website + app)
-3. **Flutter: Google sign-in + profile — done in this scaffold**
-4. Flutter: itinerary browsing + detail screens
+3. **Flutter: Google sign-in + profile — done**
+4. **Flutter: itinerary browsing + detail screens — done (read-only; see below)**
 5. Flutter: booking flow
 6. Flutter: chat
 7. Flutter: operator/guide dashboards
 8. Website: admin itinerary authoring + approval screens
 9. Reviews, notifications, polish
+
+Step 4 covers: a published-itinerary catalog (`lib/features/itineraries/`),
+a detail screen (hero image, day-by-day plan, indicative price shown
+as-is), and the read-only "approved operators" list
+(`itinerary_operators` joined to `profiles`, filtered to
+`status = 'approved'`) that a tourist will pick from once booking (step 5)
+lands. No booking action exists yet on purpose.
 
 > **Note on scope for this session:** this session only has access to the
 > `cjzang03-dev/chojay` (this) repo. The website repo
