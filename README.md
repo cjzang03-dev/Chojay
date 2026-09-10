@@ -8,8 +8,8 @@ same storage buckets — and evolves alongside it rather than replacing it.
 ## Status
 
 Project setup, shared theme, Supabase bootstrap, the app's Google sign-in
-gate, itinerary browsing, the booking request flow, and direct-message
-chat are in place, in build order:
+gate, itinerary browsing, the booking request flow, direct-message chat,
+and operator/guide dashboards are in place, in build order:
 
 1. ~~Website auth rework~~ (out of scope for this repo — see note below)
 2. Schema additions for itineraries (website + app)
@@ -17,9 +17,41 @@ chat are in place, in build order:
 4. **Flutter: itinerary browsing + detail screens — done**
 5. **Flutter: booking flow — done (request-only; see below)**
 6. **Flutter: chat — done (direct messages only; see below)**
-7. Flutter: operator/guide dashboards
+7. **Flutter: operator/guide dashboards — done (see below)**
 8. Website: admin itinerary authoring + approval screens
 9. Reviews, notifications, polish
+
+Step 7 (`lib/features/partner/`) covers: signed-in guides/operators are
+routed (by `profiles.user_type`, via `currentProfileProvider` in
+`lib/features/auth/data/auth_providers.dart`) into a separate
+`PartnerDashboardShell` instead of the tourist `HomeShell`. It reuses the
+Chat and Profile tabs as-is — messaging and account info aren't
+role-specific — and adds two new tabs:
+- **Itineraries**: every published itinerary, with an "Apply" button that
+  creates a `pending` `itinerary_operators` row, or a status banner
+  (pending/approved/rejected) if already applied. Admin approval (website,
+  step 8) is what actually makes an operator appear in the tourist-facing
+  picker list — this screen only shows this partner's own standing.
+- **Bookings**: incoming `itinerary_bookings` rows where `operator_id` is
+  the signed-in user, with a "Message" action into the existing chat
+  thread. Read-only beyond that — confirming/declining a request needs an
+  `UPDATE` policy on `itinerary_bookings` that isn't in the migration yet
+  (deferred; today's flow is "coordinate exact terms in chat," which the
+  product decisions already call for).
+
+While building this, two correctness fixes to earlier steps:
+- **The base itinerary schema had never actually been written to a
+  migration file** — it only existed as inline SQL in the original task
+  description. It's now `supabase/migrations/20260910b_itineraries_base_schema.sql`
+  (itineraries/itinerary_days/itinerary_media/itinerary_operators + RLS).
+  **Not applied** — run both this and `20260910_itinerary_bookings.sql`
+  (in that order) before any of steps 4-7 work against real data.
+- **`ItinerariesRepository.fetchApprovedOperators` was joining `profiles`
+  directly**, which would silently return null for every operator once
+  RLS is in place — the website deliberately routes all cross-user
+  profile reads through `get_public_profile(s)_by_id(s)` RPCs instead
+  (confirmed while building chat). Fixed to use the same batched-RPC
+  pattern as `ChatRepository` and the new partner screens.
 
 Step 4 covers: a published-itinerary catalog (`lib/features/itineraries/`),
 a detail screen (hero image, day-by-day plan, indicative price shown

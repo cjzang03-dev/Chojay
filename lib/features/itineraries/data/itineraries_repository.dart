@@ -34,10 +34,28 @@ class ItinerariesRepository {
   ) async {
     final rows = await supabase
         .from('itinerary_operators')
-        .select('operator_id, profiles(id, full_name, email, user_type)')
+        .select('operator_id')
         .eq('itinerary_id', itineraryId)
         .eq('status', 'approved');
-    return rows.map(ApprovedOperator.fromJson).toList();
+
+    final operatorIds =
+        rows.map((r) => r['operator_id'] as String).toList();
+    if (operatorIds.isEmpty) return [];
+
+    // Batched, RLS-safe profile lookup — matches ChatRepository's pattern
+    // rather than embedding `profiles` directly (see ApprovedOperator.fromRow).
+    final profiles = await supabase
+        .rpc('get_public_profiles_by_ids', params: {'profile_ids': operatorIds});
+    final profilesById = {
+      for (final p in (profiles as List)) (p as Map)['id'] as String: p,
+    };
+
+    return rows
+        .map((r) => ApprovedOperator.fromRow(
+              r,
+              profile: profilesById[r['operator_id']] as Map<String, dynamic>?,
+            ))
+        .toList();
   }
 
   Future<ItineraryDetail> fetchDetail(String itineraryId) async {

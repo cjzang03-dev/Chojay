@@ -43,6 +43,9 @@ dependencies:
   flutter_riverpod: ^2.6.1
   # Declarative routing with auth-aware redirects
   go_router: ^14.8.1
+  # Iterable helpers (firstOrNull) — already a transitive dep, declared
+  # directly since we use it explicitly
+  collection: ^1.19.0
 
 dev_dependencies:
   flutter_test:

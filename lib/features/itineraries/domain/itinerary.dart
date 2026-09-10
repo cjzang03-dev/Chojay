@@ -89,10 +89,17 @@ class ApprovedOperator {
 
   String get roleLabel => userType == 'guide' ? 'Licensed Guide' : 'Tour Operator';
 
-  factory ApprovedOperator.fromJson(Map<String, dynamic> json) {
-    final profile = json['profiles'] as Map<String, dynamic>?;
+  /// [profile] comes from a separate batched `get_public_profiles_by_ids`
+  /// RPC call, not a direct `profiles` embed — the website's RLS routes
+  /// all cross-user profile reads through that RPC (confirmed in
+  /// ChatRepository), so a direct join here would silently return null
+  /// for every operator under the same policy.
+  factory ApprovedOperator.fromRow(
+    Map<String, dynamic> row, {
+    Map<String, dynamic>? profile,
+  }) {
     return ApprovedOperator(
-      profileId: json['operator_id'] as String,
+      profileId: row['operator_id'] as String,
       fullName: profile?['full_name'] as String?,
       email: profile?['email'] as String?,
       userType: profile?['user_type'] as String? ?? 'operator',
