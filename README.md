@@ -8,15 +8,15 @@ same storage buckets — and evolves alongside it rather than replacing it.
 ## Status
 
 Project setup, shared theme, Supabase bootstrap, the app's Google sign-in
-gate, and read-only itinerary browsing are in place. Booking and chat are
-still stubbed as "coming soon" placeholders in the bottom-nav tabs, in
-build order:
+gate, itinerary browsing, and the booking request flow are in place. Chat
+is still a "coming soon" placeholder in the bottom-nav tab, in build
+order:
 
 1. ~~Website auth rework~~ (out of scope for this repo — see note below)
 2. Schema additions for itineraries (website + app)
 3. **Flutter: Google sign-in + profile — done**
-4. **Flutter: itinerary browsing + detail screens — done (read-only; see below)**
-5. Flutter: booking flow
+4. **Flutter: itinerary browsing + detail screens — done**
+5. **Flutter: booking flow — done (request-only; see below)**
 6. Flutter: chat
 7. Flutter: operator/guide dashboards
 8. Website: admin itinerary authoring + approval screens
@@ -24,10 +24,24 @@ build order:
 
 Step 4 covers: a published-itinerary catalog (`lib/features/itineraries/`),
 a detail screen (hero image, day-by-day plan, indicative price shown
-as-is), and the read-only "approved operators" list
-(`itinerary_operators` joined to `profiles`, filtered to
-`status = 'approved'`) that a tourist will pick from once booking (step 5)
-lands. No booking action exists yet on purpose.
+as-is), and the "approved operators" list (`itinerary_operators` joined to
+`profiles`, filtered to `status = 'approved'`) that a tourist picks from.
+
+Step 5 (`lib/features/bookings/`) covers: tapping an approved operator
+opens a booking *request* screen — travel start date, traveler count, an
+optional note, and the itinerary's indicative price shown as-is (never
+recalculated per group size, per the known shared-room-pricing issue —
+exact pricing is confirmed with the operator once chat exists). Submitting
+writes to a **new** `itinerary_bookings` table
+(`supabase/migrations/20260910_itinerary_bookings.sql`) — deliberately
+separate from the website's existing `bookings` table (legacy
+per-operator-package flow, exact shape unverified this session) rather
+than repurposing it. **This migration has not been applied** — this
+session has no Supabase credentials; review and run it yourself before
+the booking flow will work against real data. The Bookings tab lists the
+signed-in tourist's own requests with a status chip (requested / confirmed
+/ declined / cancelled); nothing yet acts on a request beyond creating it
+— operator/admin confirmation is step 7.
 
 > **Note on scope for this session:** this session only has access to the
 > `cjzang03-dev/chojay` (this) repo. The website repo

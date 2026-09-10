@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/error_state.dart';
+import '../../bookings/presentation/booking_request_screen.dart';
 import '../data/itineraries_providers.dart';
 import '../domain/itinerary.dart';
 
-/// Read-only itinerary detail, including the approved-operators list a
-/// tourist will eventually pick from to book (build order step 5). No
-/// booking action here yet.
+/// Itinerary detail, including the approved-operators list a tourist picks
+/// from to request a booking (build order step 5).
 class ItineraryDetailScreen extends ConsumerWidget {
   const ItineraryDetailScreen({super.key, required this.itineraryId});
 
@@ -100,13 +100,23 @@ class _DetailBody extends StatelessWidget {
                 Text(
                   detail.approvedOperators.isEmpty
                       ? 'No operators approved for this itinerary yet.'
-                      : 'These operators are approved to run this trip. '
-                          'Booking is coming soon.',
+                      : 'Tap an operator to request a booking.',
                   style: TextStyle(color: AppColors.stoneGrey, height: 1.4),
                 ),
                 const SizedBox(height: 12),
-                ...detail.approvedOperators
-                    .map((operator) => _OperatorTile(operator: operator)),
+                ...detail.approvedOperators.map(
+                  (operator) => _OperatorTile(
+                    operator: operator,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => BookingRequestScreen(
+                          itinerary: itinerary,
+                          operator: operator,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -198,15 +208,17 @@ class _DayTile extends StatelessWidget {
 }
 
 class _OperatorTile extends StatelessWidget {
-  const _OperatorTile({required this.operator});
+  const _OperatorTile({required this.operator, required this.onTap});
 
   final ApprovedOperator operator;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
+        onTap: onTap,
         leading: CircleAvatar(
           backgroundColor: AppColors.himalayanGreen.withValues(alpha: 0.1),
           child: Icon(
@@ -218,6 +230,7 @@ class _OperatorTile extends StatelessWidget {
         ),
         title: Text(operator.displayName),
         subtitle: Text(operator.roleLabel),
+        trailing: const Icon(Icons.chevron_right_rounded),
       ),
     );
   }
