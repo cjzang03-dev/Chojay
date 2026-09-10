@@ -77,6 +77,12 @@ class AuthRepository {
         .maybeSingle();
     if (existing != null) return;
 
+    // Mirrors the website's setup-profile upsert (verified against
+    // cjzang03-dev/taledesti-quest): tourists start 'active' and are only
+    // gated at first booking, while guides/operators start 'pending' until
+    // admin approval. Every profile also gets verification_status:
+    // 'pending' there, so we set the same here rather than leaving it null
+    // — website logic (and the admin verification queue) checks this field.
     await supabase.from('profiles').insert({
       'id': user.id,
       'email': user.email,
@@ -88,6 +94,8 @@ class AuthRepository {
         SignupIntent.guide => 'guide',
         SignupIntent.operator => 'operator',
       },
+      'status': intent == SignupIntent.tourist ? 'active' : 'pending',
+      'verification_status': 'pending',
     });
   }
 

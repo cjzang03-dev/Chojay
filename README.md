@@ -61,17 +61,50 @@ inside the app's chat UI, and group chat (the website's `group_messages` /
 direct messaging alone covers the core trust loop — say if you want group
 chat built too).
 
-> **Note on scope:** this session has access to both
-> `cjzang03-dev/chojay` (this repo) and, as of the chat feature,
-> `cjzang03-dev/taledesti-quest` (the website) — so the chat schema above
-> is verified against real source, not guessed. The itinerary/booking work
-> earlier (steps 4-5) predates that access: `profiles.user_type` values
-> and the `itineraries`/`itinerary_operators` shape there still follow the
-> product spec's schema sketch rather than a read of the live database.
-> Now that the website repo is reachable, that's worth double-checking
-> against its actual schema (or Supabase directly) before those screens
-> see real data — in particular the exact `profiles` columns and the
-> `payments.guide_id` naming bug mentioned in the spec.
+## Schema verification against the live website repo
+
+This session gained read/write access to `cjzang03-dev/taledesti-quest`
+(the website) partway through, and the steps 4-5 (itinerary/booking) work
+built before that was re-checked against the real source rather than left
+on the original schema sketch. Findings:
+
+- **`profiles.user_type` values are correct as built**: `tourist` /
+  `local` / `guide` / `operator` / `local_business`, confirmed in
+  `app/setup-profile/page.tsx`'s save logic. No `itineraries` or
+  `packages` table exists on the website at all — the itinerary model
+  really is new territory, no naming collision.
+- **Fixed a real gap**: the website's profile upsert always sets
+  `status` (`'active'` for tourists, `'pending'` for guides/operators
+  until admin approval) and `verification_status: 'pending'`. This app's
+  `AuthRepository.ensureProfile` didn't set either — now fixed to match
+  (`lib/features/auth/data/auth_repository.dart`).
+- **`itinerary_bookings` staying separate from the legacy `bookings`
+  table was the right call, for a slightly different reason than
+  guessed**: `bookings.package_id` turns out to be nullable (see
+  `app/agency/[slug]/page.tsx`), so inserting with a null package_id
+  wouldn't have violated a constraint. But `bookings` carries a lot of
+  package-flow-specific fields (`agency_package_rate`,
+  `booked_through_agency`, a `payment_status`/`deposit_paid` lifecycle
+  tied to `PaymentModal.tsx`, and the known `payments.guide_id` bug —
+  confirmed at `PaymentModal.tsx:126`, `guide_id: booking.agency_id`)
+  that don't apply to the itinerary model. A dedicated table avoids
+  writing rows the website's existing operator dashboard would
+  misinterpret.
+- **Known gap, not yet built**: a guide/operator who signs up through
+  this app's "Partner with us" flow only gets a `profiles` row. The
+  website's equivalent signup additionally creates a row in
+  `agency_listings` (operators) or `guide_listings` (guides) — that's
+  where bio/phone/location/rates live, and it's what makes an operator
+  actually appear in the website's "Find an Operator" flow. Until the
+  app builds that onboarding (operator/guide dashboards, step 7), an
+  app-created operator/guide profile is incomplete on the website side.
+- **Naming note**: the website's own code still calls operators
+  "agency" in a lot of internal identifiers (`agency_listings`,
+  `agency_id`, the `/agency/[slug]` route, `AgencyDashboard.tsx`) even
+  though `user_type` and most current UI copy already say "operator" —
+  that's pre-existing website naming, left as-is (renaming live
+  tables/routes is out of scope for an app-side session), and unrelated
+  to anything this app writes.
 
 ## Product decisions this scaffold builds to
 
