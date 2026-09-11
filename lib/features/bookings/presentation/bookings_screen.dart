@@ -8,6 +8,7 @@ import '../../chat/data/chat_providers.dart';
 import '../../chat/presentation/chat_thread_screen.dart';
 import '../data/bookings_providers.dart';
 import '../domain/booking_request.dart';
+import '../domain/booking_review.dart';
 
 class BookingsScreen extends ConsumerWidget {
   const BookingsScreen({super.key});
@@ -15,11 +16,15 @@ class BookingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsAsync = ref.watch(myBookingsProvider);
+    final reviewsAsync = ref.watch(myBookingReviewsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Bookings')),
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(myBookingsProvider.future),
+        onRefresh: () {
+          ref.invalidate(myBookingReviewsProvider);
+          return ref.refresh(myBookingsProvider.future);
+        },
         child: bookingsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stackTrace) => ListView(
@@ -49,11 +54,15 @@ class BookingsScreen extends ConsumerWidget {
                 ],
               );
             }
+            final reviews = reviewsAsync.valueOrNull ?? const {};
             return ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: bookings.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) => _BookingTile(booking: bookings[index]),
+              itemBuilder: (context, index) => _BookingTile(
+                booking: bookings[index],
+                review: reviews[bookings[index].id],
+              ),
             );
           },
         ),
@@ -63,9 +72,10 @@ class BookingsScreen extends ConsumerWidget {
 }
 
 class _BookingTile extends ConsumerStatefulWidget {
-  const _BookingTile({required this.booking});
+  const _BookingTile({required this.booking, this.review});
 
   final BookingRequest booking;
+  final BookingReview? review;
 
   @override
   ConsumerState<_BookingTile> createState() => _BookingTileState();
@@ -73,6 +83,37 @@ class _BookingTile extends ConsumerStatefulWidget {
 
 class _BookingTileState extends ConsumerState<_BookingTile> {
   bool _openingChat = false;
+  bool _submittingReview = false;
+
+  Future<void> _leaveReview() async {
+    final result = await showDialog<({int rating, String? comment})>(
+      context: context,
+      builder: (context) => _ReviewDialog(
+        operatorName: widget.booking.operatorName ?? 'the operator',
+      ),
+    );
+    if (result == null) return;
+
+    setState(() => _submittingReview = true);
+    try {
+      await ref.read(bookingsRepositoryProvider).submitReview(
+            itineraryBookingId: widget.booking.id,
+            itineraryId: widget.booking.itineraryId,
+            operatorId: widget.booking.operatorId,
+            rating: result.rating,
+            comment: result.comment,
+            itineraryTitle: widget.booking.itineraryTitle,
+          );
+      ref.invalidate(myBookingReviewsProvider);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Couldn\'t submit review: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _submittingReview = false);
+    }
+  }
 
   Future<void> _openChat() async {
     setState(() => _openingChat = true);
@@ -152,9 +193,113 @@ class _BookingTileState extends ConsumerState<_BookingTile> {
                 label: const Text('Message'),
               ),
             ),
+            if (widget.review != null) ...[
+              const Divider(height: 24),
+              Row(
+                children: [
+                  ...List.generate(
+                    5,
+                    (i) => Icon(
+                      i < widget.review!.rating ? Icons.star : Icons.star_border,
+                      size: 18,
+                      color: AppColors.saffron,
+                    ),
+                  ),
+                ],
+              ),
+              if (widget.review!.comment != null &&
+                  widget.review!.comment!.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(widget.review!.comment!,
+                    style: TextStyle(color: AppColors.stoneGrey)),
+              ],
+            ] else if (!booking.travelStartDate.isAfter(DateTime.now())) ...[
+              const Divider(height: 24),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: _submittingReview ? null : _leaveReview,
+                  icon: const Icon(Icons.star_outline, size: 18),
+                  label: const Text('Leave a review'),
+                ),
+              ),
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ReviewDialog extends StatefulWidget {
+  const _ReviewDialog({required this.operatorName});
+
+  final String operatorName;
+
+  @override
+  State<_ReviewDialog> createState() => _ReviewDialogState();
+}
+
+class _ReviewDialogState extends State<_ReviewDialog> {
+  int _rating = 0;
+  final _commentController = TextEditingController();
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Review ${widget.operatorName}'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              5,
+              (i) => IconButton(
+                onPressed: () => setState(() => _rating = i + 1),
+                icon: Icon(
+                  i < _rating ? Icons.star : Icons.star_border,
+                  color: AppColors.saffron,
+                  size: 32,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _commentController,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Share your experience (optional)',
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _rating == 0
+              ? null
+              : () => Navigator.of(context).pop((
+                    rating: _rating,
+                    comment: _commentController.text.trim().isEmpty
+                        ? null
+                        : _commentController.text.trim(),
+                  )),
+          child: const Text('Submit'),
+        ),
+      ],
     );
   }
 }

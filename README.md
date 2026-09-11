@@ -11,15 +11,18 @@ Project setup, shared theme, Supabase bootstrap, the app's Google sign-in
 gate, itinerary browsing, the booking request flow, direct-message chat,
 and operator/guide dashboards are in place, in build order:
 
-1. ~~Website auth rework~~ (out of scope for this repo — see note below)
+1. ~~Website auth rework~~ (out of scope for this repo — done on the
+   website repo: public itinerary browsing, tourist-default Google-only
+   sign-in, partner entry point)
 2. Schema additions for itineraries (website + app)
 3. **Flutter: Google sign-in + profile — done**
 4. **Flutter: itinerary browsing + detail screens — done**
 5. **Flutter: booking flow — done (request-only; see below)**
 6. **Flutter: chat — done (direct messages only; see below)**
 7. **Flutter: operator/guide dashboards — done (see below)**
-8. Website: admin itinerary authoring + approval screens
-9. Reviews, notifications, polish
+8. ~~Website: admin itinerary authoring + approval screens~~ (out of scope
+   for this repo — done on the website repo)
+9. **Reviews, notifications, polish — done (see below)**
 
 Step 7 (`lib/features/partner/`) covers: signed-in guides/operators are
 routed (by `profiles.user_type`, via `currentProfileProvider` in
@@ -92,6 +95,37 @@ inside the app's chat UI, and group chat (the website's `group_messages` /
 `group_conversations` tables exist but per the product scope-cut list,
 direct messaging alone covers the core trust loop — say if you want group
 chat built too).
+
+Step 9 covers reviews and notifications for the itinerary-model flow —
+this repo's slice of a change that also touched the website (per the
+project's rule: when a task spans both, do both and say so).
+
+- **New table** `supabase/migrations/20260911_itinerary_booking_reviews.sql`
+  — deliberately separate from the website's existing `reviews`
+  (guide-only) and `agency_reviews` (agency-booking-only) tables, same
+  rationale as `itinerary_bookings` being its own table: those are keyed
+  to the legacy `bookings` table, this one to `itinerary_bookings`. Public
+  read (reviews show on the website's itinerary detail page), tourist can
+  insert only for their own booking. **Not applied** — same caveat as the
+  other itinerary-model migrations.
+- **Bookings tab**: once a booking's `travel_start_date` has passed, a
+  "Leave a review" button opens a star-rating + comment dialog
+  (`_ReviewDialog` in `bookings_screen.dart`); submitting shows the
+  rating/comment inline instead of the button afterward. Eligibility is a
+  client-side date check, not an RLS rule — matches the website's existing
+  `ReviewForm`/`AgencyReviewForm` pattern, which also gates client-side
+  (there, on payment status) rather than in a policy.
+- **Notifications**: `BookingsRepository.submitReview` writes to the
+  already-existing shared `notifications` table (used elsewhere by
+  `ChatRepository.sendMessage` and, on the website, by its own
+  send-message handler and review forms) so the operator sees "⭐ New
+  N-star review!" in the website's notification bell — this app has no
+  notification center UI of its own, and building one is a separable
+  feature, not bundled into this pass. The reverse direction — a
+  notification when a tourist's booking is approved/rejected — turned out
+  to already exist for chat (`sendMessage` notifies on every message,
+  including the auto-sent booking summary); what was actually missing was
+  on the website's **admin** side (operator applications), fixed there.
 
 ## Schema verification against the live website repo
 
