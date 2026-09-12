@@ -37,6 +37,17 @@ jobs:
 
       - run: flutter pub get
 
+      - name: Ensure debug keystore exists (Android's standard debug defaults)
+        run: |
+          mkdir -p ~/.android
+          if [ ! -f ~/.android/debug.keystore ]; then
+            keytool -genkeypair -v \
+              -keystore ~/.android/debug.keystore \
+              -storepass android -keypass android \
+              -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
       - run: flutter build apk --debug --dart-define-from-file=env.json
 
       - name: Print debug keystore SHA-1 (for Google OAuth Android client)
