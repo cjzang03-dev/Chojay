@@ -41,6 +41,18 @@ jobs:
           }
           EOF
 
+      - name: Verify env.json secrets landed correctly (no secret values printed)
+        env:
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          echo "GOOGLE_WEB_CLIENT_ID length: ${#GOOGLE_WEB_CLIENT_ID}"
+          echo "GOOGLE_WEB_CLIENT_ID sha256: $(printf '%s' "$GOOGLE_WEB_CLIENT_ID" | sha256sum | cut -d' ' -f1)"
+          echo "Expected sha256 (of 1021329552949-c8giqurmmqk0rmu9fa1ubrg3o3e3090v.apps.googleusercontent.com): $(printf '%s' '1021329552949-c8giqurmmqk0rmu9fa1ubrg3o3e3090v.apps.googleusercontent.com' | sha256sum | cut -d' ' -f1)"
+          echo "SUPABASE_URL length: ${#SUPABASE_URL}"
+          echo "SUPABASE_ANON_KEY length: ${#SUPABASE_ANON_KEY}"
+
       - run: flutter pub get
 
       - name: Install fixed debug keystore (stable SHA-1 across builds)
