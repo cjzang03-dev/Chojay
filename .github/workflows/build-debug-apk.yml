@@ -25,13 +25,17 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Create dummy env.json (build only; no real secrets needed to compile)
+      - name: Create env.json from repository secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
         run: |
-          cat > env.json <<'EOF'
+          cat > env.json <<EOF
           {
-            "SUPABASE_URL": "https://placeholder.supabase.co",
-            "SUPABASE_ANON_KEY": "placeholder-anon-key",
-            "GOOGLE_WEB_CLIENT_ID": "placeholder.apps.googleusercontent.com"
+            "SUPABASE_URL": "$SUPABASE_URL",
+            "SUPABASE_ANON_KEY": "$SUPABASE_ANON_KEY",
+            "GOOGLE_WEB_CLIENT_ID": "$GOOGLE_WEB_CLIENT_ID"
           }
           EOF
 
