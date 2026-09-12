@@ -1,0 +1,62 @@
+name: Build debug APK
+
+# Builds a debug APK in CI so a debug keystore SHA-1 fingerprint (needed for
+# the Google OAuth Android client) and an installable APK can be produced
+# without relying on a local machine's hardware/RAM.
+on:
+  push:
+    branches:
+      - claude/sweet-wozniak-n0apwp
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Create dummy env.json (build only; no real secrets needed to compile)
+        run: |
+          cat > env.json <<'EOF'
+          {
+            "SUPABASE_URL": "https://placeholder.supabase.co",
+            "SUPABASE_ANON_KEY": "placeholder-anon-key",
+            "GOOGLE_WEB_CLIENT_ID": "placeholder.apps.googleusercontent.com"
+          }
+          EOF
+
+      - run: flutter pub get
+
+      - run: flutter build apk --debug --dart-define-from-file=env.json
+
+      - name: Print debug keystore SHA-1 (for Google OAuth Android client)
+        run: |
+          keytool -list -v \
+            -keystore ~/.android/debug.keystore \
+            -alias androiddebugkey \
+            -storepass android -keypass android \
+            | tee debug-keystore-info.txt
+          echo "### Debug keystore SHA-1" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          grep "SHA1:" debug-keystore-info.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: debug-keystore-info
+          path: debug-keystore-info.txt
