@@ -37,8 +37,10 @@ dependencies:
 
   # Backend: shared Supabase project (same DB/auth/storage as the website)
   supabase_flutter: ^2.8.0
-  # Google sign-in (the only auth method for this phase, per product decisions)
-  google_sign_in: ^6.3.0
+  # Google sign-in (the only auth method for this phase, per product decisions).
+  # v7 uses Android's Credential Manager / iOS's newer sign-in flow instead of
+  # the deprecated legacy GoogleSignInClient API.
+  google_sign_in: ^7.0.0
   # State management
   flutter_riverpod: ^2.6.1
   # Declarative routing with auth-aware redirects

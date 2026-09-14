@@ -13,18 +13,23 @@ enum SignupIntent { tourist, guide, operator }
 
 class AuthRepository {
   AuthRepository({GoogleSignIn? googleSignIn})
-      : _googleSignIn = googleSignIn ??
-            GoogleSignIn(
-              // Required on Android/iOS so Supabase can verify the Google ID
-              // token server-side; unused on web (Supabase's OAuth redirect
-              // flow is used there instead).
-              serverClientId: Env.googleWebClientId.isEmpty
-                  ? null
-                  : Env.googleWebClientId,
-              scopes: const ['email', 'profile'],
-            );
+      : _googleSignIn = googleSignIn ?? GoogleSignIn.instance;
 
   final GoogleSignIn _googleSignIn;
+  Future<void>? _initFuture;
+
+  /// `GoogleSignIn.instance` must be initialized exactly once before use.
+  /// Deferred to first sign-in (rather than the constructor) since
+  /// initialize() is async.
+  Future<void> _ensureInitialized() {
+    return _initFuture ??= _googleSignIn.initialize(
+      // Required on Android/iOS so Supabase can verify the Google ID token
+      // server-side; unused on web (Supabase's OAuth redirect flow is used
+      // there instead).
+      serverClientId:
+          Env.googleWebClientId.isEmpty ? null : Env.googleWebClientId,
+    );
+  }
 
   Stream<AuthState> get authStateChanges => supabase.auth.onAuthStateChange;
 
@@ -45,12 +50,19 @@ class AuthRepository {
       return;
     }
 
-    final googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) {
-      throw const SignInCancelledException();
+    await _ensureInitialized();
+
+    final GoogleSignInAccount googleUser;
+    try {
+      googleUser = await _googleSignIn.authenticate();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        throw const SignInCancelledException();
+      }
+      rethrow;
     }
-    final googleAuth = await googleUser.authentication;
-    final idToken = googleAuth.idToken;
+
+    final idToken = googleUser.authentication.idToken;
     if (idToken == null) {
       throw StateError('Google sign-in did not return an ID token.');
     }
@@ -58,7 +70,6 @@ class AuthRepository {
     await supabase.auth.signInWithIdToken(
       provider: OAuthProvider.google,
       idToken: idToken,
-      accessToken: googleAuth.accessToken,
     );
 
     await ensureProfile(intent);
@@ -100,7 +111,7 @@ class AuthRepository {
   }
 
   Future<void> signOut() async {
-    if (!kIsWeb) {
+    if (!kIsWeb && _initFuture != null) {
       await _googleSignIn.signOut();
     }
     await supabase.auth.signOut();
