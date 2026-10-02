@@ -5,6 +5,15 @@ A one-file music studio for singers and songwriters. It runs in the browser and 
 ## Open it
 Download `index.html` and open it in Chrome, Edge, Safari or Firefox. Allow microphone access when the browser asks.
 
+## Easy mode
+Song Studio opens in Easy mode: four steps on one screen.
+1. **Choose a vibe** (Pop, Afrobeats, Trap, R&B, Gospel, Reggaeton, Lo-fi, Acoustic). It plays straight away; use Lower/Higher to fit your voice and Slower/Faster for speed.
+2. **Write your lyrics** for the verse and chorus, with the chords shown.
+3. **Sing and record** with one big button, with optional autotune.
+4. **Listen and save** with simple volume sliders and a download button.
+
+The player bar at the bottom shows the chord and your lyrics while you sing. Tap **Open full studio** for every tool.
+
 ## Studio view
 On a computer, Song Studio opens in a studio layout modelled on FL Studio: a dark workspace with a toolbar and LCD readouts, a browser on the left (parts, channels, takes, drum kits, instruments, chord ideas), the playlist across the middle, and the piano roll and channel rack docked below. Song & lyrics, Vocals, Keyboard and Mixer open as windows on top. Tap **Simple view** for the stacked layout used on phones.
 

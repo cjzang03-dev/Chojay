@@ -239,12 +239,116 @@ body.studio .winclose button{margin:1px 4px 0 0;height:22px;padding:0 8px;border
 .br-i.on{background:var(--accent-soft);color:var(--accent)}
 .br-i small{margin-left:auto;font:500 .68rem var(--mono);color:var(--muted)}
 .br-i i{width:8px;height:8px;border-radius:2px;flex:none}
+/* easy mode: four numbered steps and a player bar */
+.easy{display:none}
+body.ezmode .shell{display:none}
+body.ezmode .easy{display:block;padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+.ez-wrap{max-width:860px;margin:0 auto;padding-inline:16px}
+.ez-top{background:var(--panel);border-bottom:1px solid var(--line)}
+.ez-toprow{display:flex;align-items:center;gap:12px;padding-block:10px}
+.ez-toprow .title{flex:1;font-size:1.3rem}
+.ez-steps{display:flex;flex-direction:column;gap:18px;padding-block:20px}
+.ez-step{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.ez-num{width:44px;height:44px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font:800 1.4rem/44px var(--display);text-align:center}
+.ez-body{display:flex;flex-direction:column;gap:12px;min-width:0}
+.ez-body h2{font-size:1.35rem}
+.ez-body .hint{font-size:.95rem}
+.vibes{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:10px}
+.vibe{border:2px solid var(--line);border-radius:10px;background:var(--panel2);padding:12px;text-align:left;display:flex;flex-direction:column;gap:2px}
+.vibe b{font:700 1.05rem var(--display)}
+.vibe span{font-size:.82rem;color:var(--muted)}
+.vibe:hover{border-color:var(--muted)}
+.vibe.on{border-color:var(--accent);background:var(--accent-soft)}
+.ez-adjust{gap:8px 10px}
+.ez-adjust .grp{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.ez-adjust b{font-family:var(--mono);color:var(--lcd);min-width:74px;display:inline-block;text-align:center}
+.ez-part{display:flex;flex-direction:column;gap:6px}
+.ez-part h3{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.chip{font:700 .8rem var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--accent)}
+.ez-rec{height:60px;padding:0 28px;border-radius:999px;border:0;background:var(--rec);color:#fff;font:800 1.15rem var(--display);display:inline-flex;align-items:center;gap:10px}
+.ez-rec.on{animation:pulse 1.2s infinite}
+.ez-take{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--panel2)}
+.ez-take .nm{font-weight:700;flex:1 1 140px;min-width:0}
+.ez-sl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 24px}
+.ez-sl label{display:flex;flex-direction:column;gap:4px;font-weight:600}
+.ez-player{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--titlebar);border-top:1px solid #000;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -8px 30px rgba(0,0,0,.35)}
+.ez-prow{display:grid;grid-template-columns:auto auto auto minmax(0,1fr);align-items:center;gap:10px 16px;padding-block:10px}
+.ez-play{height:48px;padding:0 20px;font-size:1rem}
+.ez-now{display:flex;flex-direction:column;line-height:1.1;min-width:84px}
+.ez-chord{font:800 1.9rem var(--display);color:var(--accent)}
+.ez-lyric{max-height:72px;overflow:auto;white-space:pre-wrap;font-size:.92rem;line-height:1.4;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;min-width:0}
+.ez-lyric.empty{color:var(--muted);font-style:italic}
+@media (max-width:600px){.ez-step{grid-template-columns:1fr}.ez-prow{grid-template-columns:auto auto 1fr}.ez-lyric{grid-column:1/-1;max-height:56px}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px);text-align:center}
 .toast.show{opacity:1}
 .steps{margin:0;padding-left:20px;color:var(--muted);font-size:.9rem;display:flex;flex-direction:column;gap:2px}
 </style>
 </head>
 <body>
+<div class="easy" id="easy">
+  <header class="ez-top"><div class="ez-wrap ez-toprow">
+    <span class="mark" aria-hidden="true"></span>
+    <input id="ezTitle" class="title" aria-label="Song title" maxlength="80">
+    <button class="btn" id="ezFull" title="All the tools: piano roll, playlist, mixer">Open full studio</button>
+  </div></header>
+  <div class="ez-wrap ez-steps">
+    <section class="ez-step"><div class="ez-num">1</div><div class="ez-body">
+      <h2>Choose a vibe</h2>
+      <p class="hint">Tap the kind of music you want to sing over. It starts playing straight away.</p>
+      <div class="vibes" id="ezVibes"></div>
+      <div class="row ez-adjust">
+        <div class="grp">Key <b id="ezKey">C major</b><button class="btn small" id="ezLower">Lower</button><button class="btn small" id="ezHigher">Higher</button></div>
+        <div class="grp">Speed <b id="ezBpm">90</b><button class="btn small" id="ezSlower">Slower</button><button class="btn small" id="ezFaster">Faster</button></div>
+      </div>
+      <p class="hint">Too high or too low for your voice? Tap Lower or Higher until it feels easy to sing.</p>
+    </div></section>
+
+    <section class="ez-step"><div class="ez-num">2</div><div class="ez-body">
+      <h2>Write your lyrics</h2>
+      <p class="hint">Your song has a verse and a chorus. The chords for each part are shown so you know what's playing. While the song plays, the words for the part you're in show at the bottom of the screen.</p>
+      <div id="ezLyrics" class="panel"></div>
+    </div></section>
+
+    <section class="ez-step"><div class="ez-num">3</div><div class="ez-body">
+      <h2>Sing and record</h2>
+      <ol class="steps">
+        <li>Put on headphones.</li>
+        <li>Press <b>Record</b>. You hear four clicks, then the music starts.</li>
+        <li>Sing along, then press <b>Stop</b> when you're done.</li>
+      </ol>
+      <div class="row">
+        <button class="ez-rec" id="ezRec">● Record</button>
+        <label class="chk"><input type="checkbox" id="ezAuto"> Autotune my voice</label>
+        <select class="sel" id="ezAutoStyle" aria-label="Autotune style"><option value="natural">Natural</option><option value="pop">Pop</option><option value="hard">Robot effect</option></select>
+      </div>
+      <div id="ezMicNote" class="notice" hidden></div>
+      <div id="ezTakes" class="panel"></div>
+      <div><label class="upload">Recorded on your phone? Add the file<input type="file" id="ezFile" accept="audio/*"></label></div>
+    </div></section>
+
+    <section class="ez-step"><div class="ez-num">4</div><div class="ez-body">
+      <h2>Listen and save</h2>
+      <p class="hint">Press Play at the bottom to hear your whole song. Change the balance, then save it.</p>
+      <div class="ez-sl">
+        <label>My voice<input type="range" id="ezVoice" min="0" max="1" step="0.01"></label>
+        <label>Music<input type="range" id="ezMusic" min="0" max="1" step="0.01"></label>
+        <label>Echo on my voice<input type="range" id="ezEcho" min="0" max="1" step="0.01"></label>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="ezSave">Download my song</button>
+        <button class="btn" id="ezSaveInst">Download music only</button>
+        <span class="hint" id="ezSaveStatus"></span>
+      </div>
+    </div></section>
+  </div>
+  <div class="ez-player"><div class="ez-wrap ez-prow">
+    <button class="tb play ez-play" id="ezPlay">▶ Play song</button>
+    <button class="tb ez-play" id="ezStop" aria-label="Stop">■</button>
+    <div class="ez-now"><span class="eyebrow" id="ezSec">Verse</span><span class="ez-chord" id="ezChord">Am</span><span class="hint">next <b id="ezNext">F</b></span></div>
+    <div class="ez-lyric" id="ezLyric"></div>
+  </div></div>
+</div>
+
 <div class="shell">
 <header class="top">
   <div class="wrap">
@@ -259,6 +363,7 @@ body.studio .winclose button{margin:1px 4px 0 0;height:22px;padding:0 8px;border
       <label class="field">Key <select id="tonic" aria-label="Key note"></select><select id="mode" aria-label="Major or minor"><option value="major">major</option><option value="minor">minor</option></select></label>
       <span class="clock" id="clock" title="Song position">0:00.0</span>
       <span class="lcd" id="lcdChord" title="Chord playing now">Am</span>
+      <button class="tb" id="easyBtn" title="Go back to the simple four-step screen">Easy mode</button>
       <button class="tb" id="viewBtn" title="Switch between the studio layout and the simple layout">Simple view</button>
     </div>
   </div>
@@ -561,7 +666,7 @@ function defaultSong() {
 }
 let S = defaultSong();
 try { const raw = localStorage.getItem(STORE); if (raw) S = Object.assign(defaultSong(), JSON.parse(raw)); } catch (e) {}
-function normalize() { S.sections.forEach(s => { if (!s.notes) s.notes = {}; }); if (!S.channels || !S.channels.length) S.channels = defaultChannels(); }
+function normalize() { if (S.mix.music == null) S.mix.music = 1; S.sections.forEach(s => { if (!s.notes) s.notes = {}; }); if (!S.channels || !S.channels.length) S.channels = defaultChannels(); }
 normalize();
 let saveT = 0;
 function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }, 300); }
@@ -621,13 +726,14 @@ function buildGraph(c) {
 function chanOut(g, ch) {
   g.ch = g.ch || {};
   if (!g.ch[ch.id]) { const n = g.c.createGain(), r = g.c.createGain(); r.gain.value = .15; n.connect(g.song); n.connect(r).connect(g.revIn); g.ch[ch.id] = n; }
-  g.ch[ch.id].gain.value = ch.vol;
+  g.ch[ch.id].gain.value = ch.vol * (S.mix.music == null ? 1 : S.mix.music);
   return g.ch[ch.id];
 }
 function applyMix(g = G) {
   if (!g) return;
   const m = S.mix, set = (p, v) => g.c === ctx ? p.setTargetAtTime(v, ctx.currentTime, .02) : (p.value = v);
-  set(g.master.gain, m.master); set(g.drums.gain, m.drums); set(g.chords.gain, m.chords * .8); set(g.bass.gain, m.bass);
+  set(g.master.gain, m.master); const mu = m.music == null ? 1 : m.music;
+  set(g.drums.gain, m.drums * mu); set(g.chords.gain, m.chords * .8 * mu); set(g.bass.gain, m.bass * mu);
   set(g.vocals.gain, m.vocals); set(g.keys.gain, m.keys); set(g.click.gain, m.click * .6);
   set(g.vRev.gain, m.reverb * 1.2); set(g.vEcho.gain, m.echo);
   set(g.dl.delayTime, 60 / S.bpm * .75);
@@ -900,7 +1006,7 @@ async function retune(tk) {
   if (!tk.orig) tk.orig = tk.buffer;
   const src = tk.orig, sr = src.sampleRate, x = new Float32Array(src.length);
   for (let c = 0; c < src.numberOfChannels; c++) { const d = src.getChannelData(c); for (let i = 0; i < x.length; i++) x[i] += d[i] / src.numberOfChannels; }
-  const status = p => { const el = document.querySelector('[data-take="' + tk.id + '"] .tstat'); if (el) { el.textContent = 'Tuning… ' + Math.round(p * 100) + '%'; el.classList.add('busy'); } };
+  const status = p => document.querySelectorAll('[data-take="' + tk.id + '"] .tstat').forEach(el => { el.textContent = 'Tuning… ' + Math.round(p * 100) + '%'; el.classList.add('busy'); });
   status(0); await yieldUI();
   const det = await detectPitch(x, sr, status); if (job !== tk.tuneJob) return;
   const cc = correctionCurve(det.f0, det.hopSec, tu);
@@ -961,6 +1067,7 @@ async function ensureMic() {
     note.innerHTML = 'The microphone is blocked here. Open the Song Studio file directly in Chrome, Edge, Safari or Firefox and allow microphone access when asked. ' +
       'You can still record a voice memo on your phone and add it with <b>Add a voice memo or audio file</b> below.';
     $('#micStatus').textContent = 'Microphone unavailable';
+    const ez = $('#ezMicNote'); ez.hidden = false; ez.textContent = 'The microphone is blocked here. Open the Song Studio file directly in Chrome, Edge, Safari or Firefox and allow the microphone when asked. You can also record a voice memo on your phone and add it below.';
     return false;
   }
   note.hidden = true;
@@ -997,7 +1104,7 @@ function finishTake() {
   const buffer = new AudioBuffer({length: len, sampleRate: sr, numberOfChannels: 1});
   buffer.copyToChannel(data.subarray(from), 0);
   const tk = addTake(buffer, start);
-  if (S.autoTuneNew) { tk.tune = {...TUNE_PRESETS.pop, on: true, preset: 'pop', chromatic: false}; retune(tk); }
+  if (S.autoTuneNew) { const st = TUNE_PRESETS[S.autoTuneStyle] ? S.autoTuneStyle : 'pop'; tk.tune = {...TUNE_PRESETS[st], on: true, preset: st, chromatic: false}; retune(tk); }
   toast(tk.name + ' saved');
 }
 
@@ -1065,7 +1172,7 @@ async function record() {
   if (T.recording) { stop(); return; }
   if (T.playing) stop();
   ensureCtx();
-  if (!(await ensureMic())) { switchTab('vocals'); toast('The microphone is blocked. See the Vocals tab.'); return; }
+  if (!(await ensureMic())) { if (isEasy()) toast('The microphone is blocked. See the note under Record.'); else { switchTab('vocals'); toast('The microphone is blocked. See the Vocals tab.'); } return; }
   M.chunks = []; M.capturing = true;
   play({record: true});
 }
@@ -1074,6 +1181,8 @@ function updateTransportUI() {
   $('#playIcon').innerHTML = T.playing && !T.recording ? '<rect x="3.5" y="3" width="3" height="10"/><rect x="9.5" y="3" width="3" height="10"/>' : '<path d="M4 2.5v11l9-5.5z"/>';
   $('#rec').classList.toggle('on', T.recording);
   $('#loop').setAttribute('aria-pressed', S.loop); $('#clickBtn').setAttribute('aria-pressed', S.click);
+  $('#ezPlay').textContent = T.playing && !T.recording ? '❚❚ Pause' : '▶ Play song';
+  $('#ezRec').textContent = T.recording ? '■ Stop recording' : '● Record'; $('#ezRec').classList.toggle('on', T.recording);
 }
 
 /* ---------- now-playing view ---------- */
@@ -1083,6 +1192,8 @@ function showBar(bi) {
   const nx = TL[bi + 1] || (T.loop ? TL[T.loopStart / 16] : null);
   $('#nowSec').textContent = b.sec.name + ' · bar ' + (bi + 1) + ' of ' + TL.length;
   $('#nowChord').textContent = chordName(b.chord); $('#lcdChord').textContent = chordName(b.chord);
+  $('#ezSec').textContent = b.sec.name; $('#ezChord').textContent = chordName(b.chord); $('#ezNext').textContent = nx ? chordName(nx.chord) : 'end';
+  const ezl = $('#ezLyric'); ezl.textContent = b.sec.lyrics || 'Lyrics for the ' + b.sec.name.toLowerCase() + ' will show here.'; ezl.classList.toggle('empty', !b.sec.lyrics);
   $('#nowNext').textContent = nx ? chordName(nx.chord) : 'end';
   const ly = $('#nowLyric');
   ly.textContent = b.sec.lyrics || 'No lyrics for ' + b.sec.name + ' yet. Write them on the Song tab.';
@@ -1093,7 +1204,7 @@ function showBar(bi) {
 }
 function showBeat(beat, count) {
   document.querySelectorAll('#beats i').forEach((el, i) => el.classList.toggle('on', i === beat));
-  if (count) { $('#nowChord').textContent = count; $('#nowSec').textContent = 'Get ready…'; }
+  if (count) { $('#nowChord').textContent = count; $('#nowSec').textContent = 'Get ready…'; $('#ezChord').textContent = count; $('#ezSec').textContent = 'Get ready…'; }
 }
 function showIdle() {
   refreshTL();
@@ -1207,7 +1318,7 @@ function renderVocalSettings() {
   $('#latency').value = S.latencyMs || 0; $('#latVal').textContent = (S.latencyMs || 0) + ' ms';
 }
 function renderTakes() {
-  renderPlaylist(); renderBrowser();
+  renderPlaylist(); renderBrowser(); renderEasyTakes();
   const el = $('#takes');
   if (!takes.length) { el.innerHTML = '<p class="empty">No takes yet. Press Rec at the top to record your first one.</p>'; return; }
   el.innerHTML = takes.map(tk => '<div class="take' + (tk.muted ? ' muted' : '') + '" data-take="' + tk.id + '">' +
@@ -1256,7 +1367,7 @@ function highlightChordKeys(ch) {
   const pcs = ch ? INTS[ch.q].map(i => (S.tonic + ch.r + i) % 12) : [];
   document.querySelectorAll('#piano [data-n]').forEach(el => el.classList.toggle('chord', pcs.includes(+el.dataset.n % 12)));
 }
-const MIXROWS = [['master','Master'],['vocals','Vocals'],['drums','Drums'],['chords','Chords'],['bass','Bass'],['keys','Keyboard'],['click','Click'],['reverb','Vocal reverb'],['echo','Vocal echo']];
+const MIXROWS = [['master','Master'],['music','All music'],['vocals','Vocals'],['drums','Drums'],['chords','Chords'],['bass','Bass'],['keys','Keyboard'],['click','Click'],['reverb','Vocal reverb'],['echo','Vocal echo']];
 function renderMix() {
   $('#mix').innerHTML = MIXROWS.map(([k, n]) => '<label>' + n + ' <span id="mv-' + k + '">' + Math.round(S.mix[k] * 100) + '</span><input type="range" min="0" max="1" step="0.01" data-mix="' + k + '" value="' + S.mix[k] + '"></label>').join('');
 }
@@ -1290,6 +1401,8 @@ function switchTab(t) {
   try { localStorage.setItem(STORE + '.tab', t); } catch (e) {}
 }
 function setStudio(on) {
+  if (isEasy()) { document.body.classList.remove('ezmode'); renderAll(); }
+  try { localStorage.setItem(STORE + '.view', on ? 'studio' : 'simple'); } catch (e) {}
   document.body.classList.toggle('studio', on);
   $('#viewBtn').textContent = on ? 'Simple view' : 'Studio view';
   try { localStorage.setItem(STORE + '.studio', on ? '1' : '0'); } catch (e) {}
@@ -1775,6 +1888,95 @@ $('#pl').addEventListener('pointermove', e => {
 const plUp = () => { if (!pdrag) return; const d = pdrag; pdrag = null; if (d.moved) { DB.meta(d.tk); renderTakes(); toast(d.tk.name + ' moved to ' + fmt(d.tk.start)); } };
 $('#pl').addEventListener('pointerup', plUp); $('#pl').addEventListener('pointercancel', plUp);
 
+/* ---------- easy mode ---------- */
+const VIBES = [
+  {id: 'pop', name: 'Pop', desc: 'Bright and catchy', bpm: 100, tonic: 0, mode: 'major', kit: 'Pop', ci: 'piano', cr: 'push', bi: 'synth', bp: 'bounce', verse: [5,3,0,4], chorus: [0,4,5,3]},
+  {id: 'afro', name: 'Afrobeats', desc: 'Warm, bouncy, made to dance', bpm: 104, tonic: 7, mode: 'major', kit: 'Afrobeats', ci: 'guitar', cr: 'push', bi: 'synth', bp: 'bounce', swing: 15, verse: [0,5,1,4], chorus: [3,4,0,5]},
+  {id: 'trap', name: 'Trap / Hip-hop', desc: 'Dark, hard-hitting 808s', bpm: 140, tonic: 0, mode: 'minor', kit: 'Trap', ci: 'pad', cr: 'hold', bi: 'b808', bp: 'root', verse: [0,5,6,6], chorus: [0,5,2,6]},
+  {id: 'rnb', name: 'R&B ballad', desc: 'Slow, soulful, emotional', bpm: 72, tonic: 3, mode: 'major', kit: 'Ballad', ci: 'rhodes', cr: 'hold', bi: 'synth', bp: 'root', verse: [5,3,0,4], chorus: [3,4,2,5]},
+  {id: 'gospel', name: 'Gospel / Worship', desc: 'Uplifting and full of hope', bpm: 76, tonic: 2, mode: 'major', kit: 'Ballad', ci: 'organ', cr: 'quarters', bi: 'synth', bp: 'half', verse: [0,3,0,4], chorus: [3,4,2,5]},
+  {id: 'reggaeton', name: 'Reggaeton', desc: 'Latin dembow groove', bpm: 92, tonic: 9, mode: 'minor', kit: 'Reggaeton', ci: 'guitar', cr: 'offbeat', bi: 'b808', bp: 'bounce', verse: [0,5,2,6], chorus: [0,5,2,6]},
+  {id: 'lofi', name: 'Lo-fi chill', desc: 'Relaxed and dreamy', bpm: 80, tonic: 5, mode: 'major', kit: 'Lo-fi', ci: 'rhodes', cr: 'halves', bi: 'synth', bp: 'root', swing: 35, verse: [1,4,0,5], chorus: [3,4,2,5]},
+  {id: 'acoustic', name: 'Acoustic / Rock', desc: 'Guitars and live drums', bpm: 118, tonic: 7, mode: 'major', kit: 'Rock', ci: 'guitar', cr: 'strum', bi: 'synth', bp: 'eighths', verse: [0,4,5,3], chorus: [3,0,4,4]}
+];
+const isEasy = () => document.body.classList.contains('ezmode');
+function setEasy() {
+  if (T.playing) stop();
+  document.body.classList.remove('studio'); document.body.classList.add('ezmode');
+  try { localStorage.setItem(STORE + '.view', 'easy'); } catch (e) {}
+  sel = -1; cursorBar = 0; renderEasy(); window.scrollTo(0, 0);
+}
+$('#easyBtn').onclick = setEasy;
+$('#ezFull').onclick = () => { if (T.playing) stop(); setStudio(window.innerWidth >= 1100); };
+function songParts() {
+  const order = []; S.arr.forEach(id => { if (!order.includes(id)) order.push(id); });
+  S.sections.forEach(x => { if (!order.includes(x.id)) order.push(x.id); });
+  return order.map(secById).filter(Boolean);
+}
+function renderEasy() {
+  if (!isEasy()) return;
+  $('#ezTitle').value = S.title;
+  $('#ezVibes').innerHTML = VIBES.map(v => '<button class="vibe' + (S.vibe === v.id ? ' on' : '') + '" data-vibe="' + v.id + '" aria-pressed="' + (S.vibe === v.id) + '"><b>' + v.name + '</b><span>' + v.desc + '</span></button>').join('');
+  $('#ezKey').textContent = keyLabel(); $('#ezBpm').textContent = S.bpm + ' BPM';
+  $('#ezLyrics').innerHTML = songParts().map(x => '<div class="ez-part"><h3>' + esc(x.name) + ' ' + x.chords.map(c => '<span class="chip">' + chordName(c) + '</span>').join('') + '</h3>' +
+    '<textarea class="lyr" data-ezsec="' + x.id + '" placeholder="Type the words for the ' + esc(x.name.toLowerCase()) + ' here…" aria-label="Lyrics for ' + esc(x.name) + '">' + esc(x.lyrics || '') + '</textarea></div>').join('');
+  $('#ezAuto').checked = !!S.autoTuneNew; $('#ezAutoStyle').value = TUNE_PRESETS[S.autoTuneStyle] ? S.autoTuneStyle : 'pop'; $('#ezAutoStyle').disabled = !S.autoTuneNew;
+  $('#ezVoice').value = S.mix.vocals; $('#ezMusic').value = S.mix.music == null ? 1 : S.mix.music; $('#ezEcho').value = S.mix.reverb;
+  renderEasyTakes(); showIdle(); updateTransportUI();
+}
+function renderEasyTakes() {
+  const el = $('#ezTakes'); if (!el) return;
+  if (!takes.length) { el.innerHTML = '<p class="empty">Your recordings will show up here.</p>'; return; }
+  el.innerHTML = takes.map(tk => '<div class="ez-take" data-take="' + tk.id + '"><span class="nm">' + esc(tk.name) + ' <span class="hint">· ' + fmt(tk.buffer.duration) + '</span></span>' +
+    '<label class="chk"><input type="checkbox" data-ez="use"' + (tk.muted ? '' : ' checked') + '> Use in song</label>' +
+    '<label class="chk"><input type="checkbox" data-ez="tune"' + (tk.tune && tk.tune.on ? ' checked' : '') + '> Autotune</label>' +
+    '<span class="tstat hint"></span><button class="btn small danger" data-ez="del">Delete</button></div>').join('');
+}
+function applyVibe(v) {
+  if (T.playing) stop();
+  Object.assign(S, {bpm: v.bpm, tonic: v.tonic, mode: v.mode, swing: v.swing || 0, kit: v.kit, grid: {...KITS[v.kit]}, chordInst: v.ci, chordRhythm: v.cr, bassInst: v.bi, bassPattern: v.bp, vibe: v.id, loop: false});
+  let verse = S.sections.find(x => x.name === 'Verse') || S.sections[0], chorus = S.sections.find(x => x.name === 'Chorus') || S.sections.find(x => x !== verse);
+  if (!verse) { verse = {id: uid(), name: 'Verse', drums: true, bass: true, chords: [], lyrics: '', notes: {}}; S.sections.push(verse); }
+  if (!chorus) { chorus = {id: uid(), name: 'Chorus', drums: true, bass: true, chords: [], lyrics: '', notes: {}}; S.sections.push(chorus); }
+  verse.chords = v.verse.map(x => chordFrom(x, v.mode)); chorus.chords = v.chorus.map(x => chordFrom(x, v.mode));
+  S.sections.forEach(x => { delete x.grid; delete x.kit; });
+  if (!S.arr.length) S.arr = [verse.id, chorus.id, verse.id, chorus.id];
+  save(); applyMix(); renderEasy();
+  if (takes.length) toast('Your recordings were made with the old music, so they may not line up.');
+  sel = -1; cursorBar = 0; play();
+}
+$('#ezVibes').onclick = e => { const b = e.target.closest('[data-vibe]'); if (b) applyVibe(VIBES.find(v => v.id === b.dataset.vibe)); };
+function ezChange(fn) { const was = T.playing && !T.recording; if (was) stop(); fn(); save(); applyMix(); renderEasy(); renderTakes(); if (was) play(); }
+$('#ezLower').onclick = () => ezChange(() => { S.tonic = (S.tonic + 11) % 12; });
+$('#ezHigher').onclick = () => ezChange(() => { S.tonic = (S.tonic + 1) % 12; });
+$('#ezSlower').onclick = () => ezChange(() => { S.bpm = Math.max(50, S.bpm - 5); });
+$('#ezFaster').onclick = () => ezChange(() => { S.bpm = Math.min(200, S.bpm + 5); });
+$('#ezTitle').oninput = e => { S.title = e.target.value; save(); };
+$('#ezLyrics').addEventListener('input', e => { const x = secById(e.target.dataset.ezsec); if (!x) return; x.lyrics = e.target.value; save(); if (!T.playing) showIdle(); else if (TL[shownBar] && TL[shownBar].sec === x) $('#ezLyric').textContent = x.lyrics; });
+$('#ezPlay').onclick = () => { if (T.recording) return; if (T.playing) { stop(); return; } sel = -1; cursorBar = 0; S.loop = false; play(); };
+$('#ezStop').onclick = () => stop();
+$('#ezRec').onclick = () => { if (!T.recording) { sel = -1; cursorBar = 0; } record(); };
+$('#ezAuto').onchange = e => { S.autoTuneNew = e.target.checked; $('#ezAutoStyle').disabled = !e.target.checked; save(); renderVocalSettings(); };
+$('#ezAutoStyle').onchange = e => { S.autoTuneStyle = e.target.value; save(); };
+$('#ezFile').onchange = e => { const dt = new DataTransfer(); if (e.target.files[0]) { dt.items.add(e.target.files[0]); $('#fileIn').files = dt.files; $('#fileIn').dispatchEvent(new Event('change')); } e.target.value = ''; };
+$('#ezTakes').addEventListener('change', e => {
+  const div = e.target.closest('[data-take]'), f = e.target.dataset.ez; if (!div || !f) return;
+  const tk = takes.find(t => t.id === div.dataset.take);
+  if (f === 'use') { tk.muted = !e.target.checked; DB.meta(tk); renderTakes(); }
+  if (f === 'tune') {
+    if (e.target.checked) { const st = TUNE_PRESETS[S.autoTuneStyle] ? S.autoTuneStyle : 'pop'; tk.tune = {...TUNE_PRESETS[st], on: true, preset: st, chromatic: false}; retune(tk); }
+    else { if (tk.tune) tk.tune.on = false; untune(tk); }
+  }
+});
+$('#ezTakes').addEventListener('click', e => {
+  const b = e.target.closest('[data-ez="del"]'); if (!b) return;
+  const tk = takes.find(t => t.id === b.closest('[data-take]').dataset.take);
+  confirmBtn(b, 'Tap again to delete', () => { takes = takes.filter(t => t !== tk); DB.del(tk.id); renderTakes(); });
+});
+['ezVoice', 'ezMusic', 'ezEcho'].forEach(id => $('#' + id).oninput = e => { const k = {ezVoice: 'vocals', ezMusic: 'music', ezEcho: 'reverb'}[id]; S.mix[k] = +e.target.value; applyMix(); save(); });
+$('#ezSave').onclick = e => exportSong(true, e.target, $('#ezSaveStatus'));
+$('#ezSaveInst').onclick = e => exportSong(false, e.target, $('#ezSaveStatus'));
+
 /* ---------- export ---------- */
 const safeName = s => (s || 'song').replace(/[\\/:*?"<>|]+/g, '').trim().slice(0, 80) || 'song';
 function wav(buf) {
@@ -1808,8 +2010,7 @@ async function renderSong(withVocals) {
   if (withVocals) scheduleTakes(g, 0, .05, len);
   return oc.startRendering();
 }
-async function exportSong(withVocals, btn) {
-  const st = $('#expStatus'); btn.disabled = true; st.textContent = 'Mixing your song…';
+async function exportSong(withVocals, btn, st = $('#expStatus')) { btn.disabled = true; st.textContent = 'Mixing your song…';
   try {
     const buf = await renderSong(withVocals);
     if (download(wav(buf), safeName(S.title) + (withVocals ? '' : ' (instrumental)') + '.wav') === false) st.textContent = 'Your song mixed fine, but this online preview can\'t save files. Open the Song Studio file in your browser to download it.';
@@ -1823,10 +2024,10 @@ window.__studio = {renderSong, wav, retune, detectPitch, get takes() { return ta
 
 /* ---------- boot ---------- */
 renderAll();
-let wantStudio = window.innerWidth >= 1100;
-try { const v = localStorage.getItem(STORE + '.studio'); if (v != null) wantStudio = v === '1'; } catch (e) {}
-setStudio(wantStudio);
-if (!wantStudio) try { const t = localStorage.getItem(STORE + '.tab'); if (t && document.querySelector('[data-panel="' + t + '"]')) switchTab(t); } catch (e) {}
+let view = 'easy';
+try { view = localStorage.getItem(STORE + '.view') || 'easy'; } catch (e) {}
+if (view === 'easy') setEasy(); else setStudio(view === 'studio');
+if (view === 'simple') try { const t = localStorage.getItem(STORE + '.tab'); if (t && document.querySelector('[data-panel="' + t + '"]')) switchTab(t); } catch (e) {}
 loadTakes();
 requestAnimationFrame(frame);
 })();
