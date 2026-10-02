@@ -8,24 +8,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: a sticky transport rack on top, a big "now playing" chord readout to sing from, tabbed work areas below */
+/* Layout: an FL-style studio. Toolbar with LCD readouts on top, browser on the left, playlist across
+   the middle, piano roll and channel rack docked below; other windows float over the workspace.
+   On phones it falls back to a stacked, tabbed layout. One deliberate dark look, like a desktop DAW. */
 :root{
-  --bg:#ECEEF3; --panel:#FFFFFF; --panel2:#F4F5F9; --ink:#171A23; --muted:#5B6274; --line:#D6DAE4;
-  --accent:#3346C8; --accent-soft:#E3E6FA; --accent-ink:#FFFFFF;
-  --rec:#D3263C; --rec-soft:#FBE3E6; --meter:#E0960A; --ok:#1E9A61;
+  --bg:#262D31; --panel:#343D42; --panel2:#3D474D; --ink:#D6DEE2; --muted:#8E9BA2; --line:#1E2427;
+  --titlebar:#2C3438; --accent:#F59A23; --accent-soft:#4C4030; --accent-ink:#1A1D1F;
+  --rec:#F04A41; --rec-soft:#4A2B2A; --meter:#8FD14F; --ok:#6CCB4E; --note:#86D07A; --note-ink:#11220E;
+  --lcd-bg:#14191B; --lcd:#A4E46F; --step:#4D585E; --step2:#5E4B4B; --step-on:#E4EAED;
   --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
   --body:"Figtree","Segoe UI",system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
-  --r:10px;
+  --r:6px; color-scheme:dark;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0F1118; --panel:#181B25; --panel2:#1F2330; --ink:#E8EAF2; --muted:#9BA1B4; --line:#2C3140;
-  --accent:#8E9CFF; --accent-soft:#252B4D; --accent-ink:#0D0F1F;
-  --rec:#FF4F60; --rec-soft:#3A1B22; --meter:#FFB22B; --ok:#3FCF8E; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0F1118; --panel:#181B25; --panel2:#1F2330; --ink:#E8EAF2; --muted:#9BA1B4; --line:#2C3140;
-  --accent:#8E9CFF; --accent-soft:#252B4D; --accent-ink:#0D0F1F;
-  --rec:#FF4F60; --rec-soft:#3A1B22; --meter:#FFB22B; --ok:#3FCF8E; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0}
@@ -119,9 +114,9 @@ textarea.lyr{width:100%;min-height:110px;border:1px solid var(--line);border-rad
 .dgrid-wrap{overflow-x:auto}
 .dgrid{display:grid;grid-template-columns:72px repeat(16,minmax(18px,1fr));gap:4px;min-width:380px}
 .dgrid .rl{font-size:.78rem;font-weight:700;color:var(--muted);display:flex;align-items:center}
-.cell{aspect-ratio:1;border-radius:5px;border:1px solid var(--line);background:var(--panel2);padding:0;max-width:100%}
-.cell.q{background:var(--bg)}
-.cell.on{background:var(--accent);border-color:var(--accent)}
+.cell{aspect-ratio:1;border-radius:3px;border:1px solid var(--line);background:var(--step);padding:0;max-width:100%;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+.cell.q{background:var(--step2)}
+.cell.on{background:var(--step-on);border-color:var(--step-on)}
 .cell.now{outline:2px solid var(--meter);outline-offset:-1px}
 
 /* vocals */
@@ -144,8 +139,8 @@ textarea.lyr{width:100%;min-height:110px;border:1px solid var(--line);border-rad
 .bk{position:absolute;top:0;height:60%;background:#1B1E28;border-radius:0 0 5px 5px;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:6px;font:600 .62rem var(--mono);color:#A9AFC2}
 .wk.scale::before,.bk.scale::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.55;margin-bottom:2px}
 .wk.chord,.bk.chord{box-shadow:inset 0 -6px 0 var(--meter)}
-.wk.down{background:#D9DEFA}
-.bk.down{background:#3346C8}
+.wk.down{background:#F7D3A3}
+.bk.down{background:var(--accent)}
 kbd{font:600 .75rem var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--panel2)}
 
 /* mix */
@@ -173,7 +168,7 @@ input[type=range]{accent-color:var(--accent)}
 .roll-keys div.c{color:var(--ink)}
 .roll-grid{position:relative;touch-action:none;cursor:crosshair}
 .roll-grid canvas{display:block}
-.note{position:absolute;background:var(--accent);color:var(--accent-ink);border-radius:3px;font:600 .58rem/1 var(--mono);display:flex;align-items:center;padding-left:3px;overflow:hidden;cursor:grab;box-shadow:inset -5px 0 0 rgba(0,0,0,.18)}
+.note{position:absolute;background:var(--note);color:var(--note-ink);border-radius:3px;font:600 .58rem/1 var(--mono);display:flex;align-items:center;padding-left:3px;overflow:hidden;cursor:grab;box-shadow:inset -5px 0 0 rgba(0,0,0,.18)}
 .note.hot{outline:2px solid var(--meter)}
 .roll-head,.pl-head{position:absolute;top:0;bottom:0;width:2px;background:var(--meter);pointer-events:none;z-index:4}
 /* playlist */
@@ -187,7 +182,7 @@ input[type=range]{accent-color:var(--accent)}
 .pl-ruler span{position:absolute;top:5px;font:600 .7rem var(--mono);color:var(--muted);padding-left:4px;pointer-events:none}
 .pl-clip{position:absolute;top:4px;bottom:4px;border-radius:5px;border:1px solid;overflow:hidden;font-size:.72rem;font-weight:700;padding:2px 5px;white-space:nowrap}
 .pl-clip canvas{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
-.pl-clip.take{cursor:grab;touch-action:none;background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.pl-clip.take{cursor:grab;touch-action:none;background:#2F4B3A;border-color:var(--note);color:#fff}
 .pl-clip.take.muted{opacity:.45}
 .pl-clip.part{cursor:pointer}
 .pl-clip.part.sel{box-shadow:0 0 0 2px var(--accent)}
@@ -196,12 +191,61 @@ input[type=range]{accent-color:var(--accent)}
 .tune .tstat{font-size:.82rem;color:var(--muted)}
 .tune .tstat.busy{color:var(--accent);font-weight:600}
 .take canvas.pitch{height:70px}
+/* LCD readouts */
+.lcd{font:700 1rem var(--mono);font-variant-numeric:tabular-nums;color:var(--lcd);background:var(--lcd-bg);border:1px solid #000;border-radius:3px;padding:4px 8px;min-width:58px;text-align:center;text-shadow:0 0 6px rgba(164,228,111,.35)}
+.field input#bpm{background:var(--lcd-bg);color:var(--lcd);border-color:#000}
+.clock{color:var(--lcd);background:var(--lcd-bg);border:1px solid #000;border-radius:3px;padding:4px 8px}
+.winclose{display:none}
+.browser{display:none}
+html,body{height:100%}
+/* studio workspace (desktop) */
+body.studio{overflow:hidden}
+body.studio .shell{display:grid;grid-template-columns:220px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);height:100%}
+body.studio .top{grid-column:1/-1;position:relative}
+body.studio .top .wrap{max-width:none;padding-block:6px}
+body.studio .tb{height:32px;border-radius:4px}
+body.studio .browser{display:block;overflow:auto;background:var(--panel);border-right:1px solid var(--line);font-size:.82rem;padding-bottom:20px}
+body.studio .shell>.wrap{max-width:none;margin:0;padding:6px;display:flex;flex-direction:column;gap:6px;min-height:0;min-width:0}
+body.studio .now{padding:0;gap:4px 14px;grid-template-columns:auto minmax(0,1fr)}
+body.studio .chordbig{font-size:2.3rem}
+body.studio .nextrow b{font-size:1rem}
+body.studio .lyricbox{min-height:0;height:74px;padding:6px 10px;font-size:.9rem;line-height:1.45;border-radius:4px}
+body.studio .tabs{border:0;gap:4px;overflow:visible}
+body.studio .tabs [data-tab=playlist],body.studio .tabs [data-tab=roll],body.studio .tabs [data-tab=beat]{display:none}
+body.studio .tabs button{border:1px solid var(--line);border-radius:4px;background:var(--panel2);padding:4px 12px;margin:0;font-size:.82rem;color:var(--ink)}
+body.studio .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+body.studio .tabs::before{content:"Windows";align-self:center;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+body.studio main{flex:1;min-height:0;padding:0;position:relative;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);grid-template-rows:minmax(0,.95fr) minmax(0,1.1fr);grid-template-areas:"pl pl" "roll rack";gap:6px}
+body.studio [data-panel]{min-height:0;min-width:0;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:4px;gap:0;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+body.studio [data-panel]::before{content:attr(data-title);position:sticky;top:0;left:0;z-index:6;display:block;padding:4px 10px;background:var(--titlebar);border-bottom:1px solid var(--line);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+body.studio [data-panel=playlist]{grid-area:pl}
+body.studio [data-panel=roll]{grid-area:roll}
+body.studio [data-panel=beat]{grid-area:rack}
+body.studio [data-panel=song],body.studio [data-panel=vocals],body.studio [data-panel=keys],body.studio [data-panel=mix]{position:absolute;top:0;right:0;bottom:0;width:min(640px,100%);z-index:30;box-shadow:0 14px 50px rgba(0,0,0,.6);border-color:#000}
+body.studio [data-panel] .card{border:0;border-radius:0;background:transparent;padding:10px 12px;gap:8px}
+body.studio [data-panel] .card+.card{border-top:1px solid var(--line)}
+body.studio [data-panel] h3{font-size:.95rem}
+body.studio [data-panel=roll] .card{height:calc(100% - 26px)}
+body.studio [data-panel=roll] .hint,body.studio [data-panel=playlist] .hint,body.studio [data-panel=beat] p.hint{display:none}
+body.studio .roll-wrap{max-height:none;flex:1;min-height:120px}
+body.studio .winclose{display:flex;justify-content:flex-end;position:sticky;top:0;height:0;z-index:7;overflow:visible}
+body.studio .winclose button{margin:1px 4px 0 0;height:22px;padding:0 8px;border-radius:3px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-size:.75rem;font-weight:700}
+/* browser tree */
+.br-h{padding:8px 10px 4px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--titlebar);border-bottom:1px solid var(--line)}
+.br-g{padding:6px 10px 2px 12px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:6px}
+.br-g::before{content:"";width:10px;height:8px;border-radius:1px;background:var(--accent);opacity:.8}
+.br-i{display:flex;align-items:center;gap:6px;width:100%;border:0;background:none;text-align:left;padding:3px 10px 3px 26px;color:var(--ink);font-size:.8rem}
+.br-i:hover{background:var(--panel2)}
+.br-i.on{background:var(--accent-soft);color:var(--accent)}
+.br-i small{margin-left:auto;font:500 .68rem var(--mono);color:var(--muted)}
+.br-i i{width:8px;height:8px;border-radius:2px;flex:none}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px);text-align:center}
 .toast.show{opacity:1}
 .steps{margin:0;padding-left:20px;color:var(--muted);font-size:.9rem;display:flex;flex-direction:column;gap:2px}
 </style>
 </head>
 <body>
+<div class="shell">
 <header class="top">
   <div class="wrap">
     <div class="brand"><span class="mark" aria-hidden="true"></span><input id="title" class="title" aria-label="Song title" maxlength="80"></div>
@@ -213,10 +257,13 @@ input[type=range]{accent-color:var(--accent)}
       <button class="tb" id="clickBtn" aria-pressed="false" title="Metronome click">Click</button>
       <label class="field">Tempo <input id="bpm" type="number" min="50" max="200" step="1"></label>
       <label class="field">Key <select id="tonic" aria-label="Key note"></select><select id="mode" aria-label="Major or minor"><option value="major">major</option><option value="minor">minor</option></select></label>
-      <span class="clock" id="clock">0:00.0</span>
+      <span class="clock" id="clock" title="Song position">0:00.0</span>
+      <span class="lcd" id="lcdChord" title="Chord playing now">Am</span>
+      <button class="tb" id="viewBtn" title="Switch between the studio layout and the simple layout">Simple view</button>
     </div>
   </div>
 </header>
+<aside class="browser" id="browser" aria-label="Browser"></aside>
 
 <div class="wrap">
   <section class="now" aria-live="off">
@@ -230,7 +277,7 @@ input[type=range]{accent-color:var(--accent)}
 
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="song" aria-selected="true">Song &amp; lyrics</button>
-    <button role="tab" data-tab="beat" aria-selected="false">Beat &amp; sounds</button>
+    <button role="tab" data-tab="beat" aria-selected="false">Channel rack</button>
     <button role="tab" data-tab="roll" aria-selected="false">Piano roll</button>
     <button role="tab" data-tab="playlist" aria-selected="false">Playlist</button>
     <button role="tab" data-tab="vocals" aria-selected="false">Vocals</button>
@@ -240,7 +287,8 @@ input[type=range]{accent-color:var(--accent)}
 
   <main>
     <!-- SONG -->
-    <section class="panel" data-panel="song">
+    <section class="panel" data-panel="song" data-title="Song & lyrics">
+      <div class="winclose"><button data-close>Close ✕</button></div>
       <div class="card">
         <div class="row" style="justify-content:space-between">
           <h3>Song structure</h3>
@@ -262,16 +310,7 @@ input[type=range]{accent-color:var(--accent)}
     </section>
 
     <!-- BEAT -->
-    <section class="panel" data-panel="beat" hidden>
-      <div class="card">
-        <h3>Sounds</h3>
-        <div class="grid2">
-          <label class="lbl">Chord instrument<select class="sel" id="chordInst"></select></label>
-          <label class="lbl">Chord rhythm<select class="sel" id="chordRhythm"></select></label>
-          <label class="lbl">Bass<select class="sel" id="bassInst"></select></label>
-          <label class="lbl">Bass pattern<select class="sel" id="bassPattern"></select></label>
-        </div>
-      </div>
+    <section class="panel" data-panel="beat" data-title="Channel rack" hidden>
       <div class="card">
         <div class="row" style="justify-content:space-between">
           <h3>Drums</h3>
@@ -288,19 +327,29 @@ input[type=range]{accent-color:var(--accent)}
         <div class="row" id="beatOwn" hidden><span class="hint" id="beatOwnTxt"></span><button class="btn small primary" id="beatOwnBtn">Give it its own beat</button></div>
         <div class="dgrid-wrap" id="dgridWrap"><div class="dgrid" id="dgrid"></div></div>
       </div>
-    </section>
-
-    <!-- PIANO ROLL -->
-    <section class="panel" data-panel="roll" hidden>
       <div class="card">
-        <div class="row" style="justify-content:space-between"><h3>Channel rack</h3><button class="btn small" id="addChan">+ Add channel</button></div>
+        <div class="row" style="justify-content:space-between"><h3>Instrument channels</h3><button class="btn small" id="addChan">+ Add channel</button></div>
         <p class="hint">Each channel is one instrument with its own notes. Choose a channel to edit it in the piano roll.</p>
         <div class="chans" id="chans"></div>
       </div>
       <div class="card">
+        <h3>Chords &amp; bass</h3>
+        <div class="grid2">
+          <label class="lbl">Chord instrument<select class="sel" id="chordInst"></select></label>
+          <label class="lbl">Chord rhythm<select class="sel" id="chordRhythm"></select></label>
+          <label class="lbl">Bass<select class="sel" id="bassInst"></select></label>
+          <label class="lbl">Bass pattern<select class="sel" id="bassPattern"></select></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- PIANO ROLL -->
+    <section class="panel" data-panel="roll" data-title="Piano roll" hidden>
+      <div class="card">
         <div class="row" style="justify-content:space-between">
           <h3 id="rollTitle">Piano roll</h3>
           <div class="row">
+            <label class="lbl rowlbl">Channel <select class="sel" id="rollChan"></select></label>
             <label class="lbl rowlbl">Part <select class="sel" id="rollSec"></select></label>
             <label class="lbl rowlbl">New notes <select class="sel" id="rollLen"><option value="1">1/16</option><option value="2" selected>1/8</option><option value="4">1/4</option><option value="8">1/2</option><option value="16">1 bar</option></select></label>
           </div>
@@ -320,7 +369,7 @@ input[type=range]{accent-color:var(--accent)}
     </section>
 
     <!-- PLAYLIST -->
-    <section class="panel" data-panel="playlist" hidden>
+    <section class="panel" data-panel="playlist" data-title="Playlist · arrangement" hidden>
       <div class="card">
         <div class="row" style="justify-content:space-between">
           <h3>Playlist</h3>
@@ -335,7 +384,8 @@ input[type=range]{accent-color:var(--accent)}
     </section>
 
     <!-- VOCALS -->
-    <section class="panel" data-panel="vocals" hidden>
+    <section class="panel" data-panel="vocals" data-title="Vocals · recording & autotune" hidden>
+      <div class="winclose"><button data-close>Close ✕</button></div>
       <div class="card">
         <h3>Microphone</h3>
         <div id="micNotice" class="notice" hidden></div>
@@ -363,7 +413,8 @@ input[type=range]{accent-color:var(--accent)}
     </section>
 
     <!-- KEYS -->
-    <section class="panel" data-panel="keys" hidden>
+    <section class="panel" data-panel="keys" data-title="Keyboard" hidden>
+      <div class="winclose"><button data-close>Close ✕</button></div>
       <div class="card">
         <div class="row" style="justify-content:space-between">
           <h3>Find your melody</h3>
@@ -380,7 +431,8 @@ input[type=range]{accent-color:var(--accent)}
     </section>
 
     <!-- MIX -->
-    <section class="panel" data-panel="mix" hidden>
+    <section class="panel" data-panel="mix" data-title="Mixer & export" hidden>
+      <div class="winclose"><button data-close>Close ✕</button></div>
       <div class="card">
         <h3>Mixer</h3>
         <div class="mix" id="mix"></div>
@@ -401,6 +453,7 @@ input[type=range]{accent-color:var(--accent)}
       </div>
     </section>
   </main>
+</div>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -1029,7 +1082,7 @@ function showBar(bi) {
   const b = TL[bi]; if (!b) return;
   const nx = TL[bi + 1] || (T.loop ? TL[T.loopStart / 16] : null);
   $('#nowSec').textContent = b.sec.name + ' · bar ' + (bi + 1) + ' of ' + TL.length;
-  $('#nowChord').textContent = chordName(b.chord);
+  $('#nowChord').textContent = chordName(b.chord); $('#lcdChord').textContent = chordName(b.chord);
   $('#nowNext').textContent = nx ? chordName(nx.chord) : 'end';
   const ly = $('#nowLyric');
   ly.textContent = b.sec.lyrics || 'No lyrics for ' + b.sec.name + ' yet. Write them on the Song tab.';
@@ -1113,6 +1166,7 @@ function renderArr() {
 }
 function renderSections() {
   const presets = PRESETS[S.mode];
+  setTimeout(() => { renderRoll(); renderBrowser(); });
   $('#sections').innerHTML = S.sections.map(s => {
     const used = S.arr.filter(id => id === s.id).length;
     return '<div class="card" data-sec="' + s.id + '">' +
@@ -1153,7 +1207,7 @@ function renderVocalSettings() {
   $('#latency').value = S.latencyMs || 0; $('#latVal').textContent = (S.latencyMs || 0) + ' ms';
 }
 function renderTakes() {
-  renderPlaylist();
+  renderPlaylist(); renderBrowser();
   const el = $('#takes');
   if (!takes.length) { el.innerHTML = '<p class="empty">No takes yet. Press Rec at the top to record your first one.</p>'; return; }
   el.innerHTML = takes.map(tk => '<div class="take' + (tk.muted ? ' muted' : '') + '" data-take="' + tk.id + '">' +
@@ -1214,14 +1268,70 @@ function renderHeader() {
   updateTransportUI();
 }
 function renderAll() { normalize(); renderHeader(); renderArr(); renderSections(); renderBeat(); renderVocalSettings(); renderTakes(); renderKeys(); renderMix(); renderChans(); renderRoll(); showIdle(); }
+const DOCKED = ['playlist', 'roll', 'beat'];
+let openWin = null, lastTab = 'song';
+const isStudio = () => document.body.classList.contains('studio');
 function switchTab(t) {
+  if (isStudio()) {
+    if (!DOCKED.includes(t)) openWin = openWin === t ? null : t;
+    document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === openWin));
+    document.querySelectorAll('[data-panel]').forEach(p => p.hidden = !DOCKED.includes(p.dataset.panel) && p.dataset.panel !== openWin);
+    if (t === 'vocals' && openWin === 'vocals') renderTakes();
+    renderBrowser();
+    return;
+  }
+  lastTab = t;
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
   document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== t);
+  if (t === 'beat') renderChans();
   if (t === 'vocals') renderTakes();
   if (t === 'roll') { renderChans(); renderRoll(); }
   if (t === 'playlist') renderPlaylist();
   try { localStorage.setItem(STORE + '.tab', t); } catch (e) {}
 }
+function setStudio(on) {
+  document.body.classList.toggle('studio', on);
+  $('#viewBtn').textContent = on ? 'Simple view' : 'Studio view';
+  try { localStorage.setItem(STORE + '.studio', on ? '1' : '0'); } catch (e) {}
+  if (on) { openWin = null; switchTab('playlist'); renderChans(); renderRoll(); renderPlaylist(); }
+  else switchTab(lastTab);
+}
+$('#viewBtn').onclick = () => setStudio(!isStudio());
+document.addEventListener('click', e => { if (e.target.closest('[data-close]')) { openWin = null; switchTab('playlist'); } });
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && isStudio() && openWin) { openWin = null; switchTab('playlist'); } });
+
+/* ---------- browser (left panel) ---------- */
+function renderBrowser() {
+  if (!isStudio()) return;
+  const b = $('#browser'), item = (act, id, label, extra = '', on = false, dot = '') => '<button class="br-i' + (on ? ' on' : '') + '" data-bact="' + act + '" data-id="' + esc(id) + '">' + (dot ? '<i style="background:' + dot + '"></i>' : '') + esc(label) + (extra ? '<small>' + esc(extra) + '</small>' : '') + '</button>';
+  let h = '<div class="br-h">Current project</div><div class="br-g">Parts</div>';
+  S.sections.forEach(x => h += item('part', x.id, x.name, x.chords.length + ' bars', x.id === rollSecId, 'hsl(' + secHue(x) + ' 45% 50%)'));
+  h += '<div class="br-g">Channels</div>';
+  S.channels.forEach((c, i) => h += item('chan', c.id, c.name, CHAN_INSTS[c.inst] || '', c.id === rollChId, 'hsl(' + chanHue(i) + ' 50% 55%)'));
+  h += '<div class="br-g">Vocal takes</div>';
+  h += takes.length ? takes.map(t => item('take', t.id, t.name, (t.tune && t.tune.on ? 'tuned · ' : '') + fmt(t.buffer.duration))).join('') : '<div class="br-i" style="color:var(--muted)">None yet</div>';
+  h += '<div class="br-h">Packs</div><div class="br-g">Drum kits</div>';
+  Object.keys(KITS).forEach(k => h += item('kit', k, k, '', beatTarget().kit === k));
+  h += '<div class="br-g">Instruments</div>';
+  Object.entries(CHAN_INSTS).forEach(([k, v]) => h += item('inst', k, v, '', rollChan() && rollChan().inst === k));
+  h += '<div class="br-g">Chord ideas</div>';
+  PRESETS[S.mode].forEach((pr, i) => h += item('prog', i, pr[0], pr[1].map(x => romanOf(chordFrom(x, S.mode))).join(' ')));
+  const st = b.scrollTop; b.innerHTML = h; b.scrollTop = st;
+}
+$('#browser').addEventListener('click', e => {
+  const it = e.target.closest('[data-bact]'); if (!it) return;
+  const id = it.dataset.id;
+  switch (it.dataset.bact) {
+    case 'part': rollSecId = id; renderRoll(); break;
+    case 'chan': rollChId = id; renderChans(); renderRoll(); break;
+    case 'take': openWin = null; switchTab('vocals'); break;
+    case 'kit': { const bt = beatTarget(); bt.kit = id; bt.grid = {...KITS[id]}; save(); renderBeat(); toast(id + ' beat loaded'); break; }
+    case 'inst': { const ch = rollChan(); if (!ch) return; ch.inst = id; ch.view = (id === 'b808' || id === 'synth') ? 24 : 48; save(); ensureCtx(); voice(ctx, chanOut(G, ch), ch.view + 12 + S.tonic, ctx.currentTime + .01, .4, id, .25); renderChans(); renderRoll(); toast(ch.name + ' now plays ' + CHAN_INSTS[id]); break; }
+    case 'prog': { const sec = rollSec(), pr = PRESETS[S.mode][+id]; sec.chords = pr[1].map(x => chordFrom(x, S.mode)); save(); renderSections(); renderArr(); showIdle(); toast(sec.name + ' chords: ' + sec.chords.map(chordName).join(' – ')); break; }
+  }
+  renderBrowser();
+});
+
 let toastT = 0;
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
 function confirmBtn(btn, label, fn) {
@@ -1423,6 +1533,7 @@ const rollSec = () => secById(rollSecId) || S.sections[0];
 const curStep = () => T.last ? T.last.step + (ctx.currentTime - T.last.time) / stepDur() : 0;
 function noteCount(ch) { return S.sections.reduce((a, s) => a + ((s.notes[ch.id] || []).length), 0); }
 function renderChans() {
+  setTimeout(renderBrowser);
   if (!S.channels.some(c => c.id === rollChId)) rollChId = S.channels[0] ? S.channels[0].id : '';
   $('#chans').innerHTML = S.channels.map((ch, i) => '<div class="chan' + (ch.id === rollChId ? ' sel' : '') + '" data-ch="' + ch.id + '">' +
     '<span class="led" style="background:hsl(' + chanHue(i) + ' 60% 55%)"></span>' +
@@ -1459,6 +1570,7 @@ function renderRoll() {
   if ($('[data-panel="roll"]').hidden) return;
   const sec = rollSec(), ch = rollChan(); if (!sec || !ch) return;
   rollSecId = sec.id;
+  $('#rollChan').innerHTML = S.channels.map(c => '<option value="' + c.id + '"' + (c.id === ch.id ? ' selected' : '') + '>' + esc(c.name) + '</option>').join('');
   $('#rollSec').innerHTML = S.sections.map(x => '<option value="' + x.id + '"' + (x.id === sec.id ? ' selected' : '') + '>' + esc(x.name) + '</option>').join('');
   $('#rollCopy').innerHTML = '<option value="">Copy notes from…</option>' + S.sections.filter(x => x !== sec && (x.notes[ch.id] || []).length).map(x => '<option value="' + x.id + '">' + esc(x.name) + '</option>').join('');
   $('#rollTitle').textContent = 'Piano roll · ' + ch.name + ' in ' + sec.name;
@@ -1503,7 +1615,8 @@ function renderNotes() {
 }
 function undoPush() { const sec = rollSec(); undoStack.push({id: sec.id, notes: JSON.stringify(sec.notes)}); if (undoStack.length > 80) undoStack.shift(); }
 $('#rollUndo').onclick = () => { const u = undoStack.pop(); if (!u) { toast('Nothing to undo'); return; } const sec = secById(u.id); if (sec) { sec.notes = JSON.parse(u.notes); rollSecId = sec.id; } save(); renderRoll(); renderChans(); };
-$('#rollSec').onchange = e => { rollSecId = e.target.value; renderRoll(); };
+$('#rollSec').onchange = e => { rollSecId = e.target.value; renderRoll(); renderBrowser(); };
+$('#rollChan').onchange = e => { rollChId = e.target.value; renderChans(); renderRoll(); };
 $('#rollDown').onclick = () => { const ch = rollChan(); ch.view = Math.max(12, ch.view - 12); save(); renderRoll(); };
 $('#rollUp').onclick = () => { const ch = rollChan(); ch.view = Math.min(84, ch.view + 12); save(); renderRoll(); };
 $('#rollRec').onclick = () => { recKeys = !recKeys; $('#rollRec').setAttribute('aria-pressed', recKeys); if (recKeys) toast('Press Play, then play notes with your computer keys (A W S E D…)'); };
@@ -1550,7 +1663,7 @@ const rollUp = () => {
   const d = rdrag; rdrag = null;
   if (!d.moved && !d.created && d.mode === 'move') { const arr = rollSec().notes[rollChan().id]; arr.splice(arr.indexOf(d.nt), 1); }
   if (d.created || d.moved) $('#rollLen').value = String([1, 2, 4, 8, 16].includes(d.nt.l) ? d.nt.l : $('#rollLen').value);
-  save(); renderNotes(); renderChans();
+  save(); renderNotes(); renderChans(); renderPlaylist();
 };
 $('#rollGrid').addEventListener('pointerup', rollUp); $('#rollGrid').addEventListener('pointercancel', rollUp);
 $('#rollIdea').onclick = () => {
@@ -1603,14 +1716,14 @@ function renderPlaylist() {
   h += '</div></div><div class="pl-row"><div class="pl-lab">Song parts</div><div class="pl-track" style="width:' + W + 'px">';
   S.arr.forEach((id, ai) => {
     const sec = secById(id); if (!sec) return; const a = blockStartBar(ai), hue = secHue(sec);
-    h += '<div class="pl-clip part' + (ai === sel ? ' sel' : '') + '" data-ai="' + ai + '" style="left:' + a * px + 'px;width:' + (sec.chords.length * px - 2) + 'px;background:hsl(' + hue + ' 60% 55% / .3);border-color:hsl(' + hue + ' 55% 50%)">' + esc(sec.name) + '</div>';
+    h += '<div class="pl-clip part' + (ai === sel ? ' sel' : '') + '" data-ai="' + ai + '" style="left:' + a * px + 'px;width:' + (sec.chords.length * px - 2) + 'px;background:hsl(' + hue + ' 40% 40%);border-color:hsl(' + hue + ' 50% 58%);color:#fff">' + esc(sec.name) + '</div>';
   });
   h += '</div></div>';
   S.channels.forEach((ch, ci) => {
     h += '<div class="pl-row"><div class="pl-lab" title="' + esc(ch.name) + '">' + esc(ch.name) + (ch.mute ? ' (muted)' : '') + '</div><div class="pl-track" style="width:' + W + 'px">';
     S.arr.forEach((id, ai) => {
       const sec = secById(id); if (!sec || !(sec.notes[ch.id] || []).length) return; const hue = chanHue(ci);
-      h += '<div class="pl-clip" style="left:' + blockStartBar(ai) * px + 'px;width:' + (sec.chords.length * px - 2) + 'px;background:hsl(' + hue + ' 60% 55% / .22);border-color:hsl(' + hue + ' 55% 50%)"><canvas data-notes="' + sec.id + '|' + ch.id + '"></canvas></div>';
+      h += '<div class="pl-clip" style="left:' + blockStartBar(ai) * px + 'px;width:' + (sec.chords.length * px - 2) + 'px;background:hsl(' + hue + ' 38% 34%);border-color:hsl(' + hue + ' 50% 55%)"><canvas data-notes="' + sec.id + '|' + ch.id + '"></canvas></div>';
     });
     h += '</div></div>';
   });
@@ -1710,7 +1823,10 @@ window.__studio = {renderSong, wav, retune, detectPitch, get takes() { return ta
 
 /* ---------- boot ---------- */
 renderAll();
-try { const t = localStorage.getItem(STORE + '.tab'); if (t && document.querySelector('[data-panel="' + t + '"]')) switchTab(t); } catch (e) {}
+let wantStudio = window.innerWidth >= 1100;
+try { const v = localStorage.getItem(STORE + '.studio'); if (v != null) wantStudio = v === '1'; } catch (e) {}
+setStudio(wantStudio);
+if (!wantStudio) try { const t = localStorage.getItem(STORE + '.tab'); if (t && document.querySelector('[data-panel="' + t + '"]')) switchTab(t); } catch (e) {}
 loadTakes();
 requestAnimationFrame(frame);
 })();
