@@ -1126,10 +1126,14 @@ function wav(buf) {
   for (let i = 0; i < n; i++) for (let c = 0; c < ch; c++) { const v = Math.max(-1, Math.min(1, data[c][i])); out.setInt16(o, v < 0 ? v * 0x8000 : v * 0x7fff, true); o += 2; }
   return new Blob([out], {type: 'audio/wav'});
 }
+// The claude.ai preview frame blocks file saves, so say so instead of failing silently.
+const inPreview = () => !!window.claude;
 function download(blob, name) {
+  if (inPreview()) { toast('Saving files is blocked in this online preview. Open the Song Studio file itself to download.'); return false; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+  return true;
 }
 async function renderSong(withVocals) {
   refreshTL();
@@ -1146,8 +1150,8 @@ async function exportSong(withVocals, btn) {
   const st = $('#expStatus'); btn.disabled = true; st.textContent = 'Mixing your song…';
   try {
     const buf = await renderSong(withVocals);
-    download(wav(buf), safeName(S.title) + (withVocals ? '' : ' (instrumental)') + '.wav');
-    st.textContent = 'Saved ' + fmt(buf.duration) + ' of audio. If no download started, open Song Studio directly in your browser.';
+    if (download(wav(buf), safeName(S.title) + (withVocals ? '' : ' (instrumental)') + '.wav') === false) st.textContent = 'Your song mixed fine, but this online preview can\'t save files. Open the Song Studio file in your browser to download it.';
+    else st.textContent = 'Saved ' + fmt(buf.duration) + ' of audio.';
   } catch (e) { st.textContent = e.message === 'empty' ? 'Add a part to the song first.' : 'Export failed: ' + e.message; }
   btn.disabled = false;
 }
