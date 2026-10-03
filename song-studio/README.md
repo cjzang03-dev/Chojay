@@ -14,8 +14,8 @@ Song Studio opens in Easy mode: four steps on one screen.
 
 The player bar at the bottom shows the chord and your lyrics while you sing. Tap **Open full studio** for every tool.
 
-## Studio view
-On a computer, Song Studio opens in a studio layout modelled on FL Studio: a dark workspace with a toolbar and LCD readouts, a browser on the left (parts, channels, takes, drum kits, instruments, chord ideas), the playlist across the middle, and the piano roll and channel rack docked below. Song & lyrics, Vocals, Keyboard and Mixer open as windows on top. Tap **Simple view** for the stacked layout used on phones.
+## Studio
+On a computer (980px and wider), the full studio is a modern DAW layout: a side menu (Easy mode, Studio, Lyrics & chords, Record vocals, Keyboard, Mix & export), a top bar with the transport, time, tempo, key and Export, an arrangement with a coloured clip lane for every track (vocal takes, drums, bass, chords and each instrument channel) with mute, solo and volume, a Sounds panel (search, drum kits, instruments, chord ideas and genre styles), a mixer with pan knobs, faders and live level meters, and the piano roll and step sequencer. On smaller screens it switches to a tab layout.
 
 ## What it does
 - **Song & lyrics**: build the song from parts (verse, chorus, bridge…), pick chords for each bar (or use "Chord ideas"), and write lyrics for each part. "Surprise me" picks a key, tempo, chords and beat for you.
