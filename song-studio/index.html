@@ -871,7 +871,11 @@ function normalize() { if (S.mix.music == null) S.mix.music = 1;
   S.trk = Object.assign({drums: {m: false, s: false}, chords: {m: false, s: false}, bass: {m: false, s: false}, vocals: {m: false, s: false}}, S.trk || {}); S.pan = S.pan || {}; S.sections.forEach(s => { if (!s.notes) s.notes = {}; }); if (!S.channels || !S.channels.length) S.channels = defaultChannels(); }
 normalize();
 let saveT = 0;
-function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }, 300); }
+function saveNow() { clearTimeout(saveT); try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
+function save() { clearTimeout(saveT); saveT = setTimeout(saveNow, 300); }
+// write any pending change before the page closes or goes to the background
+window.addEventListener('pagehide', saveNow);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveNow(); });
 const secById = id => S.sections.find(s => s.id === id);
 let sel = -1;           // selected arrangement block
 let TL = [];            // flattened bars
@@ -2238,9 +2242,12 @@ function renderEditor() {
   const kind = curInst.startsWith('ch:') ? 'chan' : curInst;
   ['Drums', 'Chords', 'Bass', 'Chan', 'Vocals'].forEach(n => $('#ed' + n).hidden = n.toLowerCase() !== kind);
   if (kind === 'drums') {
-    beatSecId = sec.grid ? sec.id : '';
-    $('#edDrumsTog').innerHTML = '<label class="chk"><input type="checkbox" data-tog="drums"' + (sec.drums !== false ? ' checked' : '') + '> Drums play in the ' + esc(sec.name.toLowerCase()) + '</label>' +
-      (sec.grid ? '<span class="hint">The ' + esc(sec.name.toLowerCase()) + ' has its own beat.</span><button class="btn small" data-dact="share">Use the main beat</button>' : '<span class="hint">Editing the main beat (used by every part).</span><button class="btn small" data-dact="own">Give the ' + esc(sec.name.toLowerCase()) + ' its own beat</button>');
+    // every part keeps its own beat, so editing one part never changes another
+    if (!sec.grid) { sec.grid = {...S.grid}; sec.kit = S.kit; save(); }
+    beatSecId = sec.id;
+    const pn = esc(sec.name.toLowerCase());
+    $('#edDrumsTog').innerHTML = '<label class="chk"><input type="checkbox" data-tog="drums"' + (sec.drums !== false ? ' checked' : '') + '> Drums play in the ' + pn + '</label>' +
+      '<span class="hint">You are editing the ' + pn + ' beat only.</span><button class="btn small" data-dact="copyall" title="Use this beat in every part of the song">Copy this beat to all parts</button>';
     renderBeat();
   }
   if (kind === 'chords') {
@@ -2282,7 +2289,13 @@ $('#edBody').addEventListener('click', e => {
   const ca = t.closest('[data-cact]');
   if (ca) { if (ca.dataset.cact === 'addbar') sec.chords.push(sec.chords[sec.chords.length - 1] || chordFrom(0, S.mode)); else if (sec.chords.length > 1) sec.chords.pop(); save(); renderSections(); renderArr(); renderEditor(); showIdle(); return; }
   const da = t.closest('[data-dact]');
-  if (da) { if (da.dataset.dact === 'own') { sec.grid = {...S.grid}; sec.kit = S.kit; toast('The ' + sec.name.toLowerCase() + ' now has its own beat'); } else { delete sec.grid; delete sec.kit; } save(); renderEditor(); return; }
+  if (da && da.dataset.dact === 'copyall') {
+    return confirmBtn(da, 'Tap again: replaces the beat in every part', () => {
+      S.grid = {...sec.grid}; S.kit = sec.kit;
+      S.sections.forEach(x => { x.grid = {...sec.grid}; x.kit = sec.kit; });
+      save(); renderEditor(); renderInstList(); toast('The ' + sec.name.toLowerCase() + ' beat is now in every part');
+    });
+  }
   if (t.closest('[data-cdel]')) confirmBtn(t.closest('[data-cdel]'), 'Tap again to delete', () => { const ch = rollChan(); S.channels = S.channels.filter(c => c !== ch); S.sections.forEach(x => delete x.notes[ch.id]); save(); selectInst('drums'); });
 });
 $('#edBody').addEventListener('change', e => {
