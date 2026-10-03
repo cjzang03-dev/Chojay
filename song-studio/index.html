@@ -38,7 +38,7 @@ button{cursor:pointer}
 .title{font:700 1.15rem/1.2 var(--display);border:1px solid transparent;background:transparent;border-radius:6px;padding:4px 6px;min-width:0;width:100%}
 .title:hover,.title:focus{border-color:var(--line);background:var(--panel2)}
 .transport{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.tb{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;min-width:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);font-weight:600}
+.tb{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;min-width:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);font-weight:600}
 .tb svg{width:16px;height:16px;fill:currentColor}
 .tb:hover{border-color:var(--muted)}
 .tb.play{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -65,7 +65,7 @@ button{cursor:pointer}
 .beats i.on:first-child{background:var(--accent)}
 .lyricbox{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px;min-height:110px;max-height:190px;overflow:auto;white-space:pre-wrap;font-size:1.05rem;line-height:1.6;min-width:0}
 .lyricbox.empty{color:var(--muted);font-style:italic}
-@media (max-width:720px){.now{grid-template-columns:1fr}}
+
 
 /* tabs */
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
@@ -212,7 +212,7 @@ body.studio .nextrow b{font-size:1rem}
 body.studio .lyricbox{min-height:0;height:74px;padding:6px 10px;font-size:.9rem;line-height:1.45;border-radius:4px}
 body.studio .tabs{border:0;gap:4px;overflow:visible}
 body.studio .tabs [data-tab=playlist],body.studio .tabs [data-tab=roll],body.studio .tabs [data-tab=beat]{display:none}
-body.studio .tabs button{border:1px solid var(--line);border-radius:4px;background:var(--panel2);padding:4px 12px;margin:0;font-size:.82rem;color:var(--ink)}
+body.studio .tabs button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:4px;background:var(--panel2);padding:4px 12px;margin:0;font-size:.82rem;color:var(--ink)}
 body.studio .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 body.studio .tabs::before{content:"Windows";align-self:center;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:4px}
 body.studio main{flex:1;min-height:0;padding:0;position:relative;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);grid-template-rows:minmax(0,.95fr) minmax(0,1.1fr);grid-template-areas:"pl pl" "roll rack";gap:6px}
@@ -279,6 +279,36 @@ body.ezmode .easy{display:block;padding-bottom:calc(120px + env(safe-area-inset-
 .ez-lyric{max-height:72px;overflow:auto;white-space:pre-wrap;font-size:.92rem;line-height:1.4;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;min-width:0}
 .ez-lyric.empty{color:var(--muted);font-style:italic}
 @media (max-width:600px){.ez-step{grid-template-columns:1fr}.ez-prow{grid-template-columns:auto auto 1fr}.ez-lyric{grid-column:1/-1;max-height:56px}}
+/* toolbar: title on the left, controls on the right, one line on laptops */
+@media (min-width:761px){.top .wrap{flex-wrap:nowrap}.brand{flex:0 1 230px}.transport{flex:1 1 auto;justify-content:flex-end}}
+@media (min-width:980px){.transport{flex-wrap:nowrap}.brand{min-width:90px}}
+@media (max-width:1300px){.field{font-size:0;gap:4px}.field select,.field input{font-size:.85rem}.transport{gap:6px}.tb{padding:0 10px}}
+/* tab layout (tablets and phones): side menu, slim toolbar, chord + lyrics bar at the bottom */
+.ti{width:16px;height:16px;fill:currentColor;flex:none}
+body:not(.studio) .top .wrap{max-width:1200px;padding-block:8px;gap:8px 12px}
+body:not(.studio) .tb{height:36px;padding:0 12px}
+body:not(.studio) .shell>.wrap{display:grid;grid-template-columns:200px minmax(0,1fr);gap:0 28px;max-width:1200px;padding-bottom:120px}
+body:not(.studio) .tabs{grid-column:1;grid-row:1;flex-direction:column;border:0;position:sticky;top:76px;align-self:start;padding-block:20px;gap:2px;overflow:visible}
+body:not(.studio) .tabs button{display:flex;align-items:center;gap:10px;border:0;border-radius:8px;margin:0;padding:10px 12px;text-align:left;font-weight:600}
+body:not(.studio) .tabs button:hover{background:var(--panel)}
+body:not(.studio) .tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--accent)}
+body:not(.studio) main{grid-column:2;grid-row:1}
+body:not(.studio) .now{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--titlebar);border-top:1px solid #000;box-shadow:0 -8px 30px rgba(0,0,0,.35);padding:8px max(16px,calc((100% - 1168px) / 2));padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));grid-template-columns:auto minmax(0,1fr);gap:4px 18px}
+body:not(.studio) .chordbig{font-size:2.2rem}
+body:not(.studio) .nextrow b{font-size:1rem}
+body:not(.studio) .lyricbox{min-height:0;height:72px;padding:6px 10px;font-size:.92rem;line-height:1.45;border-radius:6px}
+@media (max-width:760px){
+  body:not(.studio) .shell>.wrap{grid-template-columns:minmax(0,1fr);padding-bottom:150px}
+  body:not(.studio) .tabs{grid-row:auto;flex-direction:row;overflow-x:auto;padding-block:10px;top:0;position:relative}
+  body:not(.studio) .tabs button{white-space:nowrap;padding:8px 12px}
+  body:not(.studio) main{grid-column:1;grid-row:auto;padding-top:4px}
+  body:not(.studio) .now{grid-template-columns:auto minmax(0,1fr)}
+  body:not(.studio) .lyricbox{height:56px}
+  .tb .tl,#playTxt,.field{font-size:0}
+  .field select,.field input{font-size:.85rem}
+  .brand{flex-basis:100%}
+}
+@media (max-width:1200px){body.studio .shell{grid-template-columns:180px minmax(0,1fr)}body.studio main{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px);text-align:center}
 .toast.show{opacity:1}
 .steps{margin:0;padding-left:20px;color:var(--muted);font-size:.9rem;display:flex;flex-direction:column;gap:2px}
@@ -356,15 +386,14 @@ body.ezmode .easy{display:block;padding-bottom:calc(120px + env(safe-area-inset-
     <div class="transport">
       <button class="tb play" id="play" title="Play / pause (Space)"><svg viewBox="0 0 16 16" id="playIcon"><path d="M4 2.5v11l9-5.5z"/></svg><span id="playTxt">Play</span></button>
       <button class="tb" id="stop" title="Stop and go back" aria-label="Stop"><svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="1"/></svg></button>
-      <button class="tb rec" id="rec" title="Record your voice"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/></svg>Rec</button>
-      <button class="tb" id="loop" aria-pressed="false" title="Loop the selected part (or the whole song)"><svg viewBox="0 0 16 16"><path d="M4 5h7V3l3 3-3 3V7H4a1 1 0 0 0-1 1v1H1V8a3 3 0 0 1 3-3zm8 6H5v2l-3-3 3-3v2h7a1 1 0 0 0 1-1V8h2v1a3 3 0 0 1-3 3z"/></svg>Loop</button>
+      <button class="tb rec" id="rec" title="Record your voice"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/></svg><span class="tl">Rec</span></button>
+      <button class="tb" id="loop" aria-pressed="false" title="Loop the selected part (or the whole song)"><svg viewBox="0 0 16 16"><path d="M4 5h7V3l3 3-3 3V7H4a1 1 0 0 0-1 1v1H1V8a3 3 0 0 1 3-3zm8 6H5v2l-3-3 3-3v2h7a1 1 0 0 0 1-1V8h2v1a3 3 0 0 1-3 3z"/></svg><span class="tl">Loop</span></button>
       <button class="tb" id="clickBtn" aria-pressed="false" title="Metronome click">Click</button>
       <label class="field">Tempo <input id="bpm" type="number" min="50" max="200" step="1"></label>
       <label class="field">Key <select id="tonic" aria-label="Key note"></select><select id="mode" aria-label="Major or minor"><option value="major">major</option><option value="minor">minor</option></select></label>
       <span class="clock" id="clock" title="Song position">0:00.0</span>
       <span class="lcd" id="lcdChord" title="Chord playing now">Am</span>
-      <button class="tb" id="easyBtn" title="Go back to the simple four-step screen">Easy mode</button>
-      <button class="tb" id="viewBtn" title="Switch between the studio layout and the simple layout">Simple view</button>
+      <button class="tb" id="easyBtn" title="Go back to Easy mode: the simple four-step screen">← Easy</button>
     </div>
   </div>
 </header>
@@ -381,13 +410,13 @@ body.ezmode .easy{display:block;padding-bottom:calc(120px + env(safe-area-inset-
   </section>
 
   <nav class="tabs" role="tablist">
-    <button role="tab" data-tab="song" aria-selected="true">Song &amp; lyrics</button>
-    <button role="tab" data-tab="beat" aria-selected="false">Channel rack</button>
-    <button role="tab" data-tab="roll" aria-selected="false">Piano roll</button>
-    <button role="tab" data-tab="playlist" aria-selected="false">Playlist</button>
-    <button role="tab" data-tab="vocals" aria-selected="false">Vocals</button>
-    <button role="tab" data-tab="keys" aria-selected="false">Keyboard</button>
-    <button role="tab" data-tab="mix" aria-selected="false">Mix &amp; export</button>
+    <button role="tab" data-tab="song" aria-selected="true"><svg class="ti" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2v8.3A2.5 2.5 0 1 0 7.5 12.5V5h5V2z"/></svg>Song &amp; lyrics</button>
+    <button role="tab" data-tab="beat" aria-selected="false"><svg class="ti" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="2" width="4" height="4" rx="1"/><rect x="6" y="2" width="4" height="4" rx="1"/><rect x="11" y="2" width="4" height="4" rx="1"/><rect x="1" y="10" width="4" height="4" rx="1"/><rect x="11" y="10" width="4" height="4" rx="1"/></svg>Channel rack</button>
+    <button role="tab" data-tab="roll" aria-selected="false"><svg class="ti" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="3" width="6" height="2.5" rx="1"/><rect x="5" y="7" width="8" height="2.5" rx="1"/><rect x="9" y="11" width="6" height="2.5" rx="1"/></svg>Piano roll</button>
+    <button role="tab" data-tab="playlist" aria-selected="false"><svg class="ti" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="2" width="9" height="3" rx="1"/><rect x="4" y="6.5" width="11" height="3" rx="1"/><rect x="1" y="11" width="7" height="3" rx="1"/></svg>Playlist</button>
+    <button role="tab" data-tab="vocals" aria-selected="false"><svg class="ti" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="1" width="5" height="9" rx="2.5"/><path d="M3 7.5a5 5 0 0 0 10 0h-1.5a3.5 3.5 0 0 1-7 0zM7.25 12.5h1.5V15h-1.5z"/></svg>Vocals</button>
+    <button role="tab" data-tab="keys" aria-selected="false"><svg class="ti" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 3h14v10H1zm1.5 1.5v7h2v-3h1v3h2v-3h1v3h2v-3h1v3h2v-7z"/></svg>Keyboard</button>
+    <button role="tab" data-tab="mix" aria-selected="false"><svg class="ti" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="1" width="1.5" height="14"/><rect x="7.25" y="1" width="1.5" height="14"/><rect x="12" y="1" width="1.5" height="14"/><rect x="1" y="9" width="4.5" height="2.5" rx="1"/><rect x="5.75" y="4" width="4.5" height="2.5" rx="1"/><rect x="10.5" y="10" width="4.5" height="2.5" rx="1"/></svg>Mix &amp; export</button>
   </nav>
 
   <main>
@@ -1402,14 +1431,16 @@ function switchTab(t) {
 }
 function setStudio(on) {
   if (isEasy()) { document.body.classList.remove('ezmode'); renderAll(); }
-  try { localStorage.setItem(STORE + '.view', on ? 'studio' : 'simple'); } catch (e) {}
+  try { localStorage.setItem(STORE + '.view', 'full'); } catch (e) {}
   document.body.classList.toggle('studio', on);
-  $('#viewBtn').textContent = on ? 'Simple view' : 'Studio view';
-  try { localStorage.setItem(STORE + '.studio', on ? '1' : '0'); } catch (e) {}
   if (on) { openWin = null; switchTab('playlist'); renderChans(); renderRoll(); renderPlaylist(); }
   else switchTab(lastTab);
 }
-$('#viewBtn').onclick = () => setStudio(!isStudio());
+const STUDIO_MIN = 980;
+const wideEnough = () => window.innerWidth >= STUDIO_MIN;
+function setFull() { if (T.playing) stop(); setStudio(wideEnough()); }
+let rzT = 0;
+window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { if (!isEasy() && wideEnough() !== isStudio()) setStudio(wideEnough()); }, 200); });
 document.addEventListener('click', e => { if (e.target.closest('[data-close]')) { openWin = null; switchTab('playlist'); } });
 window.addEventListener('keydown', e => { if (e.key === 'Escape' && isStudio() && openWin) { openWin = null; switchTab('playlist'); } });
 
@@ -1907,7 +1938,7 @@ function setEasy() {
   sel = -1; cursorBar = 0; renderEasy(); window.scrollTo(0, 0);
 }
 $('#easyBtn').onclick = setEasy;
-$('#ezFull').onclick = () => { if (T.playing) stop(); setStudio(window.innerWidth >= 1100); };
+$('#ezFull').onclick = setFull;
 function songParts() {
   const order = []; S.arr.forEach(id => { if (!order.includes(id)) order.push(id); });
   S.sections.forEach(x => { if (!order.includes(x.id)) order.push(x.id); });
@@ -2026,8 +2057,8 @@ window.__studio = {renderSong, wav, retune, detectPitch, get takes() { return ta
 renderAll();
 let view = 'easy';
 try { view = localStorage.getItem(STORE + '.view') || 'easy'; } catch (e) {}
-if (view === 'easy') setEasy(); else setStudio(view === 'studio');
-if (view === 'simple') try { const t = localStorage.getItem(STORE + '.tab'); if (t && document.querySelector('[data-panel="' + t + '"]')) switchTab(t); } catch (e) {}
+if (view === 'easy') setEasy(); else setFull();
+if (!isEasy() && !isStudio()) try { const t = localStorage.getItem(STORE + '.tab'); if (t && document.querySelector('[data-panel="' + t + '"]')) switchTab(t); } catch (e) {}
 loadTakes();
 requestAnimationFrame(frame);
 })();
