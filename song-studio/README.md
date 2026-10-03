@@ -3,7 +3,13 @@
 A one-file music studio for singers and songwriters. It runs in the browser and needs no install.
 
 ## Open it
-Download `index.html` and open it in Chrome, Edge, Safari or Firefox. Allow microphone access when the browser asks.
+**Best: your own web link (free).** The repository is public, so GitHub Pages can host Song Studio. Recording and downloads work there, including on phones, and you can add it to your home screen like an app:
+1. On GitHub, open the repository → **Settings** → **Pages**.
+2. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
+3. Pick the branch that has the `song-studio` folder and the **/ (root)** folder, then **Save**.
+4. After a minute or two, open `https://cjzang03-dev.github.io/Chojay/song-studio/`.
+
+**Or offline:** download the `song-studio` folder and open `index.html` in Chrome, Edge, Safari or Firefox. Allow microphone access when asked.
 
 ## Easy mode
 Song Studio opens in Easy mode: four steps on one screen.
@@ -36,4 +42,18 @@ On smaller screens it switches to a tab layout.
 
 While you sing, the big chord display shows the current and next chord and the lyrics for the part you're in.
 
-Your song and takes are saved in your browser automatically. Wear headphones when recording.
+## Also included
+- **My songs:** keep many songs and switch between them; each keeps its own lyrics, beats and recordings.
+- **Undo / Redo** for every change (Ctrl+Z, Ctrl+Shift+Z). Recordings are not affected by undo.
+- **Hum to find chords:** hum your tune while a part plays; the studio picks a chord for each bar and can put your tune into the piano roll.
+- **Modelled instruments:** piano, guitar and electric bass are physical models of real strings; drums use classic analogue-style cymbals and toms.
+- **Voice tools:** add a harmony above or below a take, double a take for a fuller sound, or re-record just one part (punch-in).
+- **Drum fills, crash cymbals and whooshes** per part.
+- **Export:** WAV, MP3, or stems (one WAV per track in a zip).
+- **Rhyme helper:** click at the end of a lyric line, or type a word, to see rhymes; tap one to add it.
+- **Live pitch line:** see which note you are singing, whether it is in tune, in the key and in the chord.
+
+Your songs and takes are saved in your browser automatically. Wear headphones when recording.
+
+## Credits
+Bundled in `vendor/`: [lamejs](https://github.com/zhuker/lamejs) (LGPL-3.0) for MP3 encoding, [JSZip](https://stuk.github.io/jszip/) (MIT) for zip files, and a rhyme list built from the [CMU Pronouncing Dictionary](http://www.speech.cs.cmu.edu/cgi-bin/cmudict) (via cmu-pronouncing-dictionary, ISC) and SCOWL common words (via wordlist-english, MIT). Licence texts are in `vendor/`.

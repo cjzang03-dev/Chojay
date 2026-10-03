@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Song Studio</title>
+<meta name="theme-color" content="#0A0F1F">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
@@ -410,6 +414,8 @@ body.studio .daw{display:grid;height:100%;grid-template-columns:250px minmax(0,1
 #edDrums .row:has(#beatFor),#edDrums #beatOwn,#edDrums #beatShare,#edDrums p.hint{display:none!important}
 body.studio .toast{bottom:100px}
 .topbar{overflow:hidden}
+@media (max-width:1599px){.tl-style{display:none}}
+@media (max-width:1499px){.lbl-m{display:none}}
 @media (max-width:1679px){.dbrand span{display:none}.ttl{flex-basis:110px;width:110px}.topbar{gap:8px}#dSurprise .lbl-x{display:none}}
 @media (max-width:1379px){.topbar .lbl-x{display:none}.tfield select#dVibe{max-width:110px}}
 @media (max-width:1279px){.tfield .tl{display:none}}
@@ -420,6 +426,28 @@ body.studio .toast{bottom:100px}
   .tvol span,.tchk span{display:none}
   .tb2 .lbl-x{display:none}
 }
+/* song library, rhymes, pitch, voice tools */
+.modal{position:fixed;inset:0;z-index:100;background:rgba(5,8,18,.7);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:min(620px,100%);max-height:calc(100% - 32px);display:flex;flex-direction:column;gap:12px;padding:18px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal-head{display:flex;justify-content:space-between;align-items:center}
+.songs{overflow:auto;display:flex;flex-direction:column;gap:6px;min-height:60px}
+.songrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--panel2)}
+.songrow.cur{border-color:var(--accent)}
+.songrow .tx{flex:1 1 200px;min-width:0;display:flex;flex-direction:column}
+.songrow .tx b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.songrow .tx small{color:var(--muted)}
+.rhymebar{display:flex;flex-direction:column;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.rb-head{display:flex;align-items:center;gap:8px}
+.rb-head .tl{color:var(--muted);font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.rb-in{flex:1;min-width:0;height:30px}
+.rb-out{max-height:96px;overflow:auto}
+.rb-out button{padding:4px 10px;font-size:.82rem}
+.pitchbox{display:flex;flex-direction:column;gap:6px}
+.pitchbox canvas{width:100%;height:150px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;display:block}
+.pitchtxt b{color:var(--ink);font-size:1.05rem}
+.vtools .tl{color:var(--muted);font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+.humbox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.btn:disabled,.tbtn:disabled,.tb:disabled{opacity:.4;cursor:default}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px);text-align:center}
 .toast.show{opacity:1}
 .steps{margin:0;padding-left:20px;color:var(--muted);font-size:.9rem;display:flex;flex-direction:column;gap:2px}
@@ -430,6 +458,8 @@ body.studio .toast{bottom:100px}
   <header class="ez-top"><div class="ez-wrap ez-toprow">
     <span class="mark" aria-hidden="true"></span>
     <input id="ezTitle" class="title" aria-label="Song title" maxlength="80">
+    <button class="btn" data-songs title="Open or start another song">My songs</button>
+    <button class="btn" data-undo title="Undo (Ctrl+Z)">Undo</button>
     <button class="btn" id="ezFull" title="All the tools: piano roll, playlist, mixer">Open full studio</button>
   </div></header>
   <div class="ez-wrap ez-steps">
@@ -447,6 +477,7 @@ body.studio .toast{bottom:100px}
     <section class="ez-step"><div class="ez-num">2</div><div class="ez-body">
       <h2>Write your lyrics</h2>
       <p class="hint">Your song has a verse and a chorus. The chords for each part are shown so you know what's playing. While the song plays, the words for the part you're in show at the bottom of the screen.</p>
+      <div class="rhymebar" data-rhyme></div>
       <div id="ezLyrics" class="panel"></div>
     </div></section>
 
@@ -463,6 +494,7 @@ body.studio .toast{bottom:100px}
         <select class="sel" id="ezAutoStyle" aria-label="Autotune style"><option value="natural">Natural</option><option value="pop">Pop</option><option value="hard">Robot effect</option></select>
       </div>
       <div id="ezMicNote" class="notice" hidden></div>
+      <div class="pitchbox"><div class="row"><button class="btn small" data-micon>Check my pitch</button><span class="pitchtxt hint">Turn on the microphone to see which note you are singing.</span></div><canvas width="900" height="170" aria-label="Your pitch over the last few seconds"></canvas></div>
       <div id="ezTakes" class="panel"></div>
       <div><label class="upload">Recorded on your phone? Add the file<input type="file" id="ezFile" accept="audio/*"></label></div>
     </div></section>
@@ -478,6 +510,7 @@ body.studio .toast{bottom:100px}
       <div class="row">
         <button class="btn primary" id="ezSave">Download my song</button>
         <button class="btn" id="ezSaveInst">Download music only</button>
+        <button class="btn" id="ezSaveMp3" title="Smaller file, easy to share">Download MP3</button>
         <span class="hint" id="ezSaveStatus"></span>
       </div>
     </div></section>
@@ -492,9 +525,9 @@ body.studio .toast{bottom:100px}
 
 <div class="daw" id="daw">
   <header class="topbar">
-    <div class="dbrand"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 12v4M9 7v14M14 4v20M19 9v10M24 12v4"/></svg><span>Song Studio</span></div>
+    <button class="tb2" data-songs title="My songs: open, start or switch songs" aria-label="My songs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h6"/><path d="M18 5v10.5a2.5 2.5 0 1 1-2-2.45"/></svg><span class="lbl-m">My songs</span></button>
     <input class="ttl" id="dTitle" aria-label="Song title" maxlength="80">
-    <label class="tfield"><span class="tl">Style</span><select id="dVibe" aria-label="Music style"></select></label>
+    <label class="tfield"><span class="tl tl-style">Style</span><select id="dVibe" aria-label="Music style"></select></label>
     <div class="tfield"><span class="tl">Key</span><button class="step" id="dKeyDn" title="Lower the key" aria-label="Lower the key">−</button><b id="dKey">C</b><button class="step" id="dKeyUp" title="Raise the key" aria-label="Raise the key">+</button><select id="dMode" aria-label="Major or minor"><option value="major">major</option><option value="minor">minor</option></select></div>
     <div class="tfield"><span class="tl">Tempo</span><button class="step" id="dBpmDn" aria-label="Slower">−</button><input id="dBpm" type="number" min="50" max="200" aria-label="Tempo in BPM"><button class="step" id="dBpmUp" aria-label="Faster">+</button></div>
     <button class="tb2" id="dSurprise" aria-label="Surprise me" title="Random style, key, tempo and chords"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4l10 16h2M4 20h4l3-5M15 9l3-5h2M18 2l2 2-2 2M18 18l2 2-2 2"/></svg><span class="lbl-x">Surprise me</span></button>
@@ -526,11 +559,16 @@ body.studio .toast{bottom:100px}
   <aside class="pane lyr" aria-label="Lyrics">
     <div class="nowbox"><span class="bigchord" id="dChord">Am</span><div class="nx"><span class="eyebrow" id="dSec">Verse</span><span class="hint">next <b id="dNext">F</b></span><span class="beats4" id="dBeats"><i></i><i></i><i></i><i></i></span></div></div>
     <div class="phead"><h3>Lyrics</h3><span class="hint" style="font-size:.75rem">numbers = syllables per line</span></div>
+    <div class="rhymebar" data-rhyme style="margin:10px 10px 0"></div>
     <div class="pbody" id="lyrParts"></div>
     <span id="dLyric" hidden></span>
   </aside>
 
   <footer class="tbar">
+    <div class="tgroup">
+      <button class="tbtn" data-undo title="Undo (Ctrl+Z)" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="tbtn" data-redo title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5M20 9H10a6 6 0 0 0 0 12h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
     <div class="tgroup">
       <button class="tbtn" id="dBack" title="Back to the start" aria-label="Back to the start"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
       <button class="tbtn" id="dStop" title="Stop" aria-label="Stop"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
@@ -565,6 +603,9 @@ body.studio .toast{bottom:100px}
       <label class="field">Key <select id="tonic" aria-label="Key note"></select><select id="mode" aria-label="Major or minor"><option value="major">major</option><option value="minor">minor</option></select></label>
       <span class="clock" id="clock" title="Song position">0:00.0</span>
       <span class="lcd" id="lcdChord" title="Chord playing now">Am</span>
+      <button class="tb" data-songs>My songs</button>
+      <button class="tb" data-undo title="Undo (Ctrl+Z)">Undo</button>
+      <button class="tb" data-redo title="Redo (Ctrl+Shift+Z)">Redo</button>
       <button class="tb" id="easyBtn" title="Go back to Easy mode: the simple four-step screen">← Easy</button>
     </div>
   </div>
@@ -611,6 +652,7 @@ body.studio .toast{bottom:100px}
           <button class="btn small" id="moveR" title="Move selected part later">Move →</button>
         </div>
       </div>
+      <div class="card"><h3>Rhymes</h3><div class="rhymebar" data-rhyme></div></div>
       <div id="sections" class="panel"></div>
       <div><button class="btn" id="newSec">+ New part (bridge, intro, outro…)</button></div>
     </section>
@@ -702,6 +744,7 @@ body.studio .toast{bottom:100px}
         </ol>
         <div class="row"><button class="btn primary" id="micBtn">Turn on microphone</button><span class="hint" id="micStatus">Microphone is off</span></div>
         <div class="meter" aria-label="Input level"><div id="meterFill"></div></div>
+        <div class="pitchbox"><div class="row"><span class="pitchtxt hint">Turn on the microphone and sing to see your pitch.</span></div><canvas width="900" height="170" aria-label="Your pitch over the last few seconds"></canvas></div>
         <div class="row">
           <label class="chk"><input type="checkbox" id="monitor"> Hear myself (headphones only)</label>
           <label class="chk"><input type="checkbox" id="countIn"> Count-in bar before recording</label>
@@ -749,17 +792,26 @@ body.studio .toast{bottom:100px}
         <div class="row">
           <button class="btn primary" id="expFull">Download full song</button>
           <button class="btn" id="expInst">Download instrumental only</button>
+          <button class="btn" id="expMp3" title="Much smaller file, easy to send on WhatsApp">Download MP3</button>
+          <button class="btn" id="expStems" title="One file per track, for mixing elsewhere">Download stems (.zip)</button>
           <span class="hint" id="expStatus"></span>
         </div>
       </div>
       <div class="card">
-        <h3>Start over</h3>
-        <p class="hint">Clears the chords, lyrics, beat and every recorded take.</p>
-        <div><button class="btn danger" id="reset">Start a new song</button></div>
+        <h3>Songs</h3>
+        <p class="hint">Keep as many songs as you like and switch between them. Starting a new song keeps this one in My songs.</p>
+        <div class="row"><button class="btn" data-songs>My songs</button><button class="btn" id="reset">Start a new song</button></div>
       </div>
     </section>
   </main>
 </div>
+</div>
+<div class="modal" id="songsModal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="songsTitle">
+    <div class="modal-head"><h3 id="songsTitle">My songs</h3><button class="btn small" id="songsClose">Close ✕</button></div>
+    <div class="songs" id="songsList"></div>
+    <div class="row"><button class="btn primary" id="songsNew">+ New song</button><span class="hint">Each song keeps its own lyrics, beats and recordings.</span></div>
+  </div>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -810,13 +862,14 @@ const bassNote = c => { const pc = (S.tonic + c.r) % 12; return 36 + pc - (pc > 
 /* ---------- instruments, rhythms, kits ---------- */
 const CHORD_INSTS = {piano:'Piano', rhodes:'Electric piano', pad:'Warm pad', guitar:'Guitar strum', organ:'Organ'};
 const KEYS_INSTS = {piano:'Piano', rhodes:'Electric piano', lead:'Synth lead', bell:'Bells', strings:'Strings', pad:'Warm pad', guitar:'Guitar pluck', organ:'Organ'};
-const CHAN_INSTS = {lead:'Synth lead', piano:'Piano', rhodes:'Electric piano', bell:'Bells', strings:'Strings', guitar:'Pluck', pad:'Warm pad', organ:'Organ', b808:'808 bass', synth:'Synth bass'};
+const CHAN_INSTS = {lead:'Synth lead', piano:'Piano', ebass:'Electric bass', rhodes:'Electric piano', bell:'Bells', strings:'Strings', guitar:'Pluck', pad:'Warm pad', organ:'Organ', b808:'808 bass', synth:'Synth bass'};
 const defaultChannels = () => [
   {id: 'mel', name: 'Melody', inst: 'lead', vol: .6, mute: false, view: 48},
   {id: 'c808', name: '808', inst: 'b808', vol: .8, mute: false, view: 24}
 ];
 const chanHue = i => (i * 83 + 210) % 360;
-const BASS_INSTS = {synth:'Synth bass', b808:'808 bass', off:'No bass'};
+const BASS_INSTS = {synth:'Synth bass', ebass:'Electric bass', b808:'808 bass', off:'No bass'};
+const isBassy = i => i === 'b808' || i === 'synth' || i === 'ebass';
 const RHYTHMS = {
   hold: ['Long chords', [[0,16]]],
   halves: ['Two per bar', [[0,8],[8,8]]],
@@ -850,14 +903,16 @@ const KITS = {
 
 /* ---------- state ---------- */
 const STORE = 'song-studio.v1';
+const LIB = STORE + '.lib';
+let lib = {cur: null, songs: []}, hist = [], fut = [], lastSnap = null, restoring = false;
 function defaultSong() {
   const v = uid(), c = uid();
   return {
     title: 'Untitled song', tonic: 0, mode: 'major', bpm: 90, swing: 0, click: false, loop: false, countIn: true,
     latencyMs: null,
     sections: [
-      {id: v, name: 'Verse', drums: true, bass: true, chords: [0,1,2,3].map(i => chordFrom([5,3,0,4][i], 'major')), lyrics: ''},
-      {id: c, name: 'Chorus', drums: true, bass: true, chords: [0,1,2,3].map(i => chordFrom([0,4,5,3][i], 'major')), lyrics: ''}
+      {id: v, name: 'Verse', drums: true, bass: true, fill: true, chords: [0,1,2,3].map(i => chordFrom([5,3,0,4][i], 'major')), lyrics: ''},
+      {id: c, name: 'Chorus', drums: true, bass: true, crash: true, whoosh: true, chords: [0,1,2,3].map(i => chordFrom([0,4,5,3][i], 'major')), lyrics: ''}
     ],
     arr: [v, c, v, c],
     kit: 'Pop', grid: {...KITS['Pop']}, channels: defaultChannels(), zoom: 90,
@@ -870,9 +925,31 @@ try { const raw = localStorage.getItem(STORE); if (raw) S = Object.assign(defaul
 function normalize() { if (S.mix.music == null) S.mix.music = 1;
   S.trk = Object.assign({drums: {m: false, s: false}, chords: {m: false, s: false}, bass: {m: false, s: false}, vocals: {m: false, s: false}}, S.trk || {}); S.pan = S.pan || {}; S.sections.forEach(s => { if (!s.notes) s.notes = {}; }); if (!S.channels || !S.channels.length) S.channels = defaultChannels(); }
 normalize();
+try { const l = JSON.parse(localStorage.getItem(LIB)); if (l && Array.isArray(l.songs)) lib = l; } catch (e) {}
+if (lib.cur) { try { const raw = localStorage.getItem(STORE + '.song.' + lib.cur); if (raw) { S = Object.assign(defaultSong(), JSON.parse(raw)); normalize(); } } catch (e) {} }
+if (!S.id) S.id = lib.cur || uid();
+writeSong(); lastSnap = JSON.stringify(S);
 let saveT = 0;
-function saveNow() { clearTimeout(saveT); try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
-function save() { clearTimeout(saveT); saveT = setTimeout(saveNow, 300); }
+function writeSong() {
+  const json = JSON.stringify(S);
+  try {
+    localStorage.setItem(STORE, json);
+    if (S.id) {
+      localStorage.setItem(STORE + '.song.' + S.id, json);
+      const meta = {id: S.id, title: S.title || 'Untitled song', key: NOTES[S.tonic] + ' ' + S.mode, bpm: S.bpm, updated: Date.now()}, m = lib.songs.find(x => x.id === S.id);
+      if (m) Object.assign(m, meta); else lib.songs.unshift(meta);
+      lib.cur = S.id; localStorage.setItem(LIB, JSON.stringify(lib));
+    }
+  } catch (e) {}
+  return json;
+}
+function saveNow() {
+  clearTimeout(saveT); saveT = 0;
+  const json = writeSong();
+  if (!restoring && lastSnap !== null && json !== lastSnap) { hist.push(lastSnap); if (hist.length > 80) hist.shift(); fut = []; }
+  lastSnap = json; updateUndoUI();
+}
+function save() { clearTimeout(saveT); saveT = setTimeout(saveNow, 300); updateUndoUI(); }
 // write any pending change before the page closes or goes to the background
 window.addEventListener('pagehide', saveNow);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveNow(); });
@@ -956,7 +1033,7 @@ function applyMix(g = G) {
 function ensureCtx() {
   if (!ctx) {
     ctx = new (window.AudioContext || window.webkitAudioContext)({latencyHint: 'interactive'});
-    G = buildGraph(ctx);
+    G = buildGraph(ctx); setTimeout(warmSounds, 50);
     if (S.latencyMs == null) { S.latencyMs = Math.round(((ctx.outputLatency || 0) + (ctx.baseLatency || 0)) * 1000 + 15); renderVocalSettings(); }
   }
   if (ctx.state === 'suspended') ctx.resume();
@@ -964,6 +1041,45 @@ function ensureCtx() {
 }
 
 // one note on any instrument; dur == null means held until the returned release() is called
+const SBUF = new Map();
+function ksBuffer(sr, midi, kind) {
+  const key = sr + ':' + midi + ':' + kind; if (SBUF.has(key)) return SBUF.get(key);
+  const f = mtof(midi), n = Math.floor(sr * (kind === 'ebass' ? 2.2 : 2.6)), y = new Float32Array(n);
+  const p = sr / f - .5, Ni = Math.max(2, Math.floor(p)), fr = p - Ni, loss = kind === 'ebass' ? .9955 : .9978, P0 = Ni + 2;
+  let prev = 0;
+  for (let i = 0; i < P0 && i < n; i++) { const r = Math.random() * 2 - 1; prev = kind === 'ebass' ? prev * .65 + r * .35 : prev * .25 + r * .75; y[i] = prev; }
+  for (let i = P0; i < n; i++) { const a = y[i - Ni] * (1 - fr) + y[i - Ni - 1] * fr, b = y[i - Ni - 1] * (1 - fr) + y[i - Ni - 2] * fr; y[i] = loss * .5 * (a + b); }
+  let pk = 0; for (let i = 0; i < n; i++) pk = Math.max(pk, Math.abs(y[i])); if (pk) for (let i = 0; i < n; i++) y[i] /= pk;
+  for (let i = 0; i < 40 && i < n; i++) y[i] *= i / 40;
+  const buf = new AudioBuffer({length: n, sampleRate: sr, numberOfChannels: 1}); buf.copyToChannel(y, 0); SBUF.set(key, buf); return buf;
+}
+function pianoBuffer(sr, midi) {
+  const key = sr + ':' + midi + ':piano'; if (SBUF.has(key)) return SBUF.get(key);
+  const f = mtof(midi), dur = Math.max(1.4, 4 - (midi - 48) * .045), n = Math.floor(sr * dur), y = new Float32Array(n);
+  const B = .00022 * Math.pow(2, (midi - 60) / 24), hiDamp = 1 + Math.max(0, midi - 60) / 20;
+  for (let k = 1; k <= 14; k++) {
+    const fk = k * f * Math.sqrt(1 + B * k * k); if (fk > sr / 2.3) break;
+    const amp = (k === 1 ? 1 : .9) / Math.pow(k, 1.2), dec = Math.exp(-(1.1 + k * .6) * hiDamp / sr);
+    for (const det of [-.0007, .0007]) {
+      const w = 2 * Math.PI * fk * (1 + det) / sr, c2 = 2 * Math.cos(w); let s1 = Math.sin(Math.random() * 6.28), s0 = Math.sin(Math.asin(s1) - w), e = amp;
+      for (let i = 0; i < n; i++) { const s2 = c2 * s1 - s0; s0 = s1; s1 = s2; y[i] += s2 * e; e *= dec; }
+    }
+  }
+  const hn = Math.min(n, Math.floor(sr * .012)); let lp = 0;
+  for (let i = 0; i < hn; i++) { lp = lp * .7 + (Math.random() * 2 - 1) * .3; y[i] += lp * (1 - i / hn) * .6; }
+  let pk = 0; for (let i = 0; i < n; i++) pk = Math.max(pk, Math.abs(y[i])); if (pk) for (let i = 0; i < n; i++) y[i] /= pk;
+  const buf = new AudioBuffer({length: n, sampleRate: sr, numberOfChannels: 1}); buf.copyToChannel(y, 0); SBUF.set(key, buf); return buf;
+}
+// build string buffers in the background so the first notes don't stutter
+let warmQ = [];
+function warmSounds() {
+  if (!ctx) return;
+  const insts = new Set([S.chordInst, S.bassInst, ...S.channels.map(c => c.inst)]);
+  warmQ = [];
+  for (const i of insts) if (i === 'piano' || i === 'guitar' || i === 'ebass') for (let m = i === 'ebass' ? 26 : 40; m <= (i === 'ebass' ? 62 : 88); m++) if (!SBUF.has(ctx.sampleRate + ':' + m + ':' + i)) warmQ.push([i, m]);
+  stepWarm();
+}
+function stepWarm() { if (!warmQ.length || !ctx) return; const t0 = performance.now(); while (warmQ.length && performance.now() - t0 < 8) { const [i, m] = warmQ.shift(); i === 'piano' ? pianoBuffer(ctx.sampleRate, m) : ksBuffer(ctx.sampleRate, m, i); } setTimeout(stepWarm, 30); }
 function voice(c, out, midi, t, dur, inst, vel = .2) {
   const f = mtof(midi), g = c.createGain(), srcs = [];
   g.gain.value = 0; g.connect(out);
@@ -972,10 +1088,11 @@ function voice(c, out, midi, t, dur, inst, vel = .2) {
   const LP = (freq, q = .7) => { const b = c.createBiquadFilter(); b.type = 'lowpass'; b.frequency.value = freq; b.Q.value = q; b.connect(g); return b; };
   let rel = .1;
   switch (inst) {
-    case 'piano': {
-      const lp = LP(Math.min(9000, f * 8)); lp.frequency.setValueAtTime(Math.min(9000, f * 8), t); lp.frequency.exponentialRampToValueAtTime(Math.max(400, f * 2), t + 1.6);
-      O('triangle', f, lp); const h = c.createGain(); h.gain.value = .3; h.connect(lp); O('sine', f * 2, h);
-      P.setValueAtTime(0, t); P.linearRampToValueAtTime(vel, t + .006); P.setTargetAtTime(vel * .1, t + .006, .7); rel = .18; break;
+    case 'piano': case 'guitar': case 'ebass': {
+      // pre-rendered string models: piano = detuned inharmonic partials, guitar/bass = plucked string (Karplus-Strong)
+      const src = c.createBufferSource(); src.buffer = inst === 'piano' ? pianoBuffer(c.sampleRate, midi) : ksBuffer(c.sampleRate, midi, inst);
+      const lp = LP(inst === 'ebass' ? 2200 : inst === 'guitar' ? 5200 : 9000, .5); src.connect(lp); src.start(t); srcs.push(src);
+      P.setValueAtTime(vel * (inst === 'piano' ? 1.15 : inst === 'ebass' ? 1.7 : 1.2), t); rel = inst === 'piano' ? .3 : .12; break;
     }
     case 'rhodes': {
       const car = O('sine', f, g), mg = c.createGain(); mg.gain.setValueAtTime(f * 1.8, t); mg.gain.setTargetAtTime(f * .25, t, .25);
@@ -985,11 +1102,6 @@ function voice(c, out, midi, t, dur, inst, vel = .2) {
     case 'pad': {
       const lp = LP(1100, .4); O('sawtooth', f, lp, -9); O('sawtooth', f, lp, 9); O('sine', f / 2, g);
       P.setValueAtTime(0, t); P.linearRampToValueAtTime(vel * .5, t + .35); rel = .8; break;
-    }
-    case 'guitar': {
-      const lp = LP(5000, 1.2); lp.frequency.setValueAtTime(5000, t); lp.frequency.exponentialRampToValueAtTime(700, t + .3);
-      O('sawtooth', f, lp);
-      P.setValueAtTime(0, t); P.linearRampToValueAtTime(vel * .7, t + .003); P.setTargetAtTime(0.0001, t + .003, .45); rel = .12; break;
     }
     case 'organ': {
       [1, 2, 3, 4].forEach((k, i) => { const h = c.createGain(); h.gain.value = [.5, .35, .2, .12][i]; h.connect(g); O('sine', f * k, h); });
@@ -1039,13 +1151,36 @@ function tone(c, out, t, type, f0, f1, fdur, vol, dur) {
   g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
   o.connect(g).connect(out); o.start(t); o.stop(t + dur + .02); reg(c, o, t + dur + .02);
 }
+// six detuned square waves through filters: the classic analogue hi-hat and cymbal
+function metal(c, out, t, dur, vol, hp) {
+  const g = c.createGain(), bp = c.createBiquadFilter(), h = c.createBiquadFilter();
+  bp.type = 'bandpass'; bp.frequency.value = 10000; bp.Q.value = .5; h.type = 'highpass'; h.frequency.value = hp;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  bp.connect(h).connect(g).connect(out);
+  [205.3, 304.4, 369.6, 522.7, 540, 800].forEach(fq => { const o = c.createOscillator(); o.type = 'square'; o.frequency.value = fq; o.connect(bp); o.start(t); o.stop(t + dur + .02); reg(c, o, t + dur + .02); });
+}
 const DRUMS = {
-  K: (c, o, t) => { tone(c, o, t, 'sine', 160, 42, .12, 1, .45); nz(c, o, t, .012, 'highpass', 3000, .25); },
-  S: (c, o, t) => { nz(c, o, t, .18, 'highpass', 1200, .55); tone(c, o, t, 'triangle', 220, 160, .08, .45, .1); },
-  C: (c, o, t) => { [0, .011, .022].forEach(d => nz(c, o, t + d, .03, 'bandpass', 1400, .6, .8)); nz(c, o, t + .03, .2, 'bandpass', 1400, .5, .8); },
-  H: (c, o, t) => nz(c, o, t, .045, 'highpass', 8000, .3),
-  O: (c, o, t) => nz(c, o, t, .32, 'highpass', 7000, .25)
+  K: (c, o, t) => { tone(c, o, t, 'sine', 150, 46, .09, 1.1, .5); tone(c, o, t, 'triangle', 90, 50, .05, .25, .12); nz(c, o, t, .008, 'highpass', 2500, .3); },
+  S: (c, o, t) => { tone(c, o, t, 'triangle', 190, 170, .05, .42, .11); tone(c, o, t, 'sine', 330, 300, .04, .2, .08); nz(c, o, t, .22, 'bandpass', 3200, .55, .7); nz(c, o, t, .12, 'highpass', 6500, .22); },
+  C: (c, o, t) => { [0, .011, .022].forEach(d => nz(c, o, t + d, .03, 'bandpass', 1400, .6, .8)); nz(c, o, t + .03, .22, 'bandpass', 1300, .5, .8); },
+  H: (c, o, t) => { metal(c, o, t, .05, .2, 7500); nz(c, o, t, .03, 'highpass', 9500, .08); },
+  O: (c, o, t) => metal(c, o, t, .38, .17, 6500)
 };
+function tom(c, o, t, f, v = .7) { tone(c, o, t, 'sine', f * 1.6, f, .12, v, .42); nz(c, o, t, .04, 'bandpass', f * 4, .12, 1); }
+function crash(c, o, t) { metal(c, o, t, 1.9, .2, 4200); nz(c, o, t, 1.6, 'highpass', 5000, .18); }
+function riser(c, o, t, dur) {
+  const sN = c.createBufferSource(); sN.buffer = noise(c); sN.loop = true;
+  const f = c.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 2.5; f.frequency.setValueAtTime(300, t); f.frequency.exponentialRampToValueAtTime(7000, t + dur);
+  const g = c.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.28, t + dur * .97); g.gain.linearRampToValueAtTime(0, t + dur);
+  sN.connect(f).connect(g).connect(o); sN.start(t); sN.stop(t + dur + .02); reg(c, sN, t + dur + .02);
+}
+// a one-beat drum fill on the last beat of a part
+function drumFill(c, o, t, s) {
+  if (s === 12) { DRUMS.K(c, o, t); DRUMS.S(c, o, t); tom(c, o, t, 220); }
+  if (s === 13) { DRUMS.S(c, o, t); tom(c, o, t, 196, .55); }
+  if (s === 14) { tom(c, o, t, 160); DRUMS.S(c, o, t); }
+  if (s === 15) { DRUMS.K(c, o, t); tom(c, o, t, 110, .8); }
+}
 function click(c, out, t, accent) { tone(c, out, t, 'square', accent ? 1600 : 1100, accent ? 1600 : 1100, .01, .35, .035); }
 
 const stepDur = () => 60 / S.bpm / 4;
@@ -1055,7 +1190,13 @@ function scheduleStep(g, c, step, time, opts = {}) {
   const bar = TL[Math.floor(step / 16)]; if (!bar) return;
   const s = step % 16, sd = stepDur(), sec = bar.sec;
   const grid = sec.grid || S.grid;
-  if (sec.drums !== false && audible(S.trk.drums)) for (const [k] of ROWS) if (grid[k][s] === 'x') DRUMS[k](c, g.drums, time);
+  const drumsOn = sec.drums !== false && audible(S.trk.drums);
+  if (drumsOn) {
+    if (sec.fill && bar.ci === sec.chords.length - 1 && s >= 12) drumFill(c, g.drums, time, s);
+    else for (const [k] of ROWS) if (grid[k][s] === 'x') DRUMS[k](c, g.drums, time);
+    if (sec.crash && bar.ci === 0 && s === 0) crash(c, g.drums, time);
+  }
+  if (s === 0 && audible(S.trk.drums)) { const nb = TL[Math.floor(step / 16) + 1]; if (nb && nb.ai !== bar.ai && nb.sec.whoosh) riser(c, g.drums, time, 16 * sd); }
   const sis = bar.ci * 16 + s;
   for (const ch of S.channels) {
     const arr = sec.notes && sec.notes[ch.id]; if (!audible({m: ch.mute, s: ch.solo}) || !arr || !arr.length) continue;
@@ -1110,7 +1251,7 @@ const DB = {
   async tx(mode, fn) { const db = await this.open(); return new Promise((res, rej) => { const t = db.transaction('takes', mode); const out = fn(t.objectStore('takes')); t.oncomplete = () => res(out && out.result); t.onerror = () => rej(t.error); }); },
   put(tk) {
     const ch = b => { const a = []; for (let i = 0; i < b.numberOfChannels; i++) a.push(b.getChannelData(i)); return a; };
-    return this.tx('readwrite', st => st.put({id: tk.id, name: tk.name, start: tk.start, vol: tk.vol, muted: tk.muted, sr: tk.buffer.sampleRate, chans: ch(tk.buffer), orig: tk.orig ? ch(tk.orig) : null, tune: tk.tune || null, order: tk.order})).catch(() => {});
+    return this.tx('readwrite', st => st.put({id: tk.id, name: tk.name, start: tk.start, vol: tk.vol, muted: tk.muted, sr: tk.buffer.sampleRate, chans: ch(tk.buffer), orig: tk.orig ? ch(tk.orig) : null, tune: tk.tune || null, order: tk.order, songId: tk.songId || S.id})).catch(() => {});
   },
   meta(tk) { return this.tx('readwrite', st => { const r = st.get(tk.id); r.onsuccess = () => { if (r.result) st.put({...r.result, name: tk.name, start: tk.start, vol: tk.vol, muted: tk.muted, tune: tk.tune || null}); }; }).catch(() => {}); },
   del(id) { return this.tx('readwrite', st => st.delete(id)).catch(() => {}); },
@@ -1119,20 +1260,24 @@ const DB = {
 };
 async function loadTakes() {
   try {
-    const rows = (await DB.all()) || [];
+    const all = (await DB.all()) || [], songId = S.id;
+    // takes saved before songs existed belong to the song that is open now
+    all.forEach(r => { if (!r.songId) { r.songId = songId; DB.tx('readwrite', st => st.put(r)).catch(() => {}); } });
+    const rows = all.filter(r => r.songId === songId);
     rows.sort((a, b) => (a.order || 0) - (b.order || 0));
+    if (songId !== S.id) return;
     takes = rows.map(r => {
       const buffer = new AudioBuffer({length: r.chans[0].length, sampleRate: r.sr, numberOfChannels: r.chans.length});
       r.chans.forEach((d, i) => buffer.copyToChannel(d, i));
       let orig = null;
       if (r.orig) { orig = new AudioBuffer({length: r.orig[0].length, sampleRate: r.sr, numberOfChannels: r.orig.length}); r.orig.forEach((d, i) => orig.copyToChannel(d, i)); }
-      return {id: r.id, name: r.name, start: r.start, vol: r.vol, muted: r.muted, order: r.order, buffer, orig, tune: r.tune || null};
+      return {id: r.id, name: r.name, start: r.start, vol: r.vol, muted: r.muted, order: r.order, buffer, orig, tune: r.tune || null, songId: r.songId};
     });
   } catch (e) { takes = []; }
   renderTakes();
 }
 function addTake(buffer, start, name) {
-  const tk = {id: uid(), name: name || 'Take ' + (takes.length + 1), start: Math.max(0, start), vol: 1, muted: false, order: Date.now(), buffer};
+  const tk = {id: uid(), name: name || 'Take ' + (takes.length + 1), start: Math.max(0, start), vol: 1, muted: false, order: Date.now(), buffer, songId: S.id};
   takes.push(tk); DB.put(tk); renderTakes(); return tk;
 }
 
@@ -1290,7 +1435,7 @@ async function ensureMic() {
   }
   note.hidden = true;
   const src = ctx.createMediaStreamSource(M.stream);
-  M.an = ctx.createAnalyser(); M.an.fftSize = 1024; src.connect(M.an);
+  M.an = ctx.createAnalyser(); M.an.fftSize = 2048; src.connect(M.an);
   M.mon = ctx.createGain(); M.mon.gain.value = $('#monitor').checked ? 1 : 0; src.connect(M.mon); M.mon.connect(G.vocalIn);
   try {
     if (!ctx.audioWorklet) throw 0;
@@ -1321,6 +1466,8 @@ function finishTake() {
   const len = n - from; if (len < sr * .2) { toast('That take was too short to keep.'); return; }
   const buffer = new AudioBuffer({length: len, sampleRate: sr, numberOfChannels: 1});
   buffer.copyToChannel(data.subarray(from), 0);
+  if (M.hum) { const h = M.hum; M.hum = null; analyzeHum(h, data.subarray(from), sr, start); return; }
+  if (M.punch) { const pu = M.punch; M.punch = null; punchIn(pu, data.subarray(from), sr, start); return; }
   const tk = addTake(buffer, start);
   if (S.autoTuneNew) { const st = TUNE_PRESETS[S.autoTuneStyle] ? S.autoTuneStyle : 'pop'; tk.tune = {...TUNE_PRESETS[st], on: true, preset: st, chromatic: false}; retune(tk); }
   toast(tk.name + ' saved');
@@ -1449,6 +1596,7 @@ function frame() {
     meterPeak = Math.max(p, meterPeak * .92);
     const el = $('#meterFill'); el.style.width = Math.min(100, meterPeak * 110) + '%';
     el.parentElement.style.setProperty('--mw', el.parentElement.clientWidth + 'px');
+    drawPitchBoxes(d);
   }
   if (isStudio() && G && G.an) meters();
   if (!T.playing) return;
@@ -1512,11 +1660,14 @@ function renderSections() {
       '<span class="hint">' + (used ? 'Plays ' + used + '× in the song' : 'Not in the song yet') + '</span>' +
       '<label class="chk"><input type="checkbox" data-f="drums"' + (s.drums !== false ? ' checked' : '') + '> Drums</label>' +
       '<label class="chk"><input type="checkbox" data-f="bass"' + (s.bass !== false ? ' checked' : '') + '> Bass</label>' +
+      '<label class="chk" title="A short drum fill on the last beat"><input type="checkbox" data-f="fill"' + (s.fill ? ' checked' : '') + '> Fill</label>' +
+      '<label class="chk" title="A crash cymbal on the first beat"><input type="checkbox" data-f="crash"' + (s.crash ? ' checked' : '') + '> Crash</label>' +
+      '<label class="chk" title="A rising whoosh in the bar before this part"><input type="checkbox" data-f="whoosh"' + (s.whoosh ? ' checked' : '') + '> Whoosh</label>' +
       '<select class="sel" data-f="preset" aria-label="Chord ideas"><option value="">Chord ideas…</option>' + presets.map((p, i) => '<option value="' + i + '">' + esc(presetLabel(p, S.mode)) + '</option>').join('') + '</select>' +
       '<button class="btn small" data-act="dup">Duplicate</button>' +
       '<button class="btn small danger" data-act="delsec">Delete</button></div>' +
       '<div class="bars">' + s.chords.map((c, i) => '<div class="barcell" data-sec="' + s.id + '" data-i="' + i + '"><span class="bn"><span>bar ' + (i + 1) + '</span><span>' + romanOf(c) + '</span></span><select data-f="chord" data-i="' + i + '" aria-label="Chord for bar ' + (i + 1) + '">' + chordOptions(c) + '</select></div>').join('') + '</div>' +
-      '<div class="row"><button class="btn small" data-act="addbar"' + (s.chords.length >= 16 ? ' disabled' : '') + '>+ Bar</button><button class="btn small" data-act="rmbar"' + (s.chords.length <= 1 ? ' disabled' : '') + '>− Bar</button><button class="btn small" data-act="hear">Loop this part</button></div>' +
+      '<div class="row"><button class="btn small" data-act="addbar"' + (s.chords.length >= 16 ? ' disabled' : '') + '>+ Bar</button><button class="btn small" data-act="rmbar"' + (s.chords.length <= 1 ? ' disabled' : '') + '>− Bar</button><button class="btn small" data-act="hear">Loop this part</button><button class="btn small" data-act="hum" title="Hum your tune and get chords that fit">Hum to find chords</button></div>' +
       '<textarea class="lyr" data-f="lyrics" placeholder="Lyrics for the ' + esc(s.name.toLowerCase()) + '…" aria-label="Lyrics for ' + esc(s.name) + '">' + esc(s.lyrics || '') + '</textarea></div>';
   }).join('');
 }
@@ -1554,7 +1705,7 @@ function renderTakes() {
     '<div class="row"><label class="chk"><input type="checkbox" data-tf="muted"' + (tk.muted ? ' checked' : '') + '> Mute</label>' +
     '<label class="chk">Volume <input type="range" data-tf="vol" min="0" max="1.6" step="0.01" value="' + tk.vol + '" style="width:110px"></label>' +
     '<button class="btn small" data-tact="nudge" data-d="-0.01" title="Move earlier by 10 ms">◀ 10 ms</button><button class="btn small" data-tact="nudge" data-d="0.01" title="Move later by 10 ms">10 ms ▶</button>' +
-    '<button class="btn small" data-tact="dl">Download</button><button class="btn small danger" data-tact="del">Delete</button></div>' + tuneUI(tk) + '</div>').join('');
+    '<button class="btn small" data-tact="dl">Download</button><button class="btn small danger" data-tact="del">Delete</button></div>' + vocalTools(tk) + tuneUI(tk) + '</div>').join('');
   el.querySelectorAll('.take').forEach(div => { const tk = takes.find(t => t.id === div.dataset.take); drawWave(div.querySelector('canvas'), tk); drawPitch(div.querySelector('canvas.pitch'), tk); });
 }
 function drawWave(cv, tk) {
@@ -1667,7 +1818,7 @@ $('#browser').addEventListener('click', e => {
     case 'chan': rollChId = id; renderChans(); renderRoll(); break;
     case 'take': openWin = null; switchTab('vocals'); break;
     case 'kit': { const bt = beatTarget(); bt.kit = id; bt.grid = {...KITS[id]}; save(); renderBeat(); toast(id + ' beat loaded'); break; }
-    case 'inst': { const ch = rollChan(); if (!ch) return; ch.inst = id; ch.view = (id === 'b808' || id === 'synth') ? 24 : 48; save(); ensureCtx(); voice(ctx, chanOut(G, ch), ch.view + 12 + S.tonic, ctx.currentTime + .01, .4, id, .25); renderChans(); renderRoll(); toast(ch.name + ' now plays ' + CHAN_INSTS[id]); break; }
+    case 'inst': { const ch = rollChan(); if (!ch) return; ch.inst = id; ch.view = (isBassy(id)) ? 24 : 48; save(); ensureCtx(); voice(ctx, chanOut(G, ch), ch.view + 12 + S.tonic, ctx.currentTime + .01, .4, id, .25); renderChans(); renderRoll(); toast(ch.name + ' now plays ' + CHAN_INSTS[id]); break; }
     case 'prog': { const sec = rollSec(), pr = PRESETS[S.mode][+id]; sec.chords = pr[1].map(x => chordFrom(x, S.mode)); save(); renderSections(); renderArr(); showIdle(); toast(sec.name + ' chords: ' + sec.chords.map(chordName).join(' – ')); break; }
   }
   renderBrowser();
@@ -1721,6 +1872,7 @@ $('#sections').addEventListener('click', e => {
     case 'addbar': s.chords.push(s.chords[s.chords.length - 1] || chordFrom(0, S.mode)); break;
     case 'rmbar': if (s.chords.length > 1) s.chords.pop(); break;
     case 'dup': S.sections.push({...JSON.parse(JSON.stringify(s)), id: uid(), name: s.name + ' 2'}); break;
+    case 'hum': startHum(s.id, false); return;
     case 'hear': {
       let ai = S.arr.indexOf(s.id);
       if (ai < 0) { S.arr.push(s.id); ai = S.arr.length - 1; toast(s.name + ' added to the end of the song'); }
@@ -1741,7 +1893,7 @@ $('#sections').addEventListener('input', e => {
 $('#sections').addEventListener('change', e => {
   const f = e.target.dataset.f, card = e.target.closest('[data-sec]'); if (!f || !card) return;
   const s = secById(card.dataset.sec);
-  if (f === 'drums' || f === 'bass') s[f] = e.target.checked;
+  if (['drums', 'bass', 'fill', 'crash', 'whoosh'].includes(f)) s[f] = e.target.checked;
   if (f === 'chord') { const v = e.target.value; s.chords[+e.target.dataset.i] = v === 'none' ? null : {r: +v.split(':')[0], q: v.split(':')[1]}; renderSections(); }
   if (f === 'preset' && e.target.value !== '') { const p = PRESETS[S.mode][+e.target.value]; s.chords = p[1].map(x => chordFrom(x, S.mode)); if (s.chords.length < 4) s.chords.length = 4; renderSections(); }
   if (f === 'name') renderSections();
@@ -1818,6 +1970,9 @@ $('#takes').addEventListener('click', e => {
   const b = e.target.closest('[data-tact]'); if (!b) return;
   const div = b.closest('[data-take]'), tk = takes.find(t => t.id === div.dataset.take);
   if (b.dataset.tact === 'retune') { retune(tk); return; }
+  if (b.dataset.tact === 'harm') { makeHarmony(tk, +b.dataset.d); return; }
+  if (b.dataset.tact === 'double') { makeDouble(tk); return; }
+  if (b.dataset.tact === 'punch') { startPunch(tk, +div.querySelector('[data-punch]').value); return; }
   if (b.dataset.tact === 'nudge') { tk.start = Math.max(0, tk.start + +b.dataset.d); DB.meta(tk); renderTakes(); }
   if (b.dataset.tact === 'dl') download(wav(tk.buffer), safeName(S.title + ' - ' + tk.name) + '.wav');
   if (b.dataset.tact === 'del') confirmBtn(b, 'Tap again to delete', () => { takes = takes.filter(t => t !== tk); DB.del(tk.id); renderTakes(); });
@@ -1860,10 +2015,7 @@ window.addEventListener('keyup', e => { const i = KEYMAP.indexOf(e.key.toLowerCa
 
 // mix tab
 $('#mix').addEventListener('input', e => { const k = e.target.dataset.mix; if (!k) return; S.mix[k] = +e.target.value; $('#mv-' + k).textContent = Math.round(S.mix[k] * 100); applyMix(); save(); });
-$('#reset').onclick = e => confirmBtn(e.target, 'Tap again: this deletes everything', async () => {
-  stop(); S = defaultSong(); S.latencyMs = ctx ? Math.round(((ctx.outputLatency || 0) + (ctx.baseLatency || 0)) * 1000 + 15) : null;
-  takes = []; await DB.clear(); sel = -1; save(); renderAll(); applyMix(); toast('New song started');
-});
+$('#reset').onclick = () => newSong();
 
 /* ---------- channel rack + piano roll ---------- */
 let rollChId = 'mel', rollSecId = '', recKeys = false;
@@ -1892,7 +2044,7 @@ $('#chans').addEventListener('input', e => {
   if (f === 'name') ch.name = e.target.value || 'Channel';
   if (f === 'vol') { ch.vol = +e.target.value; if (G && G.ch && G.ch[ch.id]) G.ch[ch.id].gain.setTargetAtTime(ch.vol, ctx.currentTime, .02); }
   if (f === 'mute') ch.mute = e.target.checked;
-  if (f === 'inst') { ch.inst = e.target.value; const bassy = ch.inst === 'b808' || ch.inst === 'synth'; ch.view = bassy ? 24 : 48; ensureCtx(); voice(ctx, chanOut(G, ch), ch.view + 12 + (S.tonic % 12), ctx.currentTime + .01, .4, ch.inst, .25); if (ch.id === rollChId) renderRoll(); }
+  if (f === 'inst') { ch.inst = e.target.value; const bassy = isBassy(ch.inst); ch.view = bassy ? 24 : 48; ensureCtx(); voice(ctx, chanOut(G, ch), ch.view + 12 + (S.tonic % 12), ctx.currentTime + .01, .4, ch.inst, .25); if (ch.id === rollChId) renderRoll(); }
   save();
 });
 $('#chans').addEventListener('click', e => {
@@ -2015,7 +2167,7 @@ $('#rollIdea').onclick = () => {
 };
 function ideaFor(sec, ch) {
   const pick = a => a[Math.floor(Math.random() * a.length)], out = [];
-  const bassy = ch.inst === 'b808' || ch.inst === 'synth';
+  const bassy = isBassy(ch.inst);
   if (bassy) {
     const pats = [[[0, 6, 0], [6, 4, 0], [10, 6, 0]], [[0, 3, 0], [3, 3, 0], [6, 2, 12], [8, 8, 0]], [[0, 10, 0], [10, 2, 0], [12, 4, 7]], [[0, 16, 0]], [[0, 4, 0], [6, 2, 0], [8, 4, 0], [14, 2, 12]]];
     const p = pick(pats), base = Math.max(24, ch.view);
@@ -2134,7 +2286,7 @@ const DI = {
   strings: '<path d="M8 3c-3 4-3 14 0 18M16 3c3 4 3 14 0 18M8 12h8M12 3v18"/>'
 };
 const dsvg = k => '<svg viewBox="0 0 24 24" aria-hidden="true">' + (DI[k] || DI.synth) + '</svg>';
-const instIcon = i => ({piano: 'keys', rhodes: 'keys', organ: 'keys', guitar: 'guitar', bell: 'bell', strings: 'strings', pad: 'synth', lead: 'synth', b808: 'bass', synth: 'bass'})[i] || 'synth';
+const instIcon = i => ({piano: 'keys', rhodes: 'keys', organ: 'keys', guitar: 'guitar', bell: 'bell', strings: 'strings', pad: 'synth', lead: 'synth', b808: 'bass', synth: 'bass', ebass: 'bass'})[i] || 'synth';
 let curInst = 'drums', dEditTab = '', winOpen = null;
 const homes = new Map();
 function moveTo(node, parent) { if (!node) return; if (!homes.has(node)) { const ph = document.createComment('home'); node.before(ph); homes.set(node, ph); } parent.appendChild(node); }
@@ -2200,7 +2352,7 @@ $('#iList').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key =
 $('#iAdd').onclick = () => { $('#iPicker').hidden = !$('#iPicker').hidden; $('#iAdd').textContent = $('#iPicker').hidden ? '+ Add instrument' : 'Choose an instrument'; };
 $('#iPicker').onclick = e => {
   const b = e.target.closest('[data-new]'); if (!b) return;
-  const inst = b.dataset.new, bassy = inst === 'b808' || inst === 'synth';
+  const inst = b.dataset.new, bassy = isBassy(inst);
   const ch = {id: uid(), name: CHAN_INSTS[inst], inst, vol: .6, mute: false, view: bassy ? 24 : 48};
   S.channels.push(ch); save(); $('#iPicker').hidden = true; $('#iAdd').textContent = '+ Add instrument';
   ensureCtx(); voice(ctx, chanOut(G, ch), ch.view + 12 + S.tonic, ctx.currentTime + .01, .4, inst, .25);
@@ -2247,11 +2399,13 @@ function renderEditor() {
     beatSecId = sec.id;
     const pn = esc(sec.name.toLowerCase());
     $('#edDrumsTog').innerHTML = '<label class="chk"><input type="checkbox" data-tog="drums"' + (sec.drums !== false ? ' checked' : '') + '> Drums play in the ' + pn + '</label>' +
+      '<label class="chk"><input type="checkbox" data-tog="fill"' + (sec.fill ? ' checked' : '') + '> Fill at the end</label><label class="chk"><input type="checkbox" data-tog="crash"' + (sec.crash ? ' checked' : '') + '> Crash at the start</label><label class="chk"><input type="checkbox" data-tog="whoosh"' + (sec.whoosh ? ' checked' : '') + '> Whoosh into it</label>' +
       '<span class="hint">You are editing the ' + pn + ' beat only.</span><button class="btn small" data-dact="copyall" title="Use this beat in every part of the song">Copy this beat to all parts</button>';
     renderBeat();
   }
   if (kind === 'chords') {
     $('#edChords').innerHTML =
+      '<div class="esec humbox"><h4>Hum it, get chords</h4><p class="hint">Hum or sing your tune for the ' + esc(sec.name.toLowerCase()) + ' while it plays. The studio listens and picks a chord for each bar. Wear headphones.</p><div class="row"><button class="btn small primary" data-hum>Hum to find chords</button><label class="chk"><input type="checkbox" data-hummel checked> Also put my tune in the piano roll</label></div></div>' +
       '<div class="esec"><h4>Chords in the ' + esc(sec.name.toLowerCase()) + ' <span>one per bar</span></h4><div class="cbars">' + sec.chords.map((c, i) => '<div class="cbar" data-cb="' + i + '"><small><span>bar ' + (i + 1) + '</span><span>' + romanOf(c) + '</span></small><select data-cbar="' + i + '" aria-label="Chord for bar ' + (i + 1) + '">' + chordOptions(c) + '</select></div>').join('') + '</div>' +
       '<div class="row"><button class="btn small" data-cact="addbar"' + (sec.chords.length >= 16 ? ' disabled' : '') + '>+ Bar</button><button class="btn small" data-cact="rmbar"' + (sec.chords.length <= 1 ? ' disabled' : '') + '>− Bar</button></div></div>' +
       '<div class="esec"><h4>Chord ideas <span>tap to use in the ' + esc(sec.name.toLowerCase()) + '</span></h4><div class="chips" data-prog>' + PRESETS[S.mode].map((pr, i) => '<button data-p="' + i + '" title="' + pr[1].map(x => chordName(chordFrom(x, S.mode))).join(' – ') + '">' + esc(pr[0]) + '</button>').join('') + '</div></div>' +
@@ -2275,10 +2429,11 @@ function renderEditor() {
 $('#edParts').onclick = e => { const b = e.target.closest('[data-esec]'); if (!b) return; rollSecId = b.dataset.esec; renderEditor(); renderLyricsLive(); };
 $('#edBody').addEventListener('click', e => {
   const sec = rollSec(), t = e.target;
+  if (t.closest('[data-hum]')) { startHum(sec.id, !!($('[data-hummel]') || {}).checked); return; }
   const chip = t.closest('[data-set] [data-v]');
   if (chip) {
     const key = chip.parentElement.dataset.set, v = chip.dataset.v; ensureCtx();
-    if (key === 'chan') { const ch = rollChan(); ch.inst = v; ch.view = v === 'b808' || v === 'synth' ? 24 : 48; voice(ctx, chanOut(G, ch), ch.view + 12 + S.tonic, ctx.currentTime + .01, .4, v, .25); }
+    if (key === 'chan') { const ch = rollChan(); ch.inst = v; ch.view = isBassy(v) ? 24 : 48; voice(ctx, chanOut(G, ch), ch.view + 12 + S.tonic, ctx.currentTime + .01, .4, v, .25); }
     else { S[key] = v; renderBeat(); }
     if (key === 'chordInst') chordNotes({r: 0, q: 'maj'}, v).forEach(n => voice(ctx, G.chords, n, ctx.currentTime + .01, .7, v, .12));
     if (key === 'bassInst' && v !== 'off') voice(ctx, G.bass, 36 + S.tonic, ctx.currentTime + .01, .5, v, .3);
@@ -2441,7 +2596,7 @@ function renderEasy() {
   $('#ezTitle').value = S.title;
   $('#ezVibes').innerHTML = VIBES.map(v => '<button class="vibe' + (S.vibe === v.id ? ' on' : '') + '" data-vibe="' + v.id + '" aria-pressed="' + (S.vibe === v.id) + '"><b>' + v.name + '</b><span>' + v.desc + '</span></button>').join('');
   $('#ezKey').textContent = keyLabel(); $('#ezBpm').textContent = S.bpm + ' BPM';
-  $('#ezLyrics').innerHTML = songParts().map(x => '<div class="ez-part"><h3>' + esc(x.name) + ' ' + x.chords.map(c => '<span class="chip">' + chordName(c) + '</span>').join('') + '</h3>' +
+  $('#ezLyrics').innerHTML = songParts().map(x => '<div class="ez-part"><h3>' + esc(x.name) + ' ' + x.chords.map(c => '<span class="chip">' + chordName(c) + '</span>').join('') + '<button class="btn small" data-ezhum="' + x.id + '" title="Hum your tune and get chords that fit">Hum to find chords</button></h3>' +
     '<textarea class="lyr" data-ezsec="' + x.id + '" placeholder="Type the words for the ' + esc(x.name.toLowerCase()) + ' here…" aria-label="Lyrics for ' + esc(x.name) + '">' + esc(x.lyrics || '') + '</textarea></div>').join('');
   $('#ezAuto').checked = !!S.autoTuneNew; $('#ezAutoStyle').value = TUNE_PRESETS[S.autoTuneStyle] ? S.autoTuneStyle : 'pop'; $('#ezAutoStyle').disabled = !S.autoTuneNew;
   $('#ezVoice').value = S.mix.vocals; $('#ezMusic').value = S.mix.music == null ? 1 : S.mix.music; $('#ezEcho').value = S.mix.reverb;
@@ -2462,6 +2617,7 @@ function applyVibe(v) {
   if (!verse) { verse = {id: uid(), name: 'Verse', drums: true, bass: true, chords: [], lyrics: '', notes: {}}; S.sections.push(verse); }
   if (!chorus) { chorus = {id: uid(), name: 'Chorus', drums: true, bass: true, chords: [], lyrics: '', notes: {}}; S.sections.push(chorus); }
   verse.chords = v.verse.map(x => chordFrom(x, v.mode)); chorus.chords = v.chorus.map(x => chordFrom(x, v.mode));
+  verse.fill = true; chorus.crash = true; chorus.whoosh = true;
   S.sections.forEach(x => { delete x.grid; delete x.kit; });
   if (!S.arr.length) S.arr = [verse.id, chorus.id, verse.id, chorus.id];
   save(); applyMix(); renderEasy();
@@ -2500,6 +2656,271 @@ $('#ezTakes').addEventListener('click', e => {
 $('#ezSave').onclick = e => exportSong(true, e.target, $('#ezSaveStatus'));
 $('#ezSaveInst').onclick = e => exportSong(false, e.target, $('#ezSaveStatus'));
 
+/* ---------- my songs ---------- */
+const ago = ts => { const m = Math.round((Date.now() - ts) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago'; };
+function loadSongObj(id) { try { const raw = localStorage.getItem(STORE + '.song.' + id); if (raw) return Object.assign(defaultSong(), JSON.parse(raw), {id}); } catch (e) {} return null; }
+function refreshViews() { renderAll(); applyMix(); if (isStudio()) renderDaw(); if (isEasy()) renderEasy(); }
+function afterSongChange() {
+  normalize(); sel = -1; cursorBar = 0; rollSecId = ''; curInst = 'drums'; hist = []; fut = [];
+  restoring = true; saveNow(); restoring = false; takes = []; loadTakes(); refreshViews(); closeSongs(); setTimeout(warmSounds, 50);
+}
+function switchSong(id) {
+  if (id === S.id) { closeSongs(); return; }
+  const next = loadSongObj(id); if (!next) { toast('That song could not be opened.'); return; }
+  if (T.playing) stop(); saveNow(); S = next; afterSongChange(); toast('Opened ' + (S.title || 'Untitled song'));
+}
+function newSong() {
+  if (T.playing) stop(); saveNow();
+  const keep = {latencyMs: S.latencyMs, autoTuneNew: S.autoTuneNew, autoTuneStyle: S.autoTuneStyle, countIn: S.countIn};
+  S = Object.assign(defaultSong(), keep, {id: uid(), title: 'Untitled song ' + (lib.songs.length + 1)});
+  afterSongChange(); toast('New song started. Your other songs are in My songs.');
+}
+function duplicateSong(id) {
+  saveNow(); const src = loadSongObj(id); if (!src) return;
+  const copy = Object.assign({}, src, {id: uid(), title: (src.title || 'Untitled song') + ' (copy)'});
+  try { localStorage.setItem(STORE + '.song.' + copy.id, JSON.stringify(copy)); lib.songs.unshift({id: copy.id, title: copy.title, key: NOTES[copy.tonic] + ' ' + copy.mode, bpm: copy.bpm, updated: Date.now()}); localStorage.setItem(LIB, JSON.stringify(lib)); } catch (e) { toast('Not enough space to copy this song.'); }
+  renderSongs(); toast('Copied. Recordings stay with the original song.');
+}
+async function deleteSong(id) {
+  try { localStorage.removeItem(STORE + '.song.' + id); } catch (e) {}
+  lib.songs = lib.songs.filter(x => x.id !== id); try { localStorage.setItem(LIB, JSON.stringify(lib)); } catch (e) {}
+  const rows = (await DB.all()) || []; for (const r of rows) if (r.songId === id) await DB.del(r.id);
+  renderSongs(); toast('Song deleted');
+}
+function renderSongs() {
+  const list = lib.songs.slice().sort((a, b) => (b.id === S.id) - (a.id === S.id) || b.updated - a.updated);
+  $('#songsList').innerHTML = list.map(x => '<div class="songrow' + (x.id === S.id ? ' cur' : '') + '" data-song="' + x.id + '"><span class="tx"><b>' + esc(x.title) + '</b><small>' + esc(x.key) + ' · ' + x.bpm + ' BPM · edited ' + ago(x.updated) + '</small></span>' +
+    (x.id === S.id ? '<span class="hint">Open now</span>' : '<button class="btn small primary" data-so="open">Open</button>') + '<button class="btn small" data-so="dup">Duplicate</button>' + (x.id === S.id ? '' : '<button class="btn small danger" data-so="del">Delete</button>') + '</div>').join('');
+}
+function openSongs() { saveNow(); renderSongs(); $('#songsModal').hidden = false; }
+function closeSongs() { $('#songsModal').hidden = true; }
+document.addEventListener('click', e => { if (e.target.closest('[data-songs]')) openSongs(); });
+$('#songsClose').onclick = closeSongs;
+$('#songsModal').onclick = e => { if (e.target.id === 'songsModal') closeSongs(); };
+$('#songsNew').onclick = newSong;
+$('#songsList').onclick = e => {
+  const b = e.target.closest('[data-so]'); if (!b) return;
+  const id = b.closest('[data-song]').dataset.song;
+  if (b.dataset.so === 'open') switchSong(id);
+  if (b.dataset.so === 'dup') duplicateSong(id);
+  if (b.dataset.so === 'del') confirmBtn(b, 'Tap again to delete', () => deleteSong(id));
+};
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#songsModal').hidden) closeSongs(); });
+
+/* ---------- undo / redo (whole song; recordings are kept as they are) ---------- */
+function updateUndoUI() {
+  document.querySelectorAll('[data-undo]').forEach(b => b.disabled = !hist.length && !saveT);
+  document.querySelectorAll('[data-redo]').forEach(b => b.disabled = !fut.length);
+}
+function restoreSnap(json) {
+  if (T.playing) stop();
+  S = Object.assign(defaultSong(), JSON.parse(json)); restoring = true; normalize(); saveNow(); restoring = false;
+  refreshViews(); updateUndoUI();
+}
+function undo() { if (saveT) saveNow(); if (!hist.length) { toast('Nothing to undo'); return; } fut.push(JSON.stringify(S)); restoreSnap(hist.pop()); toast('Undone'); }
+function redo() { if (saveT) saveNow(); if (!fut.length) { toast('Nothing to redo'); return; } hist.push(JSON.stringify(S)); restoreSnap(fut.pop()); toast('Redone'); }
+document.addEventListener('click', e => { if (e.target.closest('[data-undo]')) undo(); else if (e.target.closest('[data-redo]')) redo(); });
+window.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey) || typing(e.target)) return;
+  const k = e.key.toLowerCase();
+  if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); } else if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); redo(); }
+});
+$('#rollUndo').onclick = undo;
+
+/* ---------- record a single part (used by hum-to-chords and re-record) ---------- */
+async function recordRegion(ai) {
+  if (T.playing) stop();
+  const prev = S.loop; sel = ai; S.loop = true; renderArr();
+  await record();
+  S.loop = prev; updateTransportUI();
+  if (!T.recording) { M.hum = null; M.punch = null; }
+}
+
+/* hum to chords */
+async function startHum(secId, toMelody) {
+  if (T.recording) return;
+  let ai = S.arr.indexOf(secId); if (ai < 0) { S.arr.push(secId); ai = S.arr.length - 1; save(); renderArr(); }
+  refreshTL();
+  const ch = S.channels.find(c => !isBassy(c.inst)) || S.channels[0];
+  M.hum = {secId, ai, barStart: blockStartBar(ai), toMelody, chId: ch && ch.id};
+  toast('Hum or sing your tune for the ' + secById(secId).name.toLowerCase() + '. It stops by itself at the end of the part.');
+  await recordRegion(ai);
+}
+async function analyzeHum(h, x, sr, start) {
+  const sec = secById(h.secId); if (!sec) return;
+  toast('Listening to your tune…');
+  const det = await detectPitch(x, sr, () => {}), sd = stepDur(), bars = sec.chords.length, W = Array.from({length: bars}, () => new Float32Array(12)), frames = [];
+  det.f0.forEach((f, i) => {
+    if (!f) { frames.push(null); return; }
+    const rel = (start + det.offSec + i * det.hopSec) / sd - h.barStart * 16;
+    if (rel < 0 || rel >= bars * 16) { frames.push(null); return; }
+    const m = 69 + 12 * Math.log2(f / 440); W[Math.floor(rel / 16)][((Math.round(m) % 12) + 12) % 12] += 1; frames.push({rel, m});
+  });
+  const total = W.reduce((a, w) => a + w.reduce((p, q) => p + q, 0), 0);
+  if (total < 15) { toast('No clear humming heard. Try again a little louder and closer to the microphone.'); return; }
+  const md = MODES[S.mode], cands = md.iv.map((r, i) => ({r, q: md.q[i], i})).filter(c => c.q !== 'dim');
+  if (S.mode === 'minor') cands.push({r: 7, q: 'maj', i: 4});
+  sec.chords = sec.chords.map((old, bi) => {
+    const w = W[bi], sum = w.reduce((a, b) => a + b, 0); if (sum < 4) return old;
+    let best = old, bs = -1e9;
+    for (const c of cands) {
+      const tones = INTS[c.q].map(iv => (S.tonic + c.r + iv) % 12); let sc = 0;
+      for (let pc = 0; pc < 12; pc++) { const k = tones.indexOf(pc); sc += k === 0 ? w[pc] * 1.25 : k > 0 ? w[pc] : -.35 * w[pc]; }
+      if ([0, 3, 4, 5].includes(c.i)) sc += sum * .04;
+      if (sc > bs) { bs = sc; best = {r: c.r, q: c.q}; }
+    }
+    return best;
+  });
+  let extra = '';
+  const ch = S.channels.find(c => c.id === h.chId);
+  if (h.toMelody && ch) { sec.notes[ch.id] = humNotes(frames, bars, ch); extra = ' Your tune is in the ' + ch.name + ' piano roll.'; }
+  save(); refreshViews();
+  toast('Chords for the ' + sec.name.toLowerCase() + ': ' + sec.chords.map(chordName).join(' – ') + '.' + extra);
+}
+function humNotes(frames, bars, ch) {
+  const out = [], sc = scaleNotes(), max = bars * 16; let cur = null;
+  const snap = m => sc.reduce((a, n) => Math.abs(n - m) < Math.abs(a - m) ? n : a, sc[0]);
+  const flush = () => { if (cur && cur.n >= 4) { const st = Math.min(max - 1, Math.round(cur.s / 2) * 2), en = Math.max(st + 1, Math.round(cur.e + .5)); out.push({s: st, n: snap(cur.sum / cur.n), l: Math.max(1, Math.min(en - st, max - st))}); } cur = null; };
+  for (const fr of frames) {
+    if (!fr) { flush(); continue; }
+    if (cur && Math.abs(fr.m - cur.sum / cur.n) < .6) { cur.sum += fr.m; cur.n++; cur.e = fr.rel; } else { flush(); cur = {s: fr.rel, e: fr.rel, sum: fr.m, n: 1}; }
+  }
+  flush();
+  if (out.length) { const med = out.map(n => n.n).sort((a, b) => a - b)[out.length >> 1], shift = Math.round(((ch.view || 48) + 18 - med) / 12) * 12; out.forEach(n => n.n += shift); }
+  return out.filter((n, i) => !i || n.s !== out[i - 1].s);
+}
+
+/* voice tools: harmonies, doubling, re-record a part */
+const scaleNotes = () => { const iv = MODES[S.mode].iv, a = []; for (let m = 24; m < 108; m++) if (iv.includes((m - S.tonic + 120) % 12)) a.push(m); return a; };
+const monoOf = b => { const x = new Float32Array(b.length); for (let c = 0; c < b.numberOfChannels; c++) { const d = b.getChannelData(c); for (let i = 0; i < x.length; i++) x[i] += d[i] / b.numberOfChannels; } return x; };
+function vocalTools(tk) {
+  refreshTL(); const sd = stepDur(), end = tk.start + tk.buffer.duration;
+  const parts = S.arr.map((id, ai) => ({ai, sec: secById(id), a: blockStartBar(ai) * 16 * sd, b: blockEndBar(ai) * 16 * sd})).filter(x => x.sec && x.b > tk.start && x.a < end);
+  return '<div class="row vtools"><span class="tl">Voice tools</span><button class="btn small" data-tact="harm" data-d="2" title="A second voice above yours that follows your melody in the key">+ Harmony above</button><button class="btn small" data-tact="harm" data-d="-2" title="A second voice below yours">+ Harmony below</button><button class="btn small" data-tact="double" title="A slightly shifted copy that makes the voice sound fuller">Double</button>' +
+    (parts.length ? '<span class="tl">Redo a part</span><select class="sel" data-punch aria-label="Part to re-record" style="height:30px">' + parts.map(x => '<option value="' + x.ai + '">' + esc(x.sec.name) + ' (bar ' + (blockStartBar(x.ai) + 1) + ')</option>').join('') + '</select><button class="btn small" data-tact="punch" title="Sing just this part again; the rest of the take stays">Re-record</button>' : '') + '</div>';
+}
+async function shiftedCopy(tk, ratioOf, label, startOffset, vol) {
+  toast('Making ' + label + ' for ' + tk.name + '…');
+  const src = tk.buffer, sr = src.sampleRate, x = monoOf(src), det = await detectPitch(x, sr, () => {});
+  const ratio = Float32Array.from(det.f0, ratioOf);
+  for (let i = 2; i < ratio.length - 2; i++) if (det.f0[i]) { const w = [ratio[i - 2], ratio[i - 1], ratio[i], ratio[i + 1], ratio[i + 2]].sort((a, b) => a - b); ratio[i] = w[2]; }
+  const out = await psola(x, sr, det.f0, det.hopSec, det.offSec, ratio, () => {});
+  const buf = new AudioBuffer({length: out.length, sampleRate: sr, numberOfChannels: 1}); buf.copyToChannel(out, 0);
+  const nt = addTake(buf, tk.start + startOffset, tk.name + ' · ' + label); nt.vol = vol; DB.meta(nt); renderTakes(); toast(label[0].toUpperCase() + label.slice(1) + ' added as a new take.');
+}
+function makeHarmony(tk, steps) {
+  const sc = scaleNotes();
+  shiftedCopy(tk, f => {
+    if (!f) return 1;
+    const m = 69 + 12 * Math.log2(f / 440); let idx = 0; for (let i = 1; i < sc.length; i++) if (Math.abs(sc[i] - m) < Math.abs(sc[idx] - m)) idx = i;
+    return Math.pow(2, (sc[Math.max(0, Math.min(sc.length - 1, idx + steps))] - sc[idx]) / 12);
+  }, 'harmony ' + (steps > 0 ? 'above' : 'below'), 0, .55);
+}
+function makeDouble(tk) { const r = Math.pow(2, .12 / 12); shiftedCopy(tk, () => r, 'double', .024, .6); }
+async function startPunch(tk, ai) {
+  if (T.recording || isNaN(ai)) return;
+  refreshTL(); const sd = stepDur(), sec = secById(S.arr[ai]);
+  M.punch = {takeId: tk.id, from: blockStartBar(ai) * 16 * sd, to: blockEndBar(ai) * 16 * sd, label: sec.name};
+  toast('Sing the ' + sec.name.toLowerCase() + ' again. It stops by itself at the end of the part.');
+  await recordRegion(ai);
+}
+function silenceRange(bf, s0, s1) {
+  const sr = bf.sampleRate, fade = Math.round(sr * .015);
+  for (let c = 0; c < bf.numberOfChannels; c++) {
+    const d = bf.getChannelData(c), a = Math.max(0, Math.round(s0 * sr)), b = Math.min(d.length, Math.round(s1 * sr));
+    for (let i = a; i < b; i++) d[i] *= Math.max(0, 1 - Math.min(i - a, b - 1 - i) / fade);
+  }
+}
+function punchIn(pu, x, sr, start) {
+  const a = Math.max(0, Math.round((pu.from - start) * sr)), b = Math.min(x.length, Math.round((pu.to - start) * sr));
+  if (b - a < sr * .2) { toast('Nothing was recorded in that part.'); return; }
+  const seg = x.slice(a, b), fade = Math.min(Math.round(sr * .015), seg.length >> 2);
+  for (let i = 0; i < fade; i++) { seg[i] *= i / fade; seg[seg.length - 1 - i] *= i / fade; }
+  const buf = new AudioBuffer({length: seg.length, sampleRate: sr, numberOfChannels: 1}); buf.copyToChannel(seg, 0);
+  const old = takes.find(t => t.id === pu.takeId);
+  if (old) { new Set([old.buffer, old.orig].filter(Boolean)).forEach(bf => silenceRange(bf, pu.from - old.start, pu.to - old.start)); DB.put(old); }
+  const nt = addTake(buf, start + a / sr, (old ? old.name : 'Take') + ' · ' + pu.label.toLowerCase() + ' redo');
+  if (old && old.tune && old.tune.on) { nt.tune = Object.assign({}, old.tune); retune(nt); }
+  renderTakes(); toast('The ' + pu.label.toLowerCase() + ' was re-recorded. The old version of that part is silenced.');
+}
+$('#ezLyrics').addEventListener('click', e => { const b = e.target.closest('[data-ezhum]'); if (b) startHum(b.dataset.ezhum, false); });
+document.addEventListener('click', e => { if (e.target.closest('[data-micon]')) ensureMic(); });
+
+/* ---------- rhymes ---------- */
+let RHY = null, rhymeWord = null, lastTA = null, rhT = 0;
+async function rhymeData() {
+  if (RHY) return RHY;
+  const raw = await loadLib('rhymes'), groups = [], map = new Map();
+  raw.split(';').forEach(g => { const ws = g.slice(g.indexOf(':') + 1).split(','), gi = groups.push(ws) - 1; ws.forEach(w => { if (!map.has(w)) map.set(w, gi); }); });
+  return RHY = {groups, map, all: [...map.keys()]};
+}
+async function rhymesFor(word) {
+  const d = await rhymeData(); let list;
+  if (d.map.has(word)) list = d.groups[d.map.get(word)];
+  else { list = d.all.filter(w => w.endsWith(word.slice(-3))); if (list.length < 3) list = d.all.filter(w => w.endsWith(word.slice(-2))); }
+  return list.filter(w => w !== word).sort((a, b) => a.length - b.length || a.localeCompare(b)).slice(0, 40);
+}
+const RB_EMPTY = '<span class="hint">Click at the end of a line in your lyrics, or type a word.</span>';
+document.querySelectorAll('[data-rhyme]').forEach(el => el.innerHTML = '<div class="rb-head"><span class="tl">Rhymes for</span><input class="inp rb-in" placeholder="any word" aria-label="Find rhymes for a word" maxlength="30"></div><div class="rb-out chips">' + RB_EMPTY + '</div>');
+async function showRhymes(word, fromInput) {
+  word = (word || '').toLowerCase().replace(/[^a-z']/g, '');
+  if (word === rhymeWord) return; rhymeWord = word;
+  const bars = document.querySelectorAll('[data-rhyme]');
+  if (!fromInput) bars.forEach(b => { const i = b.querySelector('.rb-in'); if (document.activeElement !== i) i.value = word; });
+  const set = html => bars.forEach(b => b.querySelector('.rb-out').innerHTML = html);
+  if (!word) { set(RB_EMPTY); return; }
+  let list; try { list = await rhymesFor(word); } catch (e) { set('<span class="hint">The rhyme list could not load.</span>'); return; }
+  if (word !== rhymeWord) return;
+  set(list.length ? list.map(w => '<button data-rw="' + esc(w) + '" title="Add “' + esc(w) + '” to your lyrics">' + esc(w) + '</button>').join('') : '<span class="hint">No rhymes found for “' + esc(word) + '”. Try a similar word.</span>');
+}
+const isLyricTA = el => el && el.tagName === 'TEXTAREA' && (el.matches('[data-lsec]') || el.classList.contains('lyr'));
+function caretWord(ta) { const line = ta.value.slice(0, ta.selectionStart).split('\n').pop(), m = line.match(/([A-Za-z']+)[^A-Za-z']*$/); return m ? m[1] : ''; }
+['keyup', 'click', 'focusin'].forEach(ev => document.addEventListener(ev, e => { if (!isLyricTA(e.target)) return; lastTA = e.target; clearTimeout(rhT); rhT = setTimeout(() => showRhymes(caretWord(lastTA)), 250); }));
+document.addEventListener('input', e => { if (e.target.classList && e.target.classList.contains('rb-in')) { clearTimeout(rhT); const v = e.target.value; rhT = setTimeout(() => showRhymes(v, true), 250); } });
+document.addEventListener('mousedown', e => { if (e.target.closest('[data-rw]')) e.preventDefault(); });
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-rw]'); if (!b) return;
+  const ta = lastTA; if (!ta || !document.body.contains(ta)) { toast('Click in your lyrics first, then tap a rhyme to add it.'); return; }
+  const w = b.dataset.rw, p = ta.selectionStart, v = ta.value, pre = v.slice(0, p), sp = pre && !/[\s(]$/.test(pre) ? ' ' : '';
+  ta.value = pre + sp + w + v.slice(ta.selectionEnd); const np = p + sp.length + w.length; ta.focus(); ta.setSelectionRange(np, np);
+  ta.dispatchEvent(new Event('input', {bubbles: true}));
+});
+
+/* ---------- live pitch ---------- */
+const PH = []; let pitchTick = 0;
+function livePitch(d, sr) {
+  const W = 1024, tmin = Math.floor(sr / 1000), tmax = Math.min(Math.floor(sr / 70), d.length - W - 2);
+  let rms = 0; for (let i = 0; i < W; i++) rms += d[i] * d[i]; if (Math.sqrt(rms / W) < .012) return 0;
+  const df = new Float32Array(tmax + 2); let run = 0;
+  for (let tau = 1; tau <= tmax + 1; tau++) { let sm = 0; for (let i = 0; i < W; i += 2) { const x = d[i] - d[i + tau]; sm += x * x; } run += sm; df[tau] = run ? sm * tau / run : 1; }
+  for (let tau = Math.max(2, tmin); tau < tmax; tau++) if (df[tau] < .15) { while (tau + 1 < tmax && df[tau + 1] < df[tau]) tau++; const a = df[tau - 1], b = df[tau], c = df[tau + 1], den = a - 2 * b + c; return sr / (tau + (den ? .5 * (a - c) / den : 0)); }
+  return 0;
+}
+function drawPitchBoxes(d) {
+  const boxes = [...document.querySelectorAll('.pitchbox')].filter(b => b.offsetParent); if (!boxes.length || ++pitchTick % 2) return;
+  const f = livePitch(d, ctx.sampleRate), now = performance.now() / 1000;
+  PH.push({t: now, m: f ? 69 + 12 * Math.log2(f / 440) : 0}); while (PH.length && now - PH[0].t > 8) PH.shift();
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim(), scale = MODES[S.mode].iv.map(i => (S.tonic + i) % 12);
+  const voiced = PH.filter(p => p.m), mid = voiced.length ? voiced.reduce((a, p) => a + p.m, 0) / voiced.length : 60, lo = Math.round(mid) - 6, hi = Math.round(mid) + 6, cur = PH[PH.length - 1].m;
+  const chord = T.playing && TL[shownBar] ? TL[shownBar].chord : null, ct = chord ? INTS[chord.q].map(i => (S.tonic + chord.r + i) % 12) : [];
+  boxes.forEach(box => {
+    const cv = box.querySelector('canvas'), g = cv.getContext('2d'), Wd = cv.width, H = cv.height, rowH = H / (hi - lo), y = m => H - (m - lo + .5) * rowH;
+    g.clearRect(0, 0, Wd, H); g.font = '600 12px ' + v('--mono');
+    for (let m = lo; m <= hi; m++) {
+      const pc = ((m % 12) + 12) % 12, inK = scale.includes(pc);
+      if (ct.includes(pc)) { g.globalAlpha = .18; g.fillStyle = v('--meter'); g.fillRect(48, y(m) - rowH / 2, Wd - 48, rowH); }
+      g.globalAlpha = inK ? .7 : .2; g.fillStyle = v('--line'); g.fillRect(48, y(m), Wd - 48, 1);
+      g.globalAlpha = inK ? .95 : .35; g.fillStyle = v('--muted'); g.fillText(NOTES[pc] + (Math.floor(m / 12) - 1), 6, y(m) + 4);
+    }
+    g.globalAlpha = 1; g.strokeStyle = v('--accent'); g.lineWidth = 3; g.lineJoin = 'round'; g.beginPath(); let pen = false;
+    PH.forEach(p => { const x = 48 + (1 - (now - p.t) / 8) * (Wd - 48); if (!p.m) { pen = false; return; } pen ? g.lineTo(x, y(p.m)) : g.moveTo(x, y(p.m)); pen = true; });
+    g.stroke();
+    const txt = box.querySelector('.pitchtxt');
+    if (cur) { const n = Math.round(cur), cents = Math.round((cur - n) * 100), pc = ((n % 12) + 12) % 12; txt.innerHTML = '<b>' + NOTES[pc] + (Math.floor(n / 12) - 1) + '</b> · ' + (Math.abs(cents) < 15 ? 'in tune' : cents > 0 ? cents + ' cents sharp' : -cents + ' cents flat') + (scale.includes(pc) ? ' · in the key' : ' · outside the key') + (ct.includes(pc) ? ' · in the chord' : ''); }
+    else txt.textContent = 'Sing or hum to see your pitch. Green bands are notes of the chord playing now.';
+  });
+}
+
 /* ---------- export ---------- */
 const safeName = s => (s || 'song').replace(/[\\/:*?"<>|]+/g, '').trim().slice(0, 80) || 'song';
 function wav(buf) {
@@ -2515,8 +2936,27 @@ function wav(buf) {
 }
 // The claude.ai preview frame blocks file saves, so say so instead of failing silently.
 const inPreview = () => !!window.claude;
-function download(blob, name) {
-  if (inPreview()) { toast('Saving files is blocked in this online preview. Open the Song Studio file itself to download.'); return false; }
+let downloadsCap;
+const LIBS = {jszip: ['vendor/jszip.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', 'JSZip'], lame: ['vendor/lame.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js', 'lamejs'], rhymes: ['vendor/rhymes.js', null, 'SS_RHYMES']};
+const libP = {};
+function loadLib(k) {
+  if (libP[k]) return libP[k];
+  const [local, cdn, glob] = LIBS[k];
+  const tryLoad = src => new Promise((res, rej) => { if (window[glob]) return res(window[glob]); const sc = document.createElement('script'); sc.src = src; sc.onload = () => window[glob] ? res(window[glob]) : rej(new Error('could not load ' + k)); sc.onerror = () => rej(new Error('could not load ' + k)); document.head.appendChild(sc); });
+  return libP[k] = tryLoad(local).catch(e => cdn ? tryLoad(cdn) : Promise.reject(e)).catch(e => { delete libP[k]; throw e; });
+}
+async function download(blob, name) {
+  if (inPreview()) {
+    try {
+      if (downloadsCap === undefined) downloadsCap = await window.claude.use('downloads');
+      if (!downloadsCap) throw new Error('unavailable');
+      if (!/\.(zip|txt|json|md|csv)$/i.test(name)) { const JSZip = await loadLib('jszip'), z = new JSZip(); z.file(name, blob); blob = await z.generateAsync({type: 'blob', compression: 'STORE'}); name = name.replace(/\.[^.]+$/, '') + '.zip'; }
+      await downloadsCap.save({filename: name, data: blob}); return true;
+    } catch (e) {
+      if (e && e.code === 'declined') return 'declined';
+      toast('Saving files is blocked in this preview. Open Song Studio from your own link to download.'); return false;
+    }
+  }
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
@@ -2533,14 +2973,50 @@ async function renderSong(withVocals) {
   if (withVocals) scheduleTakes(g, 0, .05, len);
   return oc.startRendering();
 }
-async function exportSong(withVocals, btn, st = $('#expStatus')) { btn.disabled = true; st.textContent = 'Mixing your song…';
+const savedMsg = (ok, what) => ok === true ? 'Saved ' + what + '.' : ok === 'declined' ? 'Download cancelled.' : 'Ready, but this preview can\'t save files. Open Song Studio from your own link to download.';
+async function exportSong(withVocals, btn, st = $('#expStatus'), format = 'wav') {
+  btn.disabled = true; st.textContent = 'Mixing your song…';
   try {
-    const buf = await renderSong(withVocals);
-    if (download(wav(buf), safeName(S.title) + (withVocals ? '' : ' (instrumental)') + '.wav') === false) st.textContent = 'Your song mixed fine, but this online preview can\'t save files. Open the Song Studio file in your browser to download it.';
-    else st.textContent = 'Saved ' + fmt(buf.duration) + ' of audio.';
+    const buf = await renderSong(withVocals), base = safeName(S.title) + (withVocals ? '' : ' (instrumental)');
+    const blob = format === 'mp3' ? await toMp3(buf, pr => st.textContent = 'Making the MP3… ' + Math.round(pr * 100) + '%') : wav(buf);
+    st.textContent = savedMsg(await download(blob, base + '.' + format), fmt(buf.duration) + ' of audio');
   } catch (e) { st.textContent = e.message === 'empty' ? 'Add a part to the song first.' : 'Export failed: ' + e.message; }
   btn.disabled = false;
 }
+async function toMp3(buf, prog) {
+  const lame = await loadLib('lame'), ch = Math.min(2, buf.numberOfChannels), enc = new lame.Mp3Encoder(ch, buf.sampleRate, 192), out = [], N = 1152;
+  const L = buf.getChannelData(0), R = ch > 1 ? buf.getChannelData(1) : null;
+  const conv = (d, i) => { const a = new Int16Array(Math.min(N, d.length - i)); for (let k = 0; k < a.length; k++) { const v = Math.max(-1, Math.min(1, d[i + k])); a[k] = v < 0 ? v * 0x8000 : v * 0x7fff; } return a; };
+  for (let i = 0, j = 0; i < L.length; i += N, j++) {
+    const m = R ? enc.encodeBuffer(conv(L, i), conv(R, i)) : enc.encodeBuffer(conv(L, i));
+    if (m.length) out.push(new Uint8Array(m));
+    if (j % 300 === 0) { prog(i / L.length); await yieldUI(); }
+  }
+  const e = enc.flush(); if (e.length) out.push(new Uint8Array(e));
+  return new Blob(out, {type: 'audio/mpeg'});
+}
+async function exportStems(btn, st) {
+  btn.disabled = true;
+  const keep = {trk: JSON.stringify(S.trk), ch: S.channels.map(c => [c.mute, c.solo]), tk: takes.map(t => [t.muted, t.solo])};
+  try {
+    const JSZip = await loadLib('jszip'), z = new JSZip(), base = safeName(S.title);
+    const list = [['vocals', 'Vocals'], ['drums', 'Drums'], ['bass', 'Bass'], ['chords', 'Chords'], ...S.channels.filter(c => S.sections.some(x => (x.notes[c.id] || []).length)).map(c => ['ch:' + c.id, c.name])];
+    for (const [k, label] of list) {
+      if (k === 'vocals' && !takes.some(t => !t.muted)) continue;
+      st.textContent = 'Mixing the ' + label.toLowerCase() + ' track…';
+      Object.values(S.trk).forEach(t => { t.m = false; t.s = false; }); S.channels.forEach(c => { c.mute = false; c.solo = false; }); takes.forEach(t => { t.solo = false; });
+      if (k.startsWith('ch:')) S.channels.find(c => 'ch:' + c.id === k).solo = true; else S.trk[k].s = true;
+      z.file(base + ' - ' + safeName(label) + '.wav', wav(await renderSong(k === 'vocals')));
+    }
+    st.textContent = 'Packing the zip…';
+    const blob = await z.generateAsync({type: 'blob', compression: 'STORE'});
+    st.textContent = savedMsg(await download(blob, base + ' - stems.zip'), 'the stems');
+  } catch (e) { st.textContent = e.message === 'empty' ? 'Add a part to the song first.' : 'Export failed: ' + e.message; }
+  finally { S.trk = JSON.parse(keep.trk); S.channels.forEach((c, i) => { [c.mute, c.solo] = keep.ch[i] || [false, false]; }); takes.forEach((t, i) => { [t.muted, t.solo] = keep.tk[i]; }); btn.disabled = false; }
+}
+$('#expMp3').onclick = e => exportSong(true, e.target, $('#expStatus'), 'mp3');
+$('#expStems').onclick = e => exportStems(e.target, $('#expStatus'));
+$('#ezSaveMp3').onclick = e => exportSong(true, e.target, $('#ezSaveStatus'), 'mp3');
 $('#expFull').onclick = e => exportSong(true, e.target);
 $('#expInst').onclick = e => exportSong(false, e.target);
 window.__studio = {renderSong, wav, retune, detectPitch, get takes() { return takes; }, get S() { return S; }, T};
@@ -2553,6 +3029,8 @@ if (view === 'easy') setEasy(); else setFull();
 if (!isEasy() && !isStudio()) try { const t = localStorage.getItem(STORE + '.tab'); if (t && document.querySelector('[data-panel="' + t + '"]')) switchTab(t); } catch (e) {}
 loadTakes();
 requestAnimationFrame(frame);
+updateUndoUI();
+if ('serviceWorker' in navigator && location.protocol === 'https:' && !window.claude) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
 </body>
