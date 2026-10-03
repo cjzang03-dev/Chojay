@@ -15,7 +15,14 @@ Song Studio opens in Easy mode: four steps on one screen.
 The player bar at the bottom shows the chord and your lyrics while you sing. Tap **Open full studio** for every tool.
 
 ## Studio
-On a computer (980px and wider), the full studio is a modern DAW layout: a side menu (Easy mode, Studio, Lyrics & chords, Record vocals, Keyboard, Mix & export), a top bar with the transport, time, tempo, key and Export, an arrangement with a coloured clip lane for every track (vocal takes, drums, bass, chords and each instrument channel) with mute, solo and volume, a Sounds panel (search, drum kits, instruments, chord ideas and genre styles), a mixer with pan knobs, faders and live level meters, and the piano roll and step sequencer. On smaller screens it switches to a tab layout.
+On a computer (980px and wider), the full studio is built around your instruments:
+- **Left:** your instruments (Vocals, Drums, Chords, Bass, Melody, 808 and any you add), each with mute and solo. Tap one to work on it.
+- **Middle:** the editor for that instrument. Drums get the beat grid, Chords get a chord per bar plus chord ideas, sounds and rhythms, Bass gets sounds and patterns, melodic instruments get the piano roll, and Vocals get the microphone, takes and autotune. The song's parts sit along the top; tabs pick which part you edit.
+- **Right:** your lyrics, one box per part, with the current chord shown big and the part being played highlighted. Syllables per line are counted to help fit the words to the beat.
+- **Bottom:** back to start, stop, play/pause, record, loop, metronome, count-in, time and bar, a song progress bar you can tap to jump, and master volume.
+- **Top:** song name, style, key, tempo, Surprise me, Song parts, Keyboard, Mixer, Export and Easy mode.
+
+On smaller screens it switches to a tab layout.
 
 ## What it does
 - **Song & lyrics**: build the song from parts (verse, chorus, bridge…), pick chords for each bar (or use "Chord ideas"), and write lyrics for each part. "Surprise me" picks a key, tempo, chords and beat for you.

@@ -268,154 +268,157 @@ body:not(.studio) .lyricbox{min-height:0;height:72px;padding:6px 10px;font-size:
   .field select,.field input{font-size:.85rem}
   .brand{flex-basis:100%}
 }
-/* DAW workspace (980px and up): nav | top bar | arrangement + sounds | mixer + editor */
+/* Studio (980px and up): top bar | instruments · editor · lyrics | transport bar */
 .daw{display:none}
 body.studio{overflow:hidden}
 body.studio .shell{display:none}
-body.studio .daw{display:grid;height:100%;grid-template-columns:220px minmax(0,1fr) 320px;grid-template-rows:68px minmax(0,1.1fr) minmax(0,1fr);grid-template-areas:"nav top top" "nav arr side" "nav mix edit";gap:10px;padding:0 10px 10px 0;font-size:13px;background:var(--bg)}
-.dnav{grid-area:nav;grid-row:1/-1;background:var(--titlebar);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px;padding:16px 12px;overflow:auto}
-.dbrand{display:flex;align-items:center;gap:10px;font:700 1.2rem var(--display);padding:2px 8px 18px}
-.dbrand svg{width:28px;height:28px;fill:none;stroke:var(--accent);stroke-width:2.4;stroke-linecap:round}
-.dn{display:flex;align-items:center;gap:12px;border:0;background:none;color:var(--ink);font-weight:600;font-size:.95rem;padding:10px 12px;border-radius:10px;text-align:left}
-.dn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.dn:hover{background:var(--panel)}
-.dn.on{background:linear-gradient(90deg,var(--accent-soft),rgba(108,92,245,.12));box-shadow:inset 3px 0 0 var(--accent)}
-.dsec{margin:18px 8px 6px;color:var(--muted);font-weight:600}
-.dsong{display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
-.dsong b{font-size:.95rem}
-.dsong span{color:var(--muted);font-size:.8rem}
-.dtip{margin-top:auto;border-radius:12px;padding:14px;background:linear-gradient(160deg,#2A2560,#11172B 70%);border:1px solid var(--line);color:var(--muted);font-size:.82rem;line-height:1.5}
-.dtip b{color:var(--ink);display:block;font:600 1rem var(--display);margin-bottom:4px}
-.dtop{grid-area:top;display:flex;align-items:center;gap:18px;padding:0 6px 0 4px;border-bottom:1px solid var(--line)}
-.dproj{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 12px;min-width:0;flex:0 1 270px}
-.dproj svg{width:22px;height:22px;fill:none;stroke:var(--muted);stroke-width:1.8;flex:none}
-.dproj input{background:none;border:0;color:var(--ink);font-weight:600;width:100%;padding:0}
-.dproj small{color:var(--muted);font-size:.75rem}
-.dtrans{display:flex;align-items:center;gap:10px;margin-left:auto}
-.dic{width:38px;height:38px;border-radius:50%;border:0;background:none;color:var(--ink);display:inline-flex;align-items:center;justify-content:center}
-.dic svg{width:18px;height:18px;fill:currentColor}
-.dic:hover{background:var(--panel2)}
-.dic[aria-pressed="true"]{color:var(--accent);background:var(--accent-soft)}
-.dplay{width:52px;height:52px;border-radius:50%;border:0;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 6px rgba(108,92,245,.18),0 8px 24px rgba(108,92,245,.45)}
-.dplay svg{width:22px;height:22px;fill:currentColor}
-.drec{color:var(--rec)}
-.drec.on{background:var(--rec);color:#fff;animation:pulse 1.2s infinite}
-.dtime{font:500 1.35rem var(--mono);font-variant-numeric:tabular-nums;min-width:110px;text-align:center}
-.dfield{display:flex;align-items:center;gap:6px;color:var(--muted);font-weight:600}
-.dfield input,.dfield select{background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--ink);height:34px;padding:0 8px;font-weight:600}
-.dfield input{width:58px;font-family:var(--mono)}
-.dexport{margin-left:auto;height:44px;padding:0 26px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;font-size:.95rem;box-shadow:0 6px 20px rgba(108,92,245,.35)}
-.dcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;min-height:0;min-width:0;overflow:hidden;display:flex;flex-direction:column}
-.darr{grid-area:arr}
-.dnow{display:flex;align-items:center;gap:14px;padding:8px 14px;border-bottom:1px solid var(--line)}
-.dnow b#dChord{font:800 1.5rem var(--display);color:var(--accent);min-width:48px}
-.dlyric{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
-.darr-scroll{flex:1;overflow:auto;position:relative}
-.dlanes{position:relative;width:max-content;min-width:100%}
-.drow{display:flex;height:64px;border-bottom:1px solid rgba(34,42,71,.6)}
-.drow.druler{height:40px;position:sticky;top:0;z-index:5;background:var(--panel)}
-.dhead{position:sticky;left:0;z-index:4;flex:none;width:232px;background:var(--panel);border-right:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 12px}
-.drow:not(.druler) .dhead{box-shadow:inset 3px 0 0 var(--c)}
-.dico{width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--c)}
-.dico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.dhn{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
-.dname{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dctl{display:flex;align-items:center;gap:6px}
+body.studio .daw{display:grid;height:100%;grid-template-columns:250px minmax(0,1fr) 340px;grid-template-rows:62px minmax(0,1fr) 82px;grid-template-areas:"top top top" "inst center lyr" "bar bar bar";gap:10px;padding:0 10px;background:var(--bg);font-size:13px;position:relative}
+.topbar{grid-area:top;display:flex;align-items:center;gap:10px;margin:0 -10px;padding:0 14px;background:var(--titlebar);border-bottom:1px solid var(--line);min-width:0}
+.dbrand{display:flex;align-items:center;gap:8px;font:700 1.1rem var(--display);white-space:nowrap}
+.dbrand svg{width:26px;height:26px;fill:none;stroke:var(--accent);stroke-width:2.4;stroke-linecap:round}
+.ttl{background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-weight:700;height:38px;padding:0 12px;width:190px;min-width:90px;flex:0 1 190px}
+.tfield{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;height:38px;padding:0 6px 0 10px;white-space:nowrap}
+.tfield .tl{color:var(--muted);font-weight:600}
+.tfield b{min-width:28px;text-align:center}
+.tfield input{width:46px;background:none;border:0;color:var(--ink);font:600 .95rem var(--mono);text-align:center}
+.tfield select{background:none;border:0;color:var(--ink);font-weight:600;max-width:150px}
+.tfield select option{background:var(--panel)}
+.step{width:26px;height:26px;border-radius:7px;border:0;background:var(--panel2);color:var(--ink);font-weight:700}
+.step:hover{background:var(--accent-soft)}
+.tb2{height:38px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.tb2 svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tb2:hover,.tb2.on{border-color:var(--accent);background:var(--accent-soft)}
+.tsp{flex:1}
+.dexport{height:38px;padding:0 20px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;box-shadow:0 6px 20px rgba(108,92,245,.35);white-space:nowrap}
+.pane{background:var(--panel);border:1px solid var(--line);border-radius:14px;min-height:0;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.insts{grid-area:inst}.center{grid-area:center}.lyr{grid-area:lyr}
+.phead{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.phead h3{font-size:1rem}
+.pbody{flex:1;overflow:auto;padding:10px}
+.ii{display:flex;align-items:center;gap:10px;padding:9px;border-radius:12px;cursor:pointer;border:1px solid transparent;margin-bottom:4px}
+.ii:hover{background:var(--panel2)}
+.ii.on{background:color-mix(in srgb,var(--c) 16%,var(--panel2));border-color:color-mix(in srgb,var(--c) 65%,transparent)}
+.ii.off .tx,.ii.off .ico{opacity:.45}
+.ico{width:40px;height:40px;border-radius:10px;background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c);display:flex;align-items:center;justify-content:center;flex:none}
+.ico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ii .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.ii .tx b{font-size:.95rem}
+.ii .tx small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ii .msg{display:flex;gap:3px}
 .ms{width:22px;height:20px;border-radius:5px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font:700 .68rem var(--body);padding:0}
-.ms.on[data-tm="m"],.ms.on[data-sm="m"]{background:#E0A43A;color:#1b1300;border-color:#E0A43A}
-.ms.on[data-tm="s"],.ms.on[data-sm="s"]{background:var(--meter);color:#04211A;border-color:var(--meter)}
-.dvol{flex:1;min-width:40px;accent-color:var(--c);height:14px}
-.dlane{position:relative;flex:none;background-image:repeating-linear-gradient(90deg,rgba(34,42,71,.7) 0 1px,transparent 1px var(--pxbar))}
-.druler .dlane{cursor:pointer;background-image:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px var(--pxbar))}
-.druler .dlane span{position:absolute;top:4px;font:600 .75rem var(--mono);color:var(--muted);padding-left:4px;pointer-events:none}
-.dpart{position:absolute;bottom:3px;height:14px;border-radius:4px;font-size:.66rem;font-weight:700;padding:0 6px;color:#fff;overflow:hidden;white-space:nowrap;cursor:pointer;opacity:.85}
-.dpart.sel{outline:2px solid #fff;opacity:1}
-.dclip{position:absolute;top:7px;bottom:7px;border-radius:8px;overflow:hidden;background:color-mix(in srgb,var(--c) 30%,transparent);border:1px solid color-mix(in srgb,var(--c) 70%,transparent)}
-.dclip.solid{background:var(--c);border-color:var(--c)}
-.dclip canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.dclip span{position:absolute;left:6px;top:3px;font-size:.68rem;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);z-index:1}
-.dclip.take{cursor:grab;touch-action:none}
-.dmuted .dclip{opacity:.35}
-.dph{position:absolute;top:0;bottom:0;width:2px;background:#fff;z-index:6;pointer-events:none;box-shadow:0 0 8px rgba(255,255,255,.5)}
-.dph::before{content:"";position:absolute;top:24px;left:-6px;border:7px solid transparent;border-top-color:#fff}
-.dcur{position:absolute;top:0;bottom:0;border-left:2px dashed var(--accent);z-index:5;pointer-events:none}
-.dempty{color:var(--muted);font-style:italic;padding:22px 16px}
-.dtabs{display:flex;gap:4px;padding:0 14px;border-bottom:1px solid var(--line);flex:none}
-.dtabs button{border:0;background:none;color:var(--muted);font-weight:600;font-size:.95rem;padding:14px 12px 11px;border-bottom:3px solid transparent;margin-bottom:-1px}
-.dtabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
-.dpane{flex:1;min-height:0;overflow:auto;padding:14px}
-.dside{grid-area:side;grid-row:2/4}
-.dsearch{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:0 12px;height:42px}
-.dsearch svg{width:16px;height:16px;fill:none;stroke:var(--muted);stroke-width:2}
-.dsearch input{flex:1;border:0;background:none;color:var(--ink)}
-.dtiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 4px}
-.dtile{border:1px solid var(--line);background:var(--panel2);border-radius:10px;color:var(--ink);font-size:.74rem;font-weight:600;padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:6px}
-.dtile svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
-.dtile.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.dh4{font:600 1rem var(--body);margin:16px 0 8px;display:flex;justify-content:space-between;align-items:baseline}
-.dh4 small{font-size:.75rem;color:var(--muted);font-weight:500}
-.dchips{display:flex;flex-wrap:wrap;gap:8px}
-.dchip{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:9px;padding:7px 14px;font-weight:500}
-.dchip:hover,.dchip.on{border-color:var(--accent);color:#fff;background:var(--accent-soft)}
-.dlib{display:flex;flex-direction:column;gap:4px}
-.dli{display:flex;align-items:center;gap:12px;padding:7px 4px;border-radius:10px}
-.dli:hover{background:var(--panel2)}
-.dli .ic{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none;background:color-mix(in srgb,var(--c) 25%,transparent);color:var(--c)}
-.dli .ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
-.dli .tx{flex:1;min-width:0;display:flex;flex-direction:column}
-.dli .tx b{font-weight:600}
-.dli .tx small{color:var(--muted);font-size:.76rem}
-.dli button{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:8px;padding:5px 12px;font-weight:600;font-size:.78rem}
-.dli button:hover{border-color:var(--accent);color:#fff}
-.dli.on .ic{outline:2px solid var(--c)}
-body.studio .daw{grid-template-areas:"nav top top" "nav arr side" "nav mix side"}
-body.studio .dbotrow{grid-area:mix;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:10px;min-height:0}
-.strips{display:flex;gap:8px;height:100%;min-height:230px}
-.strip{flex:none;width:76px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px}
+.ms.on[data-im="m"],.ms.on[data-sm="m"]{background:#E0A43A;color:#1b1300;border-color:#E0A43A}
+.ms.on[data-im="s"],.ms.on[data-sm="s"]{background:var(--meter);color:#04211A;border-color:var(--meter)}
+.addinst{width:100%;border:1px dashed var(--muted);background:none;color:var(--ink);border-radius:12px;padding:10px;font-weight:600;margin-top:6px}
+.picker{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.picker button{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:10px;padding:9px 6px;font-weight:600;display:flex;align-items:center;gap:6px;font-size:.8rem}
+.picker svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.songstrip{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+.songstrip .tl{color:var(--muted);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+.sp{display:inline-flex;border-radius:8px;overflow:hidden;flex:none;background:var(--pc)}
+.sp .pk{border:0;background:none;color:#fff;font-weight:700;padding:6px 10px;display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+.sp .pk small{font:500 .66rem var(--mono);opacity:.8}
+.sp .x{border:0;background:rgba(0,0,0,.18);color:#fff;padding:0 8px}
+.sp.sel{outline:2px solid #fff;outline-offset:1px}
+.sp.live{box-shadow:0 0 0 3px var(--meter)}
+.edhead{display:flex;align-items:center;gap:12px;padding:12px 14px;flex-wrap:wrap;flex:none}
+.edhead .ico{width:48px;height:48px;border-radius:12px}
+.edhead h2{font:700 1.3rem var(--display)}
+.edhead small{color:var(--muted)}
+.parttabs{display:flex;gap:3px;margin-left:auto;background:var(--panel2);border-radius:10px;padding:3px;flex-wrap:wrap}
+.parttabs button{border:0;background:none;color:var(--muted);font-weight:600;padding:6px 12px;border-radius:8px}
+.parttabs button.on{background:var(--accent);color:#fff}
+.edbody{flex:1;overflow:auto;padding:4px 14px 14px;min-height:0}
+.ed .card{border:0;background:none;padding:0}
+.esec{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.esec h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0;display:flex;justify-content:space-between;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:999px;padding:7px 14px;font-weight:600}
+.chips button:hover{border-color:var(--accent)}
+.chips button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.cbars{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.cbar{border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:8px 10px;display:flex;flex-direction:column;gap:2px}
+.cbar small{font:500 .7rem var(--mono);color:var(--muted);display:flex;justify-content:space-between}
+.cbar select{background:none;border:0;color:var(--ink);font:700 1.15rem var(--display);width:100%}
+.cbar select option{background:var(--panel);font-size:.9rem}
+.cbar.live{border-color:var(--meter)}
+.togrow{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:14px}
+#edDrums .dgrid{grid-template-columns:72px repeat(16,minmax(22px,1fr));gap:5px}
+#edDrums .cell{border-radius:6px}
+#edDrums h3{display:none}
+#edRoll h3,#edRoll .hint{display:none}
+#edRoll label:has(#rollChan),#edRoll label:has(#rollSec){display:none}
+#edRoll .roll-wrap{max-height:none;height:calc(100vh - 380px);min-height:220px}
+#edRoll .card{gap:8px}
+#edVocals [data-panel]{gap:12px}
+#edVocals .winclose{display:none}
+#edVocals .card{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:14px}
+.nowbox{padding:14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;background:linear-gradient(160deg,var(--accent-soft),transparent 80%);flex:none}
+.bigchord{font:800 2.6rem/1 var(--display);color:#fff;min-width:64px}
+.nowbox .nx{display:flex;flex-direction:column;gap:4px}
+.nowbox .nx b{font-size:1.05rem}
+.beats4{display:flex;gap:5px}
+.beats4 i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.beats4 i.on{background:var(--meter)}
+.lp{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;margin-bottom:10px;background:var(--panel)}
+.lp.live{border-color:var(--meter);box-shadow:0 0 0 1px var(--meter)}
+.lph{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.lph b{font-size:.95rem;margin-right:4px}
+.lp textarea{min-height:120px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:8px 10px;line-height:1.6;resize:vertical;font-size:.95rem;width:100%}
+.lp .cnt{font:500 .72rem var(--mono);color:var(--muted)}
+.tbar{grid-area:bar;margin:0 -10px;display:flex;align-items:center;gap:18px;padding:0 18px;background:var(--titlebar);border-top:1px solid var(--line);min-width:0}
+.tgroup{display:flex;align-items:center;gap:8px}
+.tbtn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);display:inline-flex;align-items:center;justify-content:center}
+.tbtn svg{width:18px;height:18px;fill:currentColor}
+.tbtn:hover{border-color:var(--accent)}
+.tbtn[aria-pressed="true"]{color:#fff;background:var(--accent);border-color:var(--accent)}
+.dplay{width:56px;height:56px;border-radius:50%;border:0;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 6px rgba(108,92,245,.18),0 8px 24px rgba(108,92,245,.45)}
+.dplay svg{width:24px;height:24px;fill:currentColor}
+.drec{height:46px;padding:0 20px;border-radius:999px;border:0;background:var(--rec);color:#fff;font:700 .95rem var(--body);display:inline-flex;align-items:center;gap:8px}
+.drec i{width:12px;height:12px;border-radius:50%;background:#fff}
+.drec.on{animation:pulse 1.2s infinite}
+.tchk{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--muted);white-space:nowrap}
+.tpos{flex:1;display:flex;align-items:center;gap:14px;min-width:160px}
+.ttime{display:flex;flex-direction:column;line-height:1.15;min-width:104px}
+.ttime b{font:500 1.35rem var(--mono);font-variant-numeric:tabular-nums}
+.ttime span{color:var(--muted);font-size:.78rem}
+.tprog{position:relative;height:10px;border-radius:5px;background:var(--panel2);cursor:pointer;flex:1;overflow:hidden}
+.tprog i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--accent);border-radius:5px}
+.tvol{display:flex;align-items:center;gap:8px;color:var(--muted);font-weight:600}
+.tvol input{width:100px;accent-color:var(--accent)}
+.meter2{width:6px;border-radius:3px;background:#0b1022;position:relative;overflow:hidden}
+.meter2 i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,var(--meter) 60%,#E0C23A 85%,var(--rec))}
+.meter2.h{width:70px;height:8px}
+.meter2.h i{top:0;bottom:0;right:auto;height:auto;width:0;background:linear-gradient(90deg,var(--meter) 60%,#E0C23A 85%,var(--rec))}
+.strips{display:flex;gap:8px;min-height:300px;padding:14px;overflow-x:auto}
+.strip{flex:none;width:78px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px}
 .strip .sn{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .strip .sn i{width:8px;height:8px;border-radius:50%;flex:none}
 .knob{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#2a3358,#141a31);border:1px solid var(--line);position:relative;cursor:ns-resize;touch-action:none;flex:none}
 .knob::after{content:"";position:absolute;left:50%;top:4px;width:2px;height:11px;margin-left:-1px;background:#fff;border-radius:1px;transform-origin:50% 13px;transform:rotate(var(--a,0deg))}
 .knob.off{visibility:hidden}
-.fwrap{flex:1;display:flex;gap:6px;align-items:stretch;min-height:90px}
-.meter2{width:6px;border-radius:3px;background:#0b1022;position:relative;overflow:hidden}
-.meter2 i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,var(--meter) 60%,#E0C23A 85%,var(--rec))}
+.fwrap{flex:1;display:flex;gap:6px;align-items:stretch;min-height:150px}
 .fader{writing-mode:vertical-lr;direction:rtl;width:18px;accent-color:var(--c);margin:0}
 .strip .db{font:500 .72rem var(--mono);color:var(--muted)}
 .strip .sm{display:flex;gap:4px}
-#dRoll .card,#dSteps .card,#dInst .card{border:0;background:none;padding:0}
-#dRoll .card{height:100%}
-#dRoll .roll-wrap{flex:1;max-height:none;min-height:140px}
-#dRoll .hint,#dSteps p.hint{display:none}
-#dRoll h3{display:none}
-#dInst{display:flex;flex-direction:column;gap:18px}
-#dRoll .row{gap:6px}
-#dRoll .btn.small{height:28px;padding:0 9px;font-size:.78rem}
-#dRoll .sel{height:30px;font-size:.8rem}
-#dRoll .lbl{font-size:.66rem}
-#dRoll #rollCopy{max-width:150px}
-#dRoll .card{gap:8px}
-.dhead .btn{white-space:nowrap}
-.dwin{position:absolute;z-index:50;top:78px;right:10px;bottom:10px;width:min(620px,calc(100% - 250px));background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden}
+.dwin{position:absolute;z-index:50;top:72px;right:10px;bottom:92px;width:min(680px,calc(100% - 280px));background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden}
 .dwin-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:700}
 .dwin-bar button{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:8px;padding:5px 12px;font-weight:600}
 .dwin-body{flex:1;overflow:auto}
 .dwin-body .winclose{display:none}
 .dwin-body .card{border-radius:0;border-left:0;border-right:0;border-top:0;background:transparent}
-.dwin-body [data-panel]{gap:0}
 .dwin-body .panel{gap:0}
-.dfx{display:flex;flex-direction:column;gap:14px}
-.dfx label{display:flex;flex-direction:column;gap:4px;font-weight:600}
-.dfx label.chk{flex-direction:row}
+#edDrums .row:has(#beatFor),#edDrums #beatOwn,#edDrums #beatShare,#edDrums p.hint{display:none!important}
+body.studio .toast{bottom:100px}
+.topbar{overflow:hidden}
+@media (max-width:1679px){.dbrand span{display:none}.ttl{flex-basis:110px;width:110px}.topbar{gap:8px}#dSurprise .lbl-x{display:none}}
+@media (max-width:1379px){.topbar .lbl-x{display:none}.tfield select#dVibe{max-width:110px}}
+@media (max-width:1279px){.tfield .tl{display:none}}
+@media (max-width:1199px){.ttl{flex-basis:96px;width:96px}.topbar{gap:6px}}
 @media (max-width:1279px){
-  body.studio .daw{grid-template-columns:64px minmax(0,1fr) 290px}
-  .dnav{padding:14px 8px}.dn{justify-content:center;padding:10px}.dn span,.dbrand span,.dsec,.dsong,.dtip{display:none}
-  .dbrand{justify-content:center;padding:2px 0 16px}
-  .dhead{width:190px}
-  .dhead .chk{display:none}
-  .dproj{flex-basis:200px}
-  .dtime{font-size:1.1rem;min-width:90px}
-  .dwin{width:min(620px,calc(100% - 90px))}
+  body.studio .daw{grid-template-columns:210px minmax(0,1fr) 280px}
+  .dbrand span{display:none}
+  .tvol span,.tchk span{display:none}
+  .tb2 .lbl-x{display:none}
 }
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px);text-align:center}
 .toast.show{opacity:1}
@@ -488,57 +491,64 @@ body.studio .dbotrow{grid-area:mix;display:grid;grid-template-columns:minmax(0,1
 </div>
 
 <div class="daw" id="daw">
-  <aside class="dnav" aria-label="Main menu">
+  <header class="topbar">
     <div class="dbrand"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 12v4M9 7v14M14 4v20M19 9v10M24 12v4"/></svg><span>Song Studio</span></div>
-    <button class="dn" data-dnav="easy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Easy mode</span></button><button class="dn" data-dnav="studio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v16M12 4v16M19 4v16"/><rect x="3" y="13" width="4" height="3" rx="1"/><rect x="10" y="7" width="4" height="3" rx="1"/><rect x="17" y="15" width="4" height="3" rx="1"/></svg><span>Studio</span></button><button class="dn" data-dnav="song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 11h10M4 16h6"/><path d="M18 5v10.5a2.5 2.5 0 1 1-2-2.45"/></svg><span>Lyrics & chords</span></button><button class="dn" data-dnav="vocals"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Record vocals</span></button><button class="dn" data-dnav="keys"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v8M12 5v8M16 5v8M6 13h4M14 13h4"/></svg><span>Keyboard</span></button><button class="dn" data-dnav="mix"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg><span>Mix & export</span></button>
-    <div class="dsec">This song</div>
-    <div class="dsong" id="dSong"></div>
-    <div class="dtip"><b>Quick keys</b>Space plays and pauses. Keys A to K play notes on the selected instrument. Esc closes a window.</div>
-  </aside>
-  <header class="dtop">
-    <div class="dproj"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="7" r="3"/><circle cx="17" cy="17" r="3"/><path d="M10 7h4a3 3 0 0 1 3 3v4"/></svg><div style="min-width:0;flex:1"><input id="dTitle" aria-label="Song title" maxlength="80"><small id="dProjSub">Project</small></div></div>
-    <div class="dtrans">
-      <button class="dic" id="dBack" title="Back to the start" aria-label="Back to the start"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
-      <button class="dplay" id="dPlay" title="Play / pause (Space)" aria-label="Play"><svg viewBox="0 0 24 24" id="dPlayIco"><path d="M8 5v14l11-7z"/></svg></button>
-      <button class="dic drec" id="dRec" title="Record your voice" aria-label="Record"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg></button>
-      <button class="dic" id="dLoop" aria-pressed="false" title="Loop the selected part" aria-label="Loop"><svg viewBox="0 0 24 24"><path d="M6 8h10V5l4 4-4 4v-3H6a1 1 0 0 0-1 1v2H3v-2a3 3 0 0 1 3-3zm12 8H8v3l-4-4 4-4v3h10a1 1 0 0 0 1-1v-2h2v2a3 3 0 0 1-3 3z"/></svg></button>
-      <button class="dic" id="dClick" aria-pressed="false" title="Metronome click" aria-label="Metronome"><svg viewBox="0 0 24 24"><path d="M9 3h6l4 18H5zM12 15l5-9" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
-    </div>
-    <div class="dtime" id="dTime">00:00.0</div>
-    <label class="dfield"><input id="dBpm" type="number" min="50" max="200" aria-label="Tempo"> BPM</label>
-    <label class="dfield">Key <select id="dTonic" aria-label="Key note"></select><select id="dMode" aria-label="Major or minor"><option value="major">major</option><option value="minor">minor</option></select></label>
+    <input class="ttl" id="dTitle" aria-label="Song title" maxlength="80">
+    <label class="tfield"><span class="tl">Style</span><select id="dVibe" aria-label="Music style"></select></label>
+    <div class="tfield"><span class="tl">Key</span><button class="step" id="dKeyDn" title="Lower the key" aria-label="Lower the key">−</button><b id="dKey">C</b><button class="step" id="dKeyUp" title="Raise the key" aria-label="Raise the key">+</button><select id="dMode" aria-label="Major or minor"><option value="major">major</option><option value="minor">minor</option></select></div>
+    <div class="tfield"><span class="tl">Tempo</span><button class="step" id="dBpmDn" aria-label="Slower">−</button><input id="dBpm" type="number" min="50" max="200" aria-label="Tempo in BPM"><button class="step" id="dBpmUp" aria-label="Faster">+</button></div>
+    <button class="tb2" id="dSurprise" aria-label="Surprise me" title="Random style, key, tempo and chords"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h4l10 16h2M4 20h4l3-5M15 9l3-5h2M18 2l2 2-2 2M18 18l2 2-2 2"/></svg><span class="lbl-x">Surprise me</span></button>
+    <div class="tsp"></div>
+    <button class="tb2" data-win="song" aria-label="Song parts" title="Add, remove and rename song parts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="lbl-x">Song parts</span></button>
+    <button class="tb2" data-win="keys" aria-label="Keyboard" title="Play notes on a keyboard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v8M12 5v8M16 5v8"/></svg><span class="lbl-x">Keyboard</span></button>
+    <button class="tb2" data-win="mixer" aria-label="Mixer" title="Volume, pan and levels"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v16M12 4v16M19 4v16"/><rect x="3" y="13" width="4" height="3" rx="1"/><rect x="10" y="7" width="4" height="3" rx="1"/><rect x="17" y="15" width="4" height="3" rx="1"/></svg><span class="lbl-x">Mixer</span></button>
     <button class="dexport" id="dExport">Export</button>
+    <button class="tb2" id="dEasy" title="Go back to the simple four steps">Easy<span class="lbl-x">&nbsp;mode</span></button>
   </header>
-  <section class="dcard darr">
-    <div class="dnow"><span class="eyebrow" id="dSec">Verse</span><b id="dChord">Am</b><span class="hint">next <b id="dNext">F</b></span><span class="dlyric" id="dLyric"></span></div>
-    <div class="darr-scroll" id="dArr"></div>
-  </section>
-  <aside class="dcard dside">
-    <div class="dtabs" data-group="side"><button data-dt="sounds" class="on">Sounds</button><button data-dt="parts">Parts</button><button data-dt="fx">Effects</button></div>
-    <div class="dpane" data-dp="sounds">
-      <div class="dsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="dSearch" placeholder="Search kits, instruments, chords…" aria-label="Search sounds"></div>
-      <div class="dtiles" id="dTiles"></div>
-      <div class="dh4">Genres <small>loads a whole style</small></div>
-      <div class="dchips" id="dGenres"></div>
-      <div class="dh4" id="dLibTitle">Library</div>
-      <div class="dlib" id="dLib"></div>
-    </div>
-    <div class="dpane" data-dp="parts" hidden id="dParts"></div>
-    <div class="dpane" data-dp="fx" hidden id="dFx"></div>
+
+  <aside class="pane insts" aria-label="Instruments">
+    <div class="phead"><h3>Instruments</h3><span class="hint" style="font-size:.75rem">M mute · S solo</span></div>
+    <div class="pbody"><div id="iList"></div><button class="addinst" id="iAdd">+ Add instrument</button><div class="picker" id="iPicker" hidden></div></div>
   </aside>
-  <div class="dbotrow">
-    <section class="dcard dmix">
-      <div class="dtabs" data-group="mix"><button data-dt="mixer" class="on">Mixer</button><button data-dt="inst">Instruments</button></div>
-      <div class="dpane" data-dp="mixer"><div class="strips" id="dStrips"></div></div>
-      <div class="dpane" data-dp="inst" hidden id="dInst"></div>
-    </section>
-    <section class="dcard dedit">
-      <div class="dtabs" data-group="edit"><button data-dt="roll" class="on">Piano Roll</button><button data-dt="steps">Step Sequencer</button></div>
-      <div class="dpane" data-dp="roll" id="dRoll" style="display:flex;flex-direction:column"></div>
-      <div class="dpane" data-dp="steps" hidden id="dSteps"></div>
-    </section>
-  </div>
-  <div class="dwin" id="dWin" hidden><div class="dwin-bar"><span id="dWinTitle">Window</span><button id="dWinClose">Close ✕</button></div><div class="dwin-body" id="dWinBody"></div></div>
+
+  <section class="pane center">
+    <div class="songstrip"><span class="tl">Song</span><div id="sStrip" style="display:flex;gap:6px"></div><select class="sel" id="sAddSel" aria-label="Part to add" style="height:32px"></select><button class="btn small" id="sAdd">+ Add</button></div>
+    <div class="edhead"><span class="ico" id="edIco"></span><div><h2 id="edTitle">Drums</h2><small id="edSub"></small></div><div class="parttabs" id="edParts" aria-label="Part to edit"></div></div>
+    <div class="edbody" id="edBody">
+      <div class="ed" id="edDrums"><div class="togrow" id="edDrumsTog"></div></div>
+      <div class="ed" id="edChords" hidden></div>
+      <div class="ed" id="edBass" hidden></div>
+      <div class="ed" id="edChan" hidden><div id="edChanTop"></div><div id="edRoll"></div></div>
+      <div class="ed" id="edVocals" hidden></div>
+    </div>
+  </section>
+
+  <aside class="pane lyr" aria-label="Lyrics">
+    <div class="nowbox"><span class="bigchord" id="dChord">Am</span><div class="nx"><span class="eyebrow" id="dSec">Verse</span><span class="hint">next <b id="dNext">F</b></span><span class="beats4" id="dBeats"><i></i><i></i><i></i><i></i></span></div></div>
+    <div class="phead"><h3>Lyrics</h3><span class="hint" style="font-size:.75rem">numbers = syllables per line</span></div>
+    <div class="pbody" id="lyrParts"></div>
+    <span id="dLyric" hidden></span>
+  </aside>
+
+  <footer class="tbar">
+    <div class="tgroup">
+      <button class="tbtn" id="dBack" title="Back to the start" aria-label="Back to the start"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+      <button class="tbtn" id="dStop" title="Stop" aria-label="Stop"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+      <button class="dplay" id="dPlay" title="Play / pause (Space)" aria-label="Play or pause"><svg viewBox="0 0 24 24" id="dPlayIco"><path d="M8 5v14l11-7z"/></svg></button>
+      <button class="drec" id="dRec" title="Record your voice"><i></i><span id="dRecTxt">Record</span></button>
+    </div>
+    <div class="tgroup">
+      <button class="tbtn" id="dLoop" aria-pressed="false" title="Loop the selected part" aria-label="Loop"><svg viewBox="0 0 24 24"><path d="M6 8h10V5l4 4-4 4v-3H6a1 1 0 0 0-1 1v2H3v-2a3 3 0 0 1 3-3zm12 8H8v3l-4-4 4-4v3h10a1 1 0 0 0 1-1v-2h2v2a3 3 0 0 1-3 3z"/></svg></button>
+      <button class="tbtn" id="dClick" aria-pressed="false" title="Metronome click" aria-label="Metronome"><svg viewBox="0 0 24 24"><path d="M9 3h6l4 18H5zM12 15l5-9" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
+      <label class="tchk"><input type="checkbox" id="dCount"><span>Count-in</span></label>
+    </div>
+    <div class="tpos"><div class="ttime"><b id="dTime">00:00.0</b><span id="dPos">Bar 1 of 16</span></div><div class="tprog" id="dProg" title="Tap to jump to a place in the song"><i id="dProgFill"></i></div></div>
+    <div class="tvol"><span>Volume</span><input type="range" id="dMaster" min="0" max="1" step="0.01" aria-label="Master volume"><div class="meter2 h"><i data-meter="master"></i></div></div>
+  </footer>
+
+  <div class="dwin" id="dWin" hidden><div class="dwin-bar"><span id="dWinTitle">Window</span><button id="dWinClose">Close ✕</button></div><div class="dwin-body" id="dWinBody">
+    <section class="panel" data-panel="mixer" data-title="Mixer" hidden><div class="strips" id="dStrips"></div></section>
+  </div></div>
 </div>
 
 <div class="shell">
@@ -1386,7 +1396,7 @@ function updateTransportUI() {
   $('#rec').classList.toggle('on', T.recording);
   $('#loop').setAttribute('aria-pressed', S.loop); $('#clickBtn').setAttribute('aria-pressed', S.click);
   $('#dPlayIco').innerHTML = T.playing && !T.recording ? '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
-  $('#dRec').classList.toggle('on', T.recording); $('#dLoop').setAttribute('aria-pressed', S.loop); $('#dClick').setAttribute('aria-pressed', S.click);
+  $('#dRec').classList.toggle('on', T.recording); $('#dRecTxt').textContent = T.recording ? 'Stop recording' : 'Record'; $('#dLoop').setAttribute('aria-pressed', S.loop); $('#dClick').setAttribute('aria-pressed', S.click);
   $('#ezPlay').textContent = T.playing && !T.recording ? '❚❚ Pause' : '▶ Play song';
   $('#ezRec').textContent = T.recording ? '■ Stop recording' : '● Record'; $('#ezRec').classList.toggle('on', T.recording);
 }
@@ -1398,7 +1408,8 @@ function showBar(bi) {
   const nx = TL[bi + 1] || (T.loop ? TL[T.loopStart / 16] : null);
   $('#nowSec').textContent = b.sec.name + ' · bar ' + (bi + 1) + ' of ' + TL.length;
   $('#nowChord').textContent = chordName(b.chord); $('#lcdChord').textContent = chordName(b.chord);
-  $('#dSec').textContent = b.sec.name + ' · bar ' + (bi + 1); $('#dChord').textContent = chordName(b.chord); $('#dNext').textContent = nx ? chordName(nx.chord) : 'end';
+  $('#dSec').textContent = b.sec.name + ' · bar ' + (bi + 1);
+  if (isStudio()) { renderLyricsLive(); document.querySelectorAll('.sp').forEach(el => el.classList.toggle('live', T.playing && +el.dataset.ai === b.ai)); document.querySelectorAll('.cbar').forEach(el => el.classList.toggle('live', T.playing && b.sec.id === rollSecId && +el.dataset.cb === b.ci)); } $('#dChord').textContent = chordName(b.chord); $('#dNext').textContent = nx ? chordName(nx.chord) : 'end';
   $('#dLyric').textContent = (b.sec.lyrics || '').replace(/\s*\n\s*/g, '  /  ') || 'No lyrics for ' + b.sec.name + ' yet';
   $('#ezSec').textContent = b.sec.name; $('#ezChord').textContent = chordName(b.chord); $('#ezNext').textContent = nx ? chordName(nx.chord) : 'end';
   const ezl = $('#ezLyric'); ezl.textContent = b.sec.lyrics || 'Lyrics for the ' + b.sec.name.toLowerCase() + ' will show here.'; ezl.classList.toggle('empty', !b.sec.lyrics);
@@ -1411,6 +1422,7 @@ function showBar(bi) {
   highlightChordKeys(b.chord);
 }
 function showBeat(beat, count) {
+  document.querySelectorAll('#dBeats i').forEach((el, i) => el.classList.toggle('on', i === beat));
   document.querySelectorAll('#beats i').forEach((el, i) => el.classList.toggle('on', i === beat));
   if (count) { $('#nowChord').textContent = count; $('#nowSec').textContent = 'Get ready…'; $('#ezChord').textContent = count; $('#ezSec').textContent = 'Get ready…'; $('#dChord').textContent = count; $('#dSec').textContent = 'Get ready…'; }
 }
@@ -1454,7 +1466,7 @@ function frame() {
     const f = T.last.step + Math.min(1.5, (ctx.currentTime - T.last.time) / stepDur());
     const ph = $('#plHead'); if (ph) ph.style.left = (PL_LAB + f / 16 * S.zoom) + 'px';
     const dh = $('#dHead'); if (dh) dh.style.left = (DH_LAB + f / 16 * S.zoom) + 'px';
-    $('#dTime').textContent = fmtDaw(T.last.step * stepDur() + (ctx.currentTime - T.last.time));
+    $('#dTime').textContent = fmtDaw(T.last.step * stepDur() + (ctx.currentTime - T.last.time)); dawTick(f);
     const rh = $('#rollHead'), b = TL[Math.floor(f / 16)];
     if (b && b.sec.id === rollSecId) { rh.hidden = false; rh.style.left = ((b.ci * 16 + f % 16) * CW) + 'px'; } else rh.hidden = true;
   }
@@ -1595,9 +1607,10 @@ let openWin = null, lastTab = 'song';
 const isStudio = () => document.body.classList.contains('studio');
 function switchTab(t) {
   if (isStudio()) {
-    if (['song', 'vocals', 'keys', 'mix'].includes(t)) openWindow(t);
-    else if (t === 'roll') dSelect('edit', 'roll');
-    else if (t === 'beat') dSelect('edit', 'steps');
+    if (['song', 'keys', 'mix'].includes(t)) openWindow(t);
+    else if (t === 'vocals') selectInst('vocals');
+    else if (t === 'roll') selectInst('ch:' + (rollChan() || {}).id);
+    else if (t === 'beat') selectInst('drums');
     return;
   }
   lastTab = t;
@@ -2100,151 +2113,71 @@ $('#pl').addEventListener('pointermove', e => {
 const plUp = () => { if (!pdrag) return; const d = pdrag; pdrag = null; if (d.moved) { DB.meta(d.tk); renderTakes(); toast(d.tk.name + ' moved to ' + fmt(d.tk.start)); } };
 $('#pl').addEventListener('pointerup', plUp); $('#pl').addEventListener('pointercancel', plUp);
 
-/* ---------- DAW workspace ---------- */
-let DH_LAB = 232;
+/* ---------- studio workspace: instruments | editor | lyrics ---------- */
+let DH_LAB = 0;
 const fmtDaw = sec => { sec = Math.max(0, sec); const m = Math.floor(sec / 60), r = sec - m * 60; return String(m).padStart(2, '0') + ':' + (r < 10 ? '0' : '') + r.toFixed(1); };
 const TRK_COL = {vocals: '#2ED18B', drums: '#4F7CFF', bass: '#8B5CF6', chords: '#22C3D6'};
 const CH_COL = ['#F2B33D', '#EC4899', '#F97316', '#14B8A6', '#A3E635', '#38BDF8'];
 const chCol = ch => CH_COL[S.channels.indexOf(ch) % CH_COL.length];
 const DI = {
   mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
-  drum: '<path d="M3 12h2l2-6 3 12 3-9 2 5 2-2h4"/>',
+  drum: '<ellipse cx="12" cy="8" rx="8" ry="3"/><path d="M4 8v8c0 1.7 3.6 3 8 3s8-1.3 8-3V8M8 2l3 5M16 2l-3 5"/>',
   bass: '<path d="M14 4l6 6M17 7l-8 8a3 3 0 1 1-4-4l8-8M8 13l3 3"/>',
   keys: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v8M12 5v8M16 5v8"/>',
   synth: '<path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="16" r="2"/>',
-  all: '<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>',
-  chord: '<path d="M4 7h16M4 12h16M4 17h10"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>'
+  guitar: '<path d="M19 3l2 2-6 6M14 10a4 4 0 0 0-5 1l-1 1a3.5 3.5 0 1 0 5 5l1-1a4 4 0 0 0 1-5z"/><circle cx="10.5" cy="14.5" r="1"/>',
+  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>',
+  strings: '<path d="M8 3c-3 4-3 14 0 18M16 3c3 4 3 14 0 18M8 12h8M12 3v18"/>'
 };
-const dsvg = k => '<svg viewBox="0 0 24 24" aria-hidden="true">' + DI[k] + '</svg>';
-let dEditTab = 'roll', dCat = 'all', dQuery = '', winOpen = null;
+const dsvg = k => '<svg viewBox="0 0 24 24" aria-hidden="true">' + (DI[k] || DI.synth) + '</svg>';
+const instIcon = i => ({piano: 'keys', rhodes: 'keys', organ: 'keys', guitar: 'guitar', bell: 'bell', strings: 'strings', pad: 'synth', lead: 'synth', b808: 'bass', synth: 'bass'})[i] || 'synth';
+let curInst = 'drums', dEditTab = '', winOpen = null;
 const homes = new Map();
 function moveTo(node, parent) { if (!node) return; if (!homes.has(node)) { const ph = document.createComment('home'); node.before(ph); homes.set(node, ph); } parent.appendChild(node); }
 function enterDaw() {
-  moveTo($('[data-panel="roll"] .card') || $('#rollWrap').closest('.card'), $('#dRoll'));
-  moveTo($('#dgrid').closest('.card'), $('#dSteps'));
-  moveTo($('#chans').closest('.card'), $('#dInst'));
-  moveTo($('#chordInst').closest('.card'), $('#dInst'));
-  ['song', 'vocals', 'keys', 'mix'].forEach(n => moveTo($('[data-panel="' + n + '"]'), $('#dWinBody')));
-  closeWindow(); renderDaw();
+  moveTo($('#dgrid').closest('.card'), $('#edDrums'));
+  moveTo($('[data-panel="roll"] .card') || $('#rollWrap').closest('.card'), $('#edRoll'));
+  moveTo($('[data-panel="vocals"]'), $('#edVocals'));
+  ['song', 'keys', 'mix'].forEach(n => moveTo($('[data-panel="' + n + '"]'), $('#dWinBody')));
+  $('[data-panel="vocals"]').hidden = false;
+  closeWindow(); selectInst(curInst); renderDaw();
 }
 function leaveDaw() { homes.forEach((ph, node) => { ph.after(node); ph.remove(); }); homes.clear(); $('#dWin').hidden = true; winOpen = null; }
 function openWindow(n) {
+  if (n === 'vocals') { selectInst('vocals'); return; }
   winOpen = n; $('#dWin').hidden = false;
   document.querySelectorAll('#dWinBody [data-panel]').forEach(p => p.hidden = p.dataset.panel !== n);
-  $('#dWinTitle').textContent = $('[data-panel="' + n + '"]').dataset.title;
-  if (n === 'vocals') renderTakes(); if (n === 'keys') renderKeys(); if (n === 'mix') renderMix(); if (n === 'song') renderSections();
-  navMark();
+  $('#dWinTitle').textContent = $('#dWinBody [data-panel="' + n + '"]').dataset.title;
+  if (n === 'keys') renderKeys(); if (n === 'mix') renderMix(); if (n === 'song') renderSections(); if (n === 'mixer') renderStrips();
+  document.querySelectorAll('[data-win]').forEach(b => b.classList.toggle('on', b.dataset.win === n));
 }
-function closeWindow() { winOpen = null; $('#dWin').hidden = true; navMark(); }
-function navMark() { document.querySelectorAll('.dn').forEach(b => b.classList.toggle('on', b.dataset.dnav === (winOpen || 'studio'))); }
-function dSelect(group, tab) {
-  const tabs = document.querySelector('.dtabs[data-group="' + group + '"]'); if (!tabs) return;
-  tabs.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.dt === tab));
-  tabs.parentElement.querySelectorAll(':scope > .dpane').forEach(p => p.hidden = p.dataset.dp !== tab);
-  if (group === 'edit') { dEditTab = tab; if (tab === 'roll') renderRoll(); else renderBeat(); }
-  if (group === 'mix' && tab === 'mixer') renderStrips();
-}
-document.querySelectorAll('.dtabs').forEach(t => t.addEventListener('click', e => { const b = e.target.closest('[data-dt]'); if (b) dSelect(t.dataset.group, b.dataset.dt); }));
-$('.dnav').addEventListener('click', e => {
-  const b = e.target.closest('[data-dnav]'); if (!b) return;
-  const n = b.dataset.dnav;
-  if (n === 'easy') setEasy(); else if (n === 'studio') closeWindow(); else openWindow(n);
-});
-$('#dWinClose').onclick = closeWindow;
-$('#dPlay').onclick = () => $('#play').click();
-$('#dBack').onclick = () => $('#stop').click();
-$('#dRec').onclick = () => $('#rec').click();
-$('#dLoop').onclick = () => $('#loop').click();
-$('#dClick').onclick = () => $('#clickBtn').click();
-$('#dExport').onclick = () => openWindow('mix');
-$('#dTitle').oninput = e => { S.title = e.target.value; $('#title').value = S.title; save(); renderSongInfo(); };
-const relay = (from, to) => $(from).onchange = e => { $(to).value = e.target.value; $(to).dispatchEvent(new Event('change')); renderDaw(); };
-relay('#dBpm', '#bpm'); relay('#dTonic', '#tonic'); relay('#dMode', '#mode');
-function renderSongInfo() {
-  $('#dSong').innerHTML = '<b>' + esc(S.title || 'Untitled song') + '</b><span>' + keyLabel() + ' · ' + S.bpm + ' BPM</span><span>' + TL.length + ' bars · ' + takes.length + (takes.length === 1 ? ' vocal take' : ' vocal takes') + '</span>';
-  $('#dProjSub').textContent = 'Project · ' + keyLabel();
-}
+function closeWindow() { winOpen = null; $('#dWin').hidden = true; document.querySelectorAll('[data-win]').forEach(b => b.classList.remove('on')); renderSide(); }
 function renderDaw() {
   if (!isStudio()) return;
   refreshTL();
-  $('#dTitle').value = S.title; $('#dBpm').value = S.bpm;
-  $('#dTonic').innerHTML = NOTES.map((n, i) => '<option value="' + i + '"' + (i === S.tonic ? ' selected' : '') + '>' + n + '</option>').join(''); $('#dMode').value = S.mode;
-  renderSongInfo(); renderSide(); renderArrange(); renderStrips(); renderChans(); renderRoll(); renderBeat(); updateTransportUI(); showIdle();
-  $('#dTime').textContent = fmtDaw((sel >= 0 ? Math.max(0, blockStartBar(sel)) : cursorBar) * 16 * stepDur());
+  $('#dTitle').value = S.title; $('#dBpm').value = S.bpm; $('#dKey').textContent = NOTES[S.tonic]; $('#dMode').value = S.mode;
+  $('#dVibe').innerHTML = '<option value="">' + (S.vibe ? 'Custom' : 'Choose…') + '</option>' + VIBES.map(v => '<option value="' + v.id + '"' + (S.vibe === v.id ? ' selected' : '') + '>' + v.name + '</option>').join('');
+  $('#dCount').checked = !!S.countIn; $('#dMaster').value = S.mix.master;
+  renderSide(); renderEditor(); updateTransportUI(); showIdle(); dawTick(null);
 }
+// called from the shared render hooks whenever parts, channels or takes change
+function renderSide() { if (!isStudio()) return; renderInstList(); renderSongStrip(); renderLyrics(); }
+function renderArrange() { if (isStudio()) renderSongStrip(); }
 
-/* arrangement */
-function dTracks() {
-  const L = [];
-  takes.forEach(tk => L.push({k: 'take:' + tk.id, name: tk.name + (tk.tune && tk.tune.on ? ' · tuned' : ''), icon: 'mic', c: TRK_COL.vocals, m: tk.muted, s: !!tk.solo, vol: tk.vol, max: 1.6}));
-  L.push({k: 'drums', name: 'Drums · ' + S.kit, icon: 'drum', c: TRK_COL.drums, m: S.trk.drums.m, s: S.trk.drums.s, vol: S.mix.drums, max: 1});
-  L.push({k: 'bass', name: 'Bass · ' + BASS_INSTS[S.bassInst], icon: 'bass', c: TRK_COL.bass, m: S.trk.bass.m, s: S.trk.bass.s, vol: S.mix.bass, max: 1});
-  L.push({k: 'chords', name: 'Chords · ' + CHORD_INSTS[S.chordInst], icon: 'keys', c: TRK_COL.chords, m: S.trk.chords.m, s: S.trk.chords.s, vol: S.mix.chords, max: 1});
-  S.channels.forEach(ch => L.push({k: 'ch:' + ch.id, name: ch.name + ' · ' + (CHAN_INSTS[ch.inst] || ''), icon: ch.inst === 'b808' || ch.inst === 'synth' ? 'bass' : 'synth', c: chCol(ch), m: ch.mute, s: !!ch.solo, vol: ch.vol, max: 1}));
+/* instruments (left) */
+function instItems() {
+  const L = [
+    {k: 'vocals', name: 'Vocals', sub: takes.length ? takes.length + (takes.length === 1 ? ' take' : ' takes') + (takes.some(t => t.tune && t.tune.on) ? ' · autotune' : '') : 'Record your voice', icon: 'mic', c: TRK_COL.vocals, t: S.trk.vocals},
+    {k: 'drums', name: 'Drums', sub: S.kit + ' beat', icon: 'drum', c: TRK_COL.drums, t: S.trk.drums},
+    {k: 'chords', name: 'Chords', sub: CHORD_INSTS[S.chordInst] + ' · ' + RHYTHMS[S.chordRhythm][0], icon: 'keys', c: TRK_COL.chords, t: S.trk.chords},
+    {k: 'bass', name: 'Bass', sub: BASS_INSTS[S.bassInst] + (S.bassInst === 'off' ? '' : ' · ' + BASS_PATS[S.bassPattern][0]), icon: 'bass', c: TRK_COL.bass, t: S.trk.bass}
+  ];
+  S.channels.forEach(ch => L.push({k: 'ch:' + ch.id, name: ch.name, sub: (CHAN_INSTS[ch.inst] || '') + ' · ' + noteCount(ch) + ' notes', icon: instIcon(ch.inst), c: chCol(ch), t: {m: ch.mute, s: !!ch.solo}}));
   return L;
 }
-function renderArrange() {
-  if (!isStudio()) return;
-  DH_LAB = window.innerWidth < 1280 ? 190 : 232;
-  refreshTL();
-  const px = S.zoom, barDur = 16 * stepDur(); let bars = Math.max(TL.length, 1);
-  takes.forEach(t => bars = Math.max(bars, Math.ceil((t.start + t.buffer.duration) / barDur)));
-  bars += 2;
-  const W = bars * px, cur = sel >= 0 ? Math.max(0, blockStartBar(sel)) : cursorBar;
-  let h = '<div class="dlanes" style="--pxbar:' + px + 'px"><div class="drow druler"><div class="dhead"><button class="btn small" id="dAddTrack" title="Add an instrument track">' + '+ Track</button><label class="chk" style="font-size:.75rem;color:var(--muted)">Zoom <input type="range" id="dZoom" min="30" max="220" step="5" value="' + px + '" style="width:70px"></label></div><div class="dlane" id="dRuler" style="width:' + W + 'px">';
-  for (let b = 0; b < bars; b++) if (b % (px < 60 ? 4 : px < 110 ? 2 : 1) === 0) h += '<span style="left:' + b * px + 'px">' + (b + 1) + '</span>';
-  S.arr.forEach((id, ai) => { const sec = secById(id); if (!sec) return; h += '<div class="dpart' + (ai === sel ? ' sel' : '') + '" data-ai="' + ai + '" style="left:' + (blockStartBar(ai) * px + 1) + 'px;width:' + (sec.chords.length * px - 3) + 'px;background:hsl(' + secHue(sec) + ' 55% 48%)">' + esc(sec.name) + '</div>'; });
-  h += '</div></div>';
-  dTracks().forEach(t => {
-    h += '<div class="drow' + (audible({m: t.m, s: t.s}) ? '' : ' dmuted') + '" data-trk="' + t.k + '" style="--c:' + t.c + '"><div class="dhead"><span class="dico">' + dsvg(t.icon) + '</span><div class="dhn"><span class="dname" title="' + esc(t.name) + '">' + esc(t.name) + '</span><div class="dctl"><button class="ms' + (t.m ? ' on' : '') + '" data-tm="m" title="Mute" aria-pressed="' + t.m + '">M</button><button class="ms' + (t.s ? ' on' : '') + '" data-tm="s" title="Solo" aria-pressed="' + t.s + '">S</button><input type="range" class="dvol" data-tv min="0" max="' + t.max + '" step="0.01" value="' + t.vol + '" aria-label="Volume for ' + esc(t.name) + '"></div></div></div><div class="dlane" style="width:' + W + 'px">';
-    const [kind, id] = t.k.split(':');
-    if (kind === 'take') { const tk = takes.find(x => x.id === id); h += '<div class="dclip take" data-take="' + tk.id + '" style="left:' + tk.start / barDur * px + 'px;width:' + Math.max(10, tk.buffer.duration / barDur * px) + 'px"><span>' + esc(tk.name) + '</span><canvas data-dc="take|' + tk.id + '"></canvas></div>'; }
-    else S.arr.forEach((sid, ai) => {
-      const sec = secById(sid); if (!sec) return;
-      if (kind === 'drums' && sec.drums === false) return;
-      if (kind === 'bass' && (sec.bass === false || S.bassInst === 'off')) return;
-      if (kind === 'ch' && !(sec.notes[id] || []).length) return;
-      h += '<div class="dclip" style="left:' + (blockStartBar(ai) * px + 1) + 'px;width:' + (sec.chords.length * px - 3) + 'px"><span>' + esc(sec.name) + '</span><canvas data-dc="' + kind + '|' + sec.id + '|' + (id || '') + '"></canvas></div>';
-    });
-    h += '</div></div>';
-  });
-  if (!takes.length) h += '<div class="drow" style="--c:' + TRK_COL.vocals + '"><div class="dhead"><span class="dico">' + dsvg('mic') + '</span><div class="dhn"><span class="dname">Vocals</span><span class="hint" style="font-size:.75rem">Press record to add a take</span></div></div><div class="dlane" style="width:' + W + 'px"></div></div>';
-  h += '<div class="dcur" style="left:' + (DH_LAB + cur * px) + 'px"></div><div class="dph" id="dHead" style="left:' + (DH_LAB + cur * px) + 'px"></div></div>';
-  const box = $('#dArr'), sl = box.scrollLeft, st = box.scrollTop; box.innerHTML = h; box.scrollLeft = sl; box.scrollTop = st;
-  box.querySelectorAll('canvas[data-dc]').forEach(drawClip);
-}
-function drawClip(cv) {
-  const [kind, a, b] = cv.dataset.dc.split('|'), clip = cv.parentElement, w = cv.width = Math.min(4000, clip.clientWidth), H = cv.height = clip.clientHeight, g = cv.getContext('2d');
-  const col = getComputedStyle(clip).getPropertyValue('--c').trim() || '#fff';
-  g.fillStyle = col;
-  if (kind === 'take') {
-    const tk = takes.find(x => x.id === a), d = tk.buffer.getChannelData(0), per = d.length / w;
-    for (let x = 0; x < w; x++) { let p = 0; const o = Math.floor(x * per); for (let i = 0; i < per; i += 6) p = Math.max(p, Math.abs(d[o + i] || 0)); const hh = Math.max(1, Math.min(1, p * 1.6) * (H - 6)); g.fillRect(x, (H - hh) / 2, 1, hh); }
-    return;
-  }
-  const sec = secById(a); if (!sec) return;
-  const bars = sec.chords.length, bw = w / bars;
-  if (kind === 'drums') {
-    const grid = sec.grid || S.grid, sw = bw / 16;
-    for (let bi = 0; bi < bars; bi++) for (let st = 0; st < 16; st++) {
-      const x = bi * bw + st * sw;
-      if (grid.K[st] === 'x') g.fillRect(x, H * .18, Math.max(2, sw * .5), H * .64);
-      if (grid.S[st] === 'x' || grid.C[st] === 'x') g.fillRect(x, H * .3, Math.max(2, sw * .5), H * .4);
-      if (grid.H[st] === 'x' || grid.O[st] === 'x') { g.globalAlpha = .6; g.fillRect(x, H * .42, Math.max(1, sw * .35), H * .16); g.globalAlpha = 1; }
-    }
-    g.fillRect(0, H / 2, w, 1);
-  } else if (kind === 'chords') {
-    g.font = '700 11px ' + getComputedStyle(document.documentElement).getPropertyValue('--mono');
-    sec.chords.forEach((c, bi) => { g.globalAlpha = .55; g.fillRect(bi * bw + 2, H * .45, bw - 4, H * .35); g.globalAlpha = 1; g.fillStyle = '#fff'; g.fillText(chordName(c), bi * bw + 6, H * .7); g.fillStyle = col; });
-  } else if (kind === 'bass') {
-    const pat = BASS_PATS[S.bassPattern][1], sw = bw / 16;
-    sec.chords.forEach((c, bi) => { if (!c) return; const y = H * .75 - ((S.tonic + c.r) % 12) / 12 * H * .5; pat.forEach(([st, len, off]) => g.fillRect(bi * bw + st * sw + 1, y - off / 12 * H * .15, Math.max(2, len * sw - 2), 4)); });
-  } else if (kind === 'ch') {
-    const arr = sec.notes[b] || []; if (!arr.length) return;
-    const lo = Math.min(...arr.map(n => n.n)) - 1, hi = Math.max(...arr.map(n => n.n)) + 1, cols = bars * 16;
-    arr.forEach(n => g.fillRect(n.s / cols * w, 18 + (hi - n.n) / Math.max(1, hi - lo) * (H - 26), Math.max(2, n.l / cols * w - 1), 3));
-  }
+function renderInstList() {
+  $('#iList').innerHTML = instItems().map(x => '<div class="ii' + (x.k === curInst ? ' on' : '') + (audible(x.t) ? '' : ' off') + '" role="button" tabindex="0" data-inst="' + x.k + '" style="--c:' + x.c + '" aria-pressed="' + (x.k === curInst) + '"><span class="ico">' + dsvg(x.icon) + '</span><span class="tx"><b>' + esc(x.name) + '</b><small>' + esc(x.sub) + '</small></span><span class="msg"><button class="ms' + (x.t.m ? ' on' : '') + '" data-im="m" title="Mute" aria-pressed="' + !!x.t.m + '">M</button><button class="ms' + (x.t.s ? ' on' : '') + '" data-im="s" title="Solo" aria-pressed="' + !!x.t.s + '">S</button></span></div>').join('');
+  $('#iPicker').innerHTML = Object.entries(CHAN_INSTS).map(([k, v]) => '<button data-new="' + k + '">' + dsvg(instIcon(k)) + v + '</button>').join('');
 }
 function trkSet(k, prop, val) {
   const [kind, id] = k.split(':');
@@ -2253,39 +2186,172 @@ function trkSet(k, prop, val) {
   else { if (prop === 'vol') { S.mix[kind] = val; applyMix(); } else S.trk[kind][prop] = val; }
   save();
 }
-$('#dArr').addEventListener('click', e => {
-  const b = e.target.closest('[data-tm]');
-  if (b) {
-    const row = b.closest('[data-trk]'), on = !b.classList.contains('on');
-    trkSet(row.dataset.trk, b.dataset.tm, on);
-    if (T.playing && !T.recording && row.dataset.trk.startsWith('take')) { stop(); play(); }
-    renderArrange(); renderStrips(); return;
-  }
-  if (e.target.closest('#dAddTrack')) { $('#addChan').click(); dSelect('mix', 'inst'); renderDaw(); }
+$('#iList').addEventListener('click', e => {
+  const it = e.target.closest('[data-inst]'); if (!it) return;
+  const b = e.target.closest('[data-im]');
+  if (b) { trkSet(it.dataset.inst, b.dataset.im, !b.classList.contains('on')); if (T.playing && !T.recording && it.dataset.inst === 'vocals') { stop(); play(); } renderInstList(); return; }
+  selectInst(it.dataset.inst);
 });
-$('#dArr').addEventListener('input', e => {
-  if (e.target.id === 'dZoom') { S.zoom = +e.target.value; save(); renderArrange(); return; }
-  if (e.target.matches('[data-tv]')) { trkSet(e.target.closest('[data-trk]').dataset.trk, 'vol', +e.target.value); renderStrips(); }
-});
-let ddrag = null;
-$('#dArr').addEventListener('pointerdown', e => {
-  const clip = e.target.closest('.dclip.take');
-  if (clip) { e.preventDefault(); clip.setPointerCapture(e.pointerId); const tk = takes.find(t => t.id === clip.dataset.take); ddrag = {tk, clip, x0: e.clientX, s0: tk.start, moved: false}; return; }
-  const part = e.target.closest('.dpart');
-  if (part) { const ai = +part.dataset.ai; sel = sel === ai ? -1 : ai; if (sel >= 0) rollSecId = S.arr[sel]; renderArr(); renderRoll(); if (T.playing && !T.recording) { stop(); play(); } else showIdle(); renderArrange(); renderSide(); return; }
-  const ruler = e.target.closest('#dRuler');
-  if (ruler) { cursorBar = Math.max(0, Math.min(TL.length - 1, Math.floor((e.clientX - ruler.getBoundingClientRect().left) / S.zoom))); sel = -1; renderArr(); if (T.playing && !T.recording) { stop(); play(); } else showIdle(); renderArrange(); $('#dTime').textContent = fmtDaw(cursorBar * 16 * stepDur()); }
-});
-$('#dArr').addEventListener('pointermove', e => {
-  if (!ddrag) return;
-  const dx = e.clientX - ddrag.x0; if (Math.abs(dx) > 3) ddrag.moved = true; if (!ddrag.moved) return;
-  const barDur = 16 * stepDur(), beat = 4 * stepDur(); let st = Math.max(0, ddrag.s0 + dx / S.zoom * barDur); st = Math.round(st / beat) * beat;
-  ddrag.tk.start = st; ddrag.clip.style.left = st / barDur * S.zoom + 'px';
-});
-const dUp = () => { if (!ddrag) return; const d = ddrag; ddrag = null; if (d.moved) { DB.meta(d.tk); renderTakes(); toast(d.tk.name + ' moved to ' + fmt(d.tk.start)); } };
-$('#dArr').addEventListener('pointerup', dUp); $('#dArr').addEventListener('pointercancel', dUp);
+$('#iList').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-inst]')) { e.preventDefault(); selectInst(e.target.dataset.inst); } });
+$('#iAdd').onclick = () => { $('#iPicker').hidden = !$('#iPicker').hidden; $('#iAdd').textContent = $('#iPicker').hidden ? '+ Add instrument' : 'Choose an instrument'; };
+$('#iPicker').onclick = e => {
+  const b = e.target.closest('[data-new]'); if (!b) return;
+  const inst = b.dataset.new, bassy = inst === 'b808' || inst === 'synth';
+  const ch = {id: uid(), name: CHAN_INSTS[inst], inst, vol: .6, mute: false, view: bassy ? 24 : 48};
+  S.channels.push(ch); save(); $('#iPicker').hidden = true; $('#iAdd').textContent = '+ Add instrument';
+  ensureCtx(); voice(ctx, chanOut(G, ch), ch.view + 12 + S.tonic, ctx.currentTime + .01, .4, inst, .25);
+  selectInst('ch:' + ch.id); toast(ch.name + ' added. Tap "Give me an idea" or draw notes.');
+};
+function selectInst(k) {
+  if (k.startsWith('ch:') && !S.channels.some(c => 'ch:' + c.id === k)) k = 'drums';
+  curInst = k;
+  if (k.startsWith('ch:')) { rollChId = k.slice(3); dEditTab = 'roll'; } else dEditTab = k;
+  renderInstList(); renderEditor();
+}
 
-/* mixer */
+/* song parts strip + part tabs */
+function renderSongStrip() {
+  refreshTL();
+  $('#sStrip').innerHTML = S.arr.length ? S.arr.map((id, ai) => { const x = secById(id); if (!x) return ''; return '<div class="sp' + (ai === sel ? ' sel' : '') + '" data-ai="' + ai + '" style="--pc:hsl(' + secHue(x) + ' 50% 42%)"><button class="pk" data-sact="pick" title="Start from here">' + esc(x.name) + '<small>bar ' + (blockStartBar(ai) + 1) + '</small></button><button class="x" data-sact="rm" aria-label="Remove ' + esc(x.name) + ' from the song">×</button></div>'; }).join('') : '<span class="hint">Empty. Add a part →</span>';
+  $('#sAddSel').innerHTML = S.sections.map(x => '<option value="' + x.id + '">' + esc(x.name) + '</option>').join('');
+}
+$('#sStrip').onclick = e => {
+  const b = e.target.closest('[data-sact]'); if (!b) return;
+  const ai = +b.closest('[data-ai]').dataset.ai;
+  if (b.dataset.sact === 'rm') { if (T.playing) stop(); S.arr.splice(ai, 1); if (sel === ai) sel = -1; else if (sel > ai) sel--; save(); renderArr(); renderSections(); showIdle(); renderDaw(); return; }
+  sel = sel === ai ? -1 : ai; if (sel >= 0) rollSecId = S.arr[sel];
+  renderArr(); renderEditor(); if (T.playing && !T.recording) { stop(); play(); } else showIdle(); renderSide();
+};
+$('#sAdd').onclick = () => { const id = $('#sAddSel').value; if (!id) return; S.arr.push(id); save(); renderArr(); renderSections(); renderDaw(); toast(secById(id).name + ' added to the end of the song'); };
+
+/* editor (middle) */
+const chipRow = (key, obj, cur) => '<div class="chips" data-set="' + key + '">' + Object.entries(obj).map(([k, v]) => '<button data-v="' + esc(k) + '"' + (k === cur ? ' class="on"' : '') + '>' + esc(Array.isArray(v) ? v[0] : v) + '</button>').join('') + '</div>';
+function renderEditor() {
+  if (!isStudio()) return;
+  const sec = rollSec(); if (!sec) return; rollSecId = sec.id;
+  const item = instItems().find(x => x.k === curInst) || instItems()[1];
+  $('#edIco').style.setProperty('--c', item.c); $('#edIco').innerHTML = dsvg(item.icon);
+  $('#edTitle').textContent = item.name; $('#edSub').textContent = item.sub;
+  const showParts = curInst !== 'vocals';
+  $('#edParts').hidden = !showParts;
+  $('#edParts').innerHTML = songParts().map(x => '<button data-esec="' + x.id + '"' + (x.id === sec.id ? ' class="on"' : '') + '>' + esc(x.name) + '</button>').join('');
+  const kind = curInst.startsWith('ch:') ? 'chan' : curInst;
+  ['Drums', 'Chords', 'Bass', 'Chan', 'Vocals'].forEach(n => $('#ed' + n).hidden = n.toLowerCase() !== kind);
+  if (kind === 'drums') {
+    beatSecId = sec.grid ? sec.id : '';
+    $('#edDrumsTog').innerHTML = '<label class="chk"><input type="checkbox" data-tog="drums"' + (sec.drums !== false ? ' checked' : '') + '> Drums play in the ' + esc(sec.name.toLowerCase()) + '</label>' +
+      (sec.grid ? '<span class="hint">The ' + esc(sec.name.toLowerCase()) + ' has its own beat.</span><button class="btn small" data-dact="share">Use the main beat</button>' : '<span class="hint">Editing the main beat (used by every part).</span><button class="btn small" data-dact="own">Give the ' + esc(sec.name.toLowerCase()) + ' its own beat</button>');
+    renderBeat();
+  }
+  if (kind === 'chords') {
+    $('#edChords').innerHTML =
+      '<div class="esec"><h4>Chords in the ' + esc(sec.name.toLowerCase()) + ' <span>one per bar</span></h4><div class="cbars">' + sec.chords.map((c, i) => '<div class="cbar" data-cb="' + i + '"><small><span>bar ' + (i + 1) + '</span><span>' + romanOf(c) + '</span></small><select data-cbar="' + i + '" aria-label="Chord for bar ' + (i + 1) + '">' + chordOptions(c) + '</select></div>').join('') + '</div>' +
+      '<div class="row"><button class="btn small" data-cact="addbar"' + (sec.chords.length >= 16 ? ' disabled' : '') + '>+ Bar</button><button class="btn small" data-cact="rmbar"' + (sec.chords.length <= 1 ? ' disabled' : '') + '>− Bar</button></div></div>' +
+      '<div class="esec"><h4>Chord ideas <span>tap to use in the ' + esc(sec.name.toLowerCase()) + '</span></h4><div class="chips" data-prog>' + PRESETS[S.mode].map((pr, i) => '<button data-p="' + i + '" title="' + pr[1].map(x => chordName(chordFrom(x, S.mode))).join(' – ') + '">' + esc(pr[0]) + '</button>').join('') + '</div></div>' +
+      '<div class="esec"><h4>Sound</h4>' + chipRow('chordInst', CHORD_INSTS, S.chordInst) + '</div>' +
+      '<div class="esec"><h4>Rhythm</h4>' + chipRow('chordRhythm', RHYTHMS, S.chordRhythm) + '</div>';
+  }
+  if (kind === 'bass') {
+    $('#edBass').innerHTML = '<div class="togrow"><label class="chk"><input type="checkbox" data-tog="bass"' + (sec.bass !== false ? ' checked' : '') + '> Bass plays in the ' + esc(sec.name.toLowerCase()) + '</label><span class="hint">The bass follows your chords automatically.</span></div>' +
+      '<div class="esec"><h4>Sound</h4>' + chipRow('bassInst', BASS_INSTS, S.bassInst) + '</div>' +
+      '<div class="esec"><h4>Pattern</h4>' + chipRow('bassPattern', BASS_PATS, S.bassPattern) + '</div>' +
+      '<p class="hint">Want to write your own bass line? Add an 808 or Synth bass instrument on the left and draw the notes.</p>';
+  }
+  if (kind === 'chan') {
+    const ch = rollChan();
+    $('#edChanTop').innerHTML = '<div class="togrow"><label class="chk">Name <input class="inp" data-cname value="' + esc(ch.name) + '" maxlength="20" style="width:140px"></label><label class="chk">Volume <input type="range" data-cvol min="0" max="1" step="0.01" value="' + ch.vol + '" style="width:110px"></label>' + (S.channels.length > 1 ? '<button class="btn small danger" data-cdel>Delete instrument</button>' : '') + '</div>' +
+      '<div class="esec"><h4>Sound</h4>' + chipRow('chan', CHAN_INSTS, ch.inst) + '</div>';
+    renderRoll();
+  }
+  if (kind === 'vocals') renderTakes();
+}
+$('#edParts').onclick = e => { const b = e.target.closest('[data-esec]'); if (!b) return; rollSecId = b.dataset.esec; renderEditor(); renderLyricsLive(); };
+$('#edBody').addEventListener('click', e => {
+  const sec = rollSec(), t = e.target;
+  const chip = t.closest('[data-set] [data-v]');
+  if (chip) {
+    const key = chip.parentElement.dataset.set, v = chip.dataset.v; ensureCtx();
+    if (key === 'chan') { const ch = rollChan(); ch.inst = v; ch.view = v === 'b808' || v === 'synth' ? 24 : 48; voice(ctx, chanOut(G, ch), ch.view + 12 + S.tonic, ctx.currentTime + .01, .4, v, .25); }
+    else { S[key] = v; renderBeat(); }
+    if (key === 'chordInst') chordNotes({r: 0, q: 'maj'}, v).forEach(n => voice(ctx, G.chords, n, ctx.currentTime + .01, .7, v, .12));
+    if (key === 'bassInst' && v !== 'off') voice(ctx, G.bass, 36 + S.tonic, ctx.currentTime + .01, .5, v, .3);
+    save(); renderEditor(); renderInstList(); return;
+  }
+  const pg = t.closest('[data-prog] [data-p]');
+  if (pg) { const pr = PRESETS[S.mode][+pg.dataset.p]; sec.chords = pr[1].map(x => chordFrom(x, S.mode)); save(); renderSections(); renderEditor(); showIdle(); toast(sec.name + ': ' + sec.chords.map(chordName).join(' – ')); return; }
+  const ca = t.closest('[data-cact]');
+  if (ca) { if (ca.dataset.cact === 'addbar') sec.chords.push(sec.chords[sec.chords.length - 1] || chordFrom(0, S.mode)); else if (sec.chords.length > 1) sec.chords.pop(); save(); renderSections(); renderArr(); renderEditor(); showIdle(); return; }
+  const da = t.closest('[data-dact]');
+  if (da) { if (da.dataset.dact === 'own') { sec.grid = {...S.grid}; sec.kit = S.kit; toast('The ' + sec.name.toLowerCase() + ' now has its own beat'); } else { delete sec.grid; delete sec.kit; } save(); renderEditor(); return; }
+  if (t.closest('[data-cdel]')) confirmBtn(t.closest('[data-cdel]'), 'Tap again to delete', () => { const ch = rollChan(); S.channels = S.channels.filter(c => c !== ch); S.sections.forEach(x => delete x.notes[ch.id]); save(); selectInst('drums'); });
+});
+$('#edBody').addEventListener('change', e => {
+  const sec = rollSec(), t = e.target;
+  if (t.dataset.tog) { sec[t.dataset.tog] = t.checked; save(); renderSections(); renderInstList(); return; }
+  if (t.dataset.cbar != null) { const v = t.value; sec.chords[+t.dataset.cbar] = v === 'none' ? null : {r: +v.split(':')[0], q: v.split(':')[1]}; save(); renderSections(); renderEditor(); showIdle(); renderLyrics(); }
+});
+$('#edBody').addEventListener('input', e => {
+  const ch = rollChan(), t = e.target;
+  if (t.matches('[data-cname]')) { ch.name = t.value || 'Instrument'; save(); renderInstList(); $('#edTitle').textContent = ch.name; }
+  if (t.matches('[data-cvol]')) trkSet('ch:' + ch.id, 'vol', +t.value);
+});
+
+/* lyrics (right) */
+const syl = w => { w = w.toLowerCase().replace(/[^a-z]/g, ''); if (!w) return 0; if (w.length <= 3) return 1; w = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '').replace(/^y/, ''); const m = w.match(/[aeiouy]{1,2}/g); return m ? m.length : 1; };
+const lineSyl = txt => txt.split('\n').filter(l => l.trim()).map(l => l.split(/\s+/).reduce((a, w) => a + syl(w), 0));
+const cntTxt = txt => { const L = lineSyl(txt || ''); return L.length ? L.length + (L.length === 1 ? ' line' : ' lines') + ' · ' + L.join(' · ') : 'No lines yet'; };
+function renderLyrics() {
+  const box = $('#lyrParts'); if (box.contains(document.activeElement)) return;
+  box.innerHTML = songParts().map(x => '<div class="lp" data-sec="' + x.id + '"><div class="lph"><b>' + esc(x.name) + '</b>' + x.chords.map(c => '<span class="chip">' + chordName(c) + '</span>').join('') + '</div><textarea data-lsec="' + x.id + '" placeholder="Write the ' + esc(x.name.toLowerCase()) + ' here…" aria-label="Lyrics for ' + esc(x.name) + '">' + esc(x.lyrics || '') + '</textarea><span class="cnt">' + cntTxt(x.lyrics) + '</span></div>').join('');
+  renderLyricsLive();
+}
+function renderLyricsLive() {
+  const cur = T.playing && TL[shownBar] ? TL[shownBar].sec.id : rollSecId;
+  document.querySelectorAll('.lp').forEach(el => el.classList.toggle('live', el.dataset.sec === cur));
+}
+$('#lyrParts').addEventListener('input', e => {
+  const x = secById(e.target.dataset.lsec); if (!x) return;
+  x.lyrics = e.target.value; save(); e.target.parentElement.querySelector('.cnt').textContent = cntTxt(x.lyrics);
+  if (!T.playing) showIdle();
+});
+
+/* top bar + transport */
+$('#dTitle').oninput = e => { S.title = e.target.value; $('#title').value = S.title; save(); };
+$('#dVibe').onchange = e => { const v = VIBES.find(x => x.id === e.target.value); if (v) { applyVibe(v); renderDaw(); } };
+$('#dKeyDn').onclick = () => { ezChange(() => { S.tonic = (S.tonic + 11) % 12; }); renderDaw(); };
+$('#dKeyUp').onclick = () => { ezChange(() => { S.tonic = (S.tonic + 1) % 12; }); renderDaw(); };
+$('#dMode').onchange = e => { $('#mode').value = e.target.value; $('#mode').dispatchEvent(new Event('change')); renderDaw(); };
+$('#dBpmDn').onclick = () => { ezChange(() => { S.bpm = Math.max(50, S.bpm - 5); }); renderDaw(); };
+$('#dBpmUp').onclick = () => { ezChange(() => { S.bpm = Math.min(200, S.bpm + 5); }); renderDaw(); };
+$('#dBpm').onchange = e => { $('#bpm').value = e.target.value; $('#bpm').dispatchEvent(new Event('change')); renderDaw(); };
+$('#dSurprise').onclick = () => { $('#surprise').click(); renderDaw(); };
+document.querySelectorAll('[data-win]').forEach(b => b.onclick = () => winOpen === b.dataset.win ? closeWindow() : openWindow(b.dataset.win));
+$('#dExport').onclick = () => openWindow('mix');
+$('#dEasy').onclick = setEasy;
+$('#dWinClose').onclick = closeWindow;
+$('#dPlay').onclick = () => $('#play').click();
+$('#dBack').onclick = () => $('#stop').click();
+$('#dStop').onclick = () => stop();
+$('#dRec').onclick = () => $('#rec').click();
+$('#dLoop').onclick = () => $('#loop').click();
+$('#dClick').onclick = () => $('#clickBtn').click();
+$('#dCount').onchange = e => { S.countIn = e.target.checked; save(); renderVocalSettings(); };
+$('#dMaster').oninput = e => { S.mix.master = +e.target.value; applyMix(); save(); };
+$('#dProg').onclick = e => {
+  refreshTL(); if (!TL.length) return;
+  const r = $('#dProg').getBoundingClientRect(); cursorBar = Math.max(0, Math.min(TL.length - 1, Math.floor((e.clientX - r.left) / r.width * TL.length))); sel = -1;
+  renderArr(); if (T.playing && !T.recording) { stop(); play(); } else { showIdle(); dawTick(null); }
+};
+function dawTick(f) {
+  if (!isStudio()) return;
+  const total = Math.max(1, TL.length * 16);
+  if (f == null) f = (sel >= 0 ? Math.max(0, blockStartBar(sel)) : cursorBar) * 16;
+  const bar = Math.min(TL.length, Math.floor(f / 16) + 1);
+  $('#dPos').textContent = 'Bar ' + bar + ' of ' + TL.length + (T.playing ? ' · beat ' + (Math.floor(f % 16 / 4) + 1) : '');
+  $('#dProgFill').style.width = Math.min(100, f / total * 100) + '%';
+}
+
+/* mixer window */
 function dStrips() {
   const L = [{k: 'vocals', name: 'Vocals', c: TRK_COL.vocals, v: S.mix.vocals, t: S.trk.vocals}, {k: 'drums', name: 'Drums', c: TRK_COL.drums, v: S.mix.drums, t: S.trk.drums}, {k: 'bass', name: 'Bass', c: TRK_COL.bass, v: S.mix.bass, t: S.trk.bass}, {k: 'chords', name: 'Chords', c: TRK_COL.chords, v: S.mix.chords, t: S.trk.chords}];
   S.channels.forEach(ch => L.push({k: 'ch:' + ch.id, name: ch.name, c: chCol(ch), v: ch.vol, t: {m: ch.mute, s: !!ch.solo}, pan: ch.pan || 0}));
@@ -2294,6 +2360,7 @@ function dStrips() {
   return L;
 }
 const dbTxt = v => v <= .001 ? '−∞ dB' : (20 * Math.log10(v)).toFixed(1) + ' dB';
+const panTxt = v => Math.abs(v) < .05 ? 'centre' : Math.round(Math.abs(v) * 100) + '% ' + (v < 0 ? 'left' : 'right');
 function renderStrips() {
   if (!isStudio()) return;
   $('#dStrips').innerHTML = dStrips().map(x => '<div class="strip" data-strip="' + x.k + '" style="--c:' + x.c + '"><div class="sn" title="' + esc(x.name) + '"><i style="background:' + x.c + '"></i>' + esc(x.name) + '</div>' +
@@ -2302,21 +2369,13 @@ function renderStrips() {
     '<div class="db">' + dbTxt(x.v) + '</div>' +
     (x.t ? '<div class="sm"><button class="ms' + (x.t.s ? ' on' : '') + '" data-sm="s" title="Solo">S</button><button class="ms' + (x.t.m ? ' on' : '') + '" data-sm="m" title="Mute">M</button></div>' : '<div class="sm" style="height:20px"></div>') + '</div>').join('');
 }
-const panTxt = v => Math.abs(v) < .05 ? 'centre' : Math.round(Math.abs(v) * 100) + '% ' + (v < 0 ? 'left' : 'right');
 function stripSet(k, prop, v) {
   if (k.startsWith('ch:')) return trkSet(k, prop === 'v' ? 'vol' : prop, v);
-  if (prop === 'v') { S.mix[k] = v; applyMix(); save(); return; }
-  if (prop === 'm' || prop === 's') { S.trk[k][prop] = v; if (k === 'vocals' && T.playing && !T.recording) { stop(); play(); } save(); }
+  if (prop === 'v') { S.mix[k] = v; applyMix(); save(); if (k === 'master') $('#dMaster').value = v; return; }
+  S.trk[k][prop] = v; if (k === 'vocals' && T.playing && !T.recording) { stop(); play(); } save();
 }
-$('#dStrips').addEventListener('input', e => {
-  if (!e.target.matches('.fader')) return;
-  const st = e.target.closest('[data-strip]'), v = +e.target.value; stripSet(st.dataset.strip, 'v', v);
-  st.querySelector('.db').textContent = dbTxt(v); renderArrangeSoon();
-});
-$('#dStrips').addEventListener('click', e => {
-  const b = e.target.closest('[data-sm]'); if (!b) return;
-  stripSet(b.closest('[data-strip]').dataset.strip, b.dataset.sm, !b.classList.contains('on')); renderStrips(); renderArrange();
-});
+$('#dStrips').addEventListener('input', e => { if (!e.target.matches('.fader')) return; const st = e.target.closest('[data-strip]'), v = +e.target.value; stripSet(st.dataset.strip, 'v', v); st.querySelector('.db').textContent = dbTxt(v); });
+$('#dStrips').addEventListener('click', e => { const b = e.target.closest('[data-sm]'); if (!b) return; stripSet(b.closest('[data-strip]').dataset.strip, b.dataset.sm, !b.classList.contains('on')); renderStrips(); renderInstList(); });
 let kdrag = null;
 function setPan(k, v) {
   if (k.startsWith('ch:')) { const ch = S.channels.find(x => 'ch:' + x.id === k); ch.pan = v; if (G && G.pan && G.pan[k]) G.pan[k].pan.value = v; }
@@ -2328,77 +2387,15 @@ $('#dStrips').addEventListener('pointermove', e => { if (!kdrag) return; const v
 const kUp = () => { kdrag = null; };
 $('#dStrips').addEventListener('pointerup', kUp); $('#dStrips').addEventListener('pointercancel', kUp);
 $('#dStrips').addEventListener('dblclick', e => { const kn = e.target.closest('[data-pan]'); if (!kn) return; setPan(kn.closest('[data-strip]').dataset.strip, 0); kn.style.setProperty('--a', '0deg'); });
-let raT = 0; const renderArrangeSoon = () => { clearTimeout(raT); raT = setTimeout(renderArrange, 150); };
 const mbuf = new Float32Array(256);
 function meters() {
   document.querySelectorAll('[data-meter]').forEach(el => {
-    const a = G.an[el.dataset.meter]; if (!a) { el.style.height = '0'; return; }
-    a.getFloatTimeDomainData(mbuf); let p = 0; for (let i = 0; i < mbuf.length; i++) p = Math.max(p, Math.abs(mbuf[i]));
-    const prev = +(el.dataset.v || 0), v = Math.max(p, prev * .9); el.dataset.v = v; el.style.height = Math.min(100, v * 120) + '%';
+    if (!el.offsetParent) return;
+    const a = G.an[el.dataset.meter], horiz = el.parentElement.classList.contains('h');
+    let v = 0; if (a) { a.getFloatTimeDomainData(mbuf); for (let i = 0; i < mbuf.length; i++) v = Math.max(v, Math.abs(mbuf[i])); }
+    v = Math.max(v, +(el.dataset.v || 0) * .9); el.dataset.v = v; el.style[horiz ? 'width' : 'height'] = Math.min(100, v * 120) + '%';
   });
 }
-
-/* right panel: sounds, parts, effects */
-function dLibItems() {
-  const L = [];
-  Object.keys(KITS).forEach(k => L.push({cat: 'kits', act: 'kit', id: k, name: k, sub: 'Drum kit', c: TRK_COL.drums, icon: 'drum', btn: 'Load', on: beatTarget().kit === k}));
-  Object.entries(CHAN_INSTS).forEach(([k, v]) => L.push({cat: 'inst', act: 'inst', id: k, name: v, sub: 'Instrument for ' + (rollChan() ? rollChan().name : 'channel'), c: k === 'b808' || k === 'synth' ? TRK_COL.bass : '#F2B33D', icon: k === 'b808' || k === 'synth' ? 'bass' : 'synth', btn: 'Use', on: rollChan() && rollChan().inst === k}));
-  Object.entries(CHORD_INSTS).forEach(([k, v]) => L.push({cat: 'inst', act: 'cinst', id: k, name: v, sub: 'Chord sound', c: TRK_COL.chords, icon: 'keys', btn: 'Use', on: S.chordInst === k}));
-  PRESETS[S.mode].forEach((pr, i) => L.push({cat: 'chords', act: 'prog', id: i, name: pr[0] + ' chords', sub: pr[1].map(x => chordName(chordFrom(x, S.mode))).join(' – ') + ' → ' + rollSec().name, c: '#EC4899', icon: 'chord', btn: 'Apply'}));
-  return L;
-}
-function renderLib() {
-  const q = dQuery.trim().toLowerCase(), items = dLibItems().filter(x => (dCat === 'all' || x.cat === dCat) && (!q || (x.name + ' ' + x.sub).toLowerCase().includes(q)));
-  $('#dLibTitle').innerHTML = 'Library <small>' + items.length + ' sounds</small>';
-  $('#dLib').innerHTML = items.length ? items.map(x => '<div class="dli' + (x.on ? ' on' : '') + '" style="--c:' + x.c + '"><span class="ic">' + dsvg(x.icon) + '</span><span class="tx"><b>' + esc(x.name) + '</b><small>' + esc(x.sub) + '</small></span><button data-lact="' + x.act + '" data-id="' + esc(x.id) + '">' + (x.on ? 'In use' : x.btn) + '</button></div>').join('') : '<p class="empty">Nothing matches “' + esc(dQuery) + '”.</p>';
-}
-function renderSide() {
-  if (!isStudio()) return;
-  $('#dTiles').innerHTML = [['all', 'All', 'all'], ['kits', 'Drum kits', 'drum'], ['inst', 'Instruments', 'synth'], ['chords', 'Chords', 'chord']].map(([k, l, i]) => '<button class="dtile' + (dCat === k ? ' on' : '') + '" data-cat="' + k + '">' + dsvg(i) + l + '</button>').join('');
-  $('#dGenres').innerHTML = VIBES.map(v => '<button class="dchip' + (S.vibe === v.id ? ' on' : '') + '" data-vibe="' + v.id + '" title="' + esc(v.desc) + '">' + esc(v.name) + '</button>').join('');
-  renderLib();
-  const rs = rollSec();
-  $('#dParts').innerHTML = '<p class="hint" style="margin-bottom:10px">Tap a part to edit its notes in the piano roll. The song plays the parts in the order shown on the timeline.</p>' + S.sections.map(x => '<div class="dli' + (rs && x.id === rs.id ? ' on' : '') + '" style="--c:hsl(' + secHue(x) + ' 55% 55%)"><span class="ic">' + dsvg('chord') + '</span><span class="tx"><b>' + esc(x.name) + '</b><small>' + x.chords.map(chordName).join(' – ') + ' · in song ' + S.arr.filter(i => i === x.id).length + '×</small></span><button data-pact="edit" data-id="' + x.id + '">Edit</button><button data-pact="add" data-id="' + x.id + '" title="Add to the end of the song">+</button></div>').join('') +
-    '<div class="row" style="margin-top:12px"><button class="btn small" data-pact="new">+ New part</button><button class="btn small" data-pact="lyrics">Lyrics & chords…</button></div>';
-  $('#dFx').innerHTML = '<div class="dfx">' +
-    '<label>Vocal reverb<input type="range" data-fx="reverb" min="0" max="1" step="0.01" value="' + S.mix.reverb + '"></label>' +
-    '<label>Vocal echo<input type="range" data-fx="echo" min="0" max="1" step="0.01" value="' + S.mix.echo + '"></label>' +
-    '<label>Swing (groove)<input type="range" data-fx="swing" min="0" max="100" step="1" value="' + S.swing + '"></label>' +
-    '<label class="chk"><input type="checkbox" data-fx="auto"' + (S.autoTuneNew ? ' checked' : '') + '> Autotune new takes</label>' +
-    '<label>Autotune style<select class="sel" data-fx="style">' + Object.entries(TUNE_PRESETS).map(([k, v]) => '<option value="' + k + '"' + ((S.autoTuneStyle || 'pop') === k ? ' selected' : '') + '>' + v.label + '</option>').join('') + '</select></label>' +
-    '<label class="chk"><input type="checkbox" data-fx="count"' + (S.countIn ? ' checked' : '') + '> Count-in bar before recording</label>' +
-    '<p class="hint">Per-take autotune, timing fixes and the microphone are in Record vocals.</p></div>';
-}
-$('#dTiles').onclick = e => { const b = e.target.closest('[data-cat]'); if (!b) return; dCat = b.dataset.cat; renderSide(); };
-$('#dSearch').oninput = e => { dQuery = e.target.value; renderLib(); };
-$('#dGenres').onclick = e => { const b = e.target.closest('[data-vibe]'); if (b) { applyVibe(VIBES.find(v => v.id === b.dataset.vibe)); renderDaw(); } };
-$('#dLib').onclick = e => {
-  const b = e.target.closest('[data-lact]'); if (!b) return;
-  const id = b.dataset.id; ensureCtx();
-  if (b.dataset.lact === 'kit') { const bt = beatTarget(); bt.kit = id; bt.grid = {...KITS[id]}; toast(id + ' drums loaded'); }
-  if (b.dataset.lact === 'inst') { const ch = rollChan(); if (!ch) return; ch.inst = id; ch.view = id === 'b808' || id === 'synth' ? 24 : 48; voice(ctx, chanOut(G, ch), ch.view + 12 + S.tonic, ctx.currentTime + .01, .4, id, .25); toast(ch.name + ' now plays ' + CHAN_INSTS[id]); }
-  if (b.dataset.lact === 'cinst') { S.chordInst = id; chordNotes({r: 0, q: 'maj'}, id).forEach(n => voice(ctx, G.chords, n, ctx.currentTime + .01, .6, id, .12)); toast('Chords now play on ' + CHORD_INSTS[id]); }
-  if (b.dataset.lact === 'prog') { const sec = rollSec(), pr = PRESETS[S.mode][+id]; sec.chords = pr[1].map(x => chordFrom(x, S.mode)); toast(sec.name + ' chords: ' + sec.chords.map(chordName).join(' – ')); }
-  save(); renderDaw();
-};
-$('#dParts').onclick = e => {
-  const b = e.target.closest('[data-pact]'); if (!b) return;
-  const a = b.dataset.pact;
-  if (a === 'edit') { rollSecId = b.dataset.id; dSelect('edit', 'roll'); }
-  if (a === 'add') { S.arr.push(b.dataset.id); save(); renderArr(); toast(secById(b.dataset.id).name + ' added to the end of the song'); }
-  if (a === 'new') { $('#newSec').click(); rollSecId = S.sections[S.sections.length - 1].id; }
-  if (a === 'lyrics') { openWindow('song'); return; }
-  renderDaw();
-};
-$('#dFx').addEventListener('input', e => {
-  const k = e.target.dataset.fx; if (!k) return;
-  if (k === 'reverb' || k === 'echo') { S.mix[k] = +e.target.value; applyMix(); }
-  if (k === 'swing') S.swing = +e.target.value;
-  if (k === 'auto') S.autoTuneNew = e.target.checked;
-  if (k === 'style') S.autoTuneStyle = e.target.value;
-  if (k === 'count') S.countIn = e.target.checked;
-  save(); renderVocalSettings();
-});
 
 /* ---------- easy mode ---------- */
 const VIBES = [
