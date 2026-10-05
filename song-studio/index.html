@@ -448,6 +448,12 @@ body.studio .toast{bottom:100px}
 .vtools .tl{color:var(--muted);font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
 .humbox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
 .btn:disabled,.tbtn:disabled,.tb:disabled{opacity:.4;cursor:default}
+.nomic-only{display:none!important}
+body.nomic .needs-mic{display:none!important}
+body.nomic .nomic-only{display:revert!important}
+body.nomic .nomic-flex.nomic-only{display:flex!important}
+.memo{display:flex;flex-direction:column;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.memo ol{margin:0;padding-left:20px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px);text-align:center}
 .toast.show{opacity:1}
 .steps{margin:0;padding-left:20px;color:var(--muted);font-size:.9rem;display:flex;flex-direction:column;gap:2px}
@@ -483,20 +489,27 @@ body.studio .toast{bottom:100px}
 
     <section class="ez-step"><div class="ez-num">3</div><div class="ez-body">
       <h2>Sing and record</h2>
-      <ol class="steps">
+      <div class="memo nomic-flex nomic-only">
+        <ol>
+          <li>Press <b>Play song</b> at the bottom and record yourself singing along with your phone's voice memo app.</li>
+          <li>Add the recording here. Then use <b>Autotune</b>, harmonies and the timing buttons to make it fit.</li>
+        </ol>
+        <div><button class="ez-rec" data-memo>+ Add a voice memo</button></div>
+      </div>
+      <ol class="steps needs-mic">
         <li>Put on headphones.</li>
         <li>Press <b>Record</b>. You hear four clicks, then the music starts.</li>
         <li>Sing along, then press <b>Stop</b> when you're done.</li>
       </ol>
       <div class="row">
-        <button class="ez-rec" id="ezRec">● Record</button>
+        <button class="ez-rec needs-mic" id="ezRec">● Record</button>
         <label class="chk"><input type="checkbox" id="ezAuto"> Autotune my voice</label>
         <select class="sel" id="ezAutoStyle" aria-label="Autotune style"><option value="natural">Natural</option><option value="pop">Pop</option><option value="hard">Robot effect</option></select>
       </div>
       <div id="ezMicNote" class="notice" hidden></div>
-      <div class="pitchbox"><div class="row"><button class="btn small" data-micon>Check my pitch</button><span class="pitchtxt hint">Turn on the microphone to see which note you are singing.</span></div><canvas width="900" height="170" aria-label="Your pitch over the last few seconds"></canvas></div>
+      <div class="pitchbox needs-mic"><div class="row"><button class="btn small" data-micon>Check my pitch</button><span class="pitchtxt hint">Turn on the microphone to see which note you are singing.</span></div><canvas width="900" height="170" aria-label="Your pitch over the last few seconds"></canvas></div>
       <div id="ezTakes" class="panel"></div>
-      <div><label class="upload">Recorded on your phone? Add the file<input type="file" id="ezFile" accept="audio/*"></label></div>
+      <div class="needs-mic"><label class="upload">Recorded on your phone? Add the file<input type="file" id="ezFile" accept="audio/*"></label></div>
     </div></section>
 
     <section class="ez-step"><div class="ez-num">4</div><div class="ez-body">
@@ -573,12 +586,13 @@ body.studio .toast{bottom:100px}
       <button class="tbtn" id="dBack" title="Back to the start" aria-label="Back to the start"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
       <button class="tbtn" id="dStop" title="Stop" aria-label="Stop"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
       <button class="dplay" id="dPlay" title="Play / pause (Space)" aria-label="Play or pause"><svg viewBox="0 0 24 24" id="dPlayIco"><path d="M8 5v14l11-7z"/></svg></button>
-      <button class="drec" id="dRec" title="Record your voice"><i></i><span id="dRecTxt">Record</span></button>
+      <button class="drec needs-mic" id="dRec" title="Record your voice"><i></i><span id="dRecTxt">Record</span></button>
+      <button class="drec nomic-only" data-memo title="Add a recording made on your phone">+ Voice memo</button>
     </div>
     <div class="tgroup">
       <button class="tbtn" id="dLoop" aria-pressed="false" title="Loop the selected part" aria-label="Loop"><svg viewBox="0 0 24 24"><path d="M6 8h10V5l4 4-4 4v-3H6a1 1 0 0 0-1 1v2H3v-2a3 3 0 0 1 3-3zm12 8H8v3l-4-4 4-4v3h10a1 1 0 0 0 1-1v-2h2v2a3 3 0 0 1-3 3z"/></svg></button>
       <button class="tbtn" id="dClick" aria-pressed="false" title="Metronome click" aria-label="Metronome"><svg viewBox="0 0 24 24"><path d="M9 3h6l4 18H5zM12 15l5-9" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
-      <label class="tchk"><input type="checkbox" id="dCount"><span>Count-in</span></label>
+      <label class="tchk needs-mic"><input type="checkbox" id="dCount"><span>Count-in</span></label>
     </div>
     <div class="tpos"><div class="ttime"><b id="dTime">00:00.0</b><span id="dPos">Bar 1 of 16</span></div><div class="tprog" id="dProg" title="Tap to jump to a place in the song"><i id="dProgFill"></i></div></div>
     <div class="tvol"><span>Volume</span><input type="range" id="dMaster" min="0" max="1" step="0.01" aria-label="Master volume"><div class="meter2 h"><i data-meter="master"></i></div></div>
@@ -596,7 +610,8 @@ body.studio .toast{bottom:100px}
     <div class="transport">
       <button class="tb play" id="play" title="Play / pause (Space)"><svg viewBox="0 0 16 16" id="playIcon"><path d="M4 2.5v11l9-5.5z"/></svg><span id="playTxt">Play</span></button>
       <button class="tb" id="stop" title="Stop and go back" aria-label="Stop"><svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="1"/></svg></button>
-      <button class="tb rec" id="rec" title="Record your voice"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/></svg><span class="tl">Rec</span></button>
+      <button class="tb nomic-only" data-memo title="Add a recording made on your phone">+ Voice memo</button>
+      <button class="tb rec needs-mic" id="rec" title="Record your voice"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/></svg><span class="tl">Rec</span></button>
       <button class="tb" id="loop" aria-pressed="false" title="Loop the selected part (or the whole song)"><svg viewBox="0 0 16 16"><path d="M4 5h7V3l3 3-3 3V7H4a1 1 0 0 0-1 1v1H1V8a3 3 0 0 1 3-3zm8 6H5v2l-3-3 3-3v2h7a1 1 0 0 0 1-1V8h2v1a3 3 0 0 1-3 3z"/></svg><span class="tl">Loop</span></button>
       <button class="tb" id="clickBtn" aria-pressed="false" title="Metronome click">Click</button>
       <label class="field">Tempo <input id="bpm" type="number" min="50" max="200" step="1"></label>
@@ -734,7 +749,18 @@ body.studio .toast{bottom:100px}
     <!-- VOCALS -->
     <section class="panel" data-panel="vocals" data-title="Vocals · recording & autotune" hidden>
       <div class="winclose"><button data-close>Close ✕</button></div>
-      <div class="card">
+      <div class="card nomic-only">
+        <h3>Add your singing</h3>
+        <div class="memo nomic-flex">
+          <ol>
+            <li>Press <b>Play</b> and record yourself singing along with your phone's voice memo app.</li>
+            <li>Add the recording below. It lands at the start of the selected part, or the start of the song.</li>
+            <li>Line it up with the beat buttons on the take, then try Autotune, harmonies or Double.</li>
+          </ol>
+          <div><button class="btn primary" data-memo>+ Add a voice memo</button></div>
+        </div>
+      </div>
+      <div class="card needs-mic">
         <h3>Microphone</h3>
         <div id="micNotice" class="notice" hidden></div>
         <ol class="steps">
@@ -813,6 +839,7 @@ body.studio .toast{bottom:100px}
     <div class="row"><button class="btn primary" id="songsNew">+ New song</button><span class="hint">Each song keeps its own lyrics, beats and recordings.</span></div>
   </div>
 </div>
+<input type="file" id="humFile" accept="audio/*" hidden>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -1667,7 +1694,7 @@ function renderSections() {
       '<button class="btn small" data-act="dup">Duplicate</button>' +
       '<button class="btn small danger" data-act="delsec">Delete</button></div>' +
       '<div class="bars">' + s.chords.map((c, i) => '<div class="barcell" data-sec="' + s.id + '" data-i="' + i + '"><span class="bn"><span>bar ' + (i + 1) + '</span><span>' + romanOf(c) + '</span></span><select data-f="chord" data-i="' + i + '" aria-label="Chord for bar ' + (i + 1) + '">' + chordOptions(c) + '</select></div>').join('') + '</div>' +
-      '<div class="row"><button class="btn small" data-act="addbar"' + (s.chords.length >= 16 ? ' disabled' : '') + '>+ Bar</button><button class="btn small" data-act="rmbar"' + (s.chords.length <= 1 ? ' disabled' : '') + '>− Bar</button><button class="btn small" data-act="hear">Loop this part</button><button class="btn small" data-act="hum" title="Hum your tune and get chords that fit">Hum to find chords</button></div>' +
+      '<div class="row"><button class="btn small" data-act="addbar"' + (s.chords.length >= 16 ? ' disabled' : '') + '>+ Bar</button><button class="btn small" data-act="rmbar"' + (s.chords.length <= 1 ? ' disabled' : '') + '>− Bar</button><button class="btn small" data-act="hear">Loop this part</button><button class="btn small" data-act="hum" title="Hum your tune and get chords that fit">' + (micOK() ? 'Hum to find chords' : 'Add a hum recording') + '</button></div>' +
       '<textarea class="lyr" data-f="lyrics" placeholder="Lyrics for the ' + esc(s.name.toLowerCase()) + '…" aria-label="Lyrics for ' + esc(s.name) + '">' + esc(s.lyrics || '') + '</textarea></div>';
   }).join('');
 }
@@ -1704,7 +1731,7 @@ function renderTakes() {
     '<canvas width="800" height="92"></canvas>' +
     '<div class="row"><label class="chk"><input type="checkbox" data-tf="muted"' + (tk.muted ? ' checked' : '') + '> Mute</label>' +
     '<label class="chk">Volume <input type="range" data-tf="vol" min="0" max="1.6" step="0.01" value="' + tk.vol + '" style="width:110px"></label>' +
-    '<button class="btn small" data-tact="nudge" data-d="-0.01" title="Move earlier by 10 ms">◀ 10 ms</button><button class="btn small" data-tact="nudge" data-d="0.01" title="Move later by 10 ms">10 ms ▶</button>' +
+    '<button class="btn small" data-tact="nudge" data-d="-beat" title="Move earlier by one beat">◀ beat</button><button class="btn small" data-tact="nudge" data-d="beat" title="Move later by one beat">beat ▶</button><button class="btn small" data-tact="nudge" data-d="-0.01" title="Move earlier by 10 ms">◀ 10 ms</button><button class="btn small" data-tact="nudge" data-d="0.01" title="Move later by 10 ms">10 ms ▶</button>' +
     '<button class="btn small" data-tact="dl">Download</button><button class="btn small danger" data-tact="del">Delete</button></div>' + vocalTools(tk) + tuneUI(tk) + '</div>').join('');
   el.querySelectorAll('.take').forEach(div => { const tk = takes.find(t => t.id === div.dataset.take); drawWave(div.querySelector('canvas'), tk); drawPitch(div.querySelector('canvas.pitch'), tk); });
 }
@@ -1973,7 +2000,7 @@ $('#takes').addEventListener('click', e => {
   if (b.dataset.tact === 'harm') { makeHarmony(tk, +b.dataset.d); return; }
   if (b.dataset.tact === 'double') { makeDouble(tk); return; }
   if (b.dataset.tact === 'punch') { startPunch(tk, +div.querySelector('[data-punch]').value); return; }
-  if (b.dataset.tact === 'nudge') { tk.start = Math.max(0, tk.start + +b.dataset.d); DB.meta(tk); renderTakes(); }
+  if (b.dataset.tact === 'nudge') { const dd = b.dataset.d, beat = 60 / S.bpm; tk.start = Math.max(0, tk.start + (dd === 'beat' ? beat : dd === '-beat' ? -beat : +dd)); DB.meta(tk); renderTakes(); }
   if (b.dataset.tact === 'dl') download(wav(tk.buffer), safeName(S.title + ' - ' + tk.name) + '.wav');
   if (b.dataset.tact === 'del') confirmBtn(b, 'Tap again to delete', () => { takes = takes.filter(t => t !== tk); DB.del(tk.id); renderTakes(); });
 });
@@ -2405,7 +2432,7 @@ function renderEditor() {
   }
   if (kind === 'chords') {
     $('#edChords').innerHTML =
-      '<div class="esec humbox"><h4>Hum it, get chords</h4><p class="hint">Hum or sing your tune for the ' + esc(sec.name.toLowerCase()) + ' while it plays. The studio listens and picks a chord for each bar. Wear headphones.</p><div class="row"><button class="btn small primary" data-hum>Hum to find chords</button><label class="chk"><input type="checkbox" data-hummel checked> Also put my tune in the piano roll</label></div></div>' +
+      '<div class="esec humbox"><h4>Hum it, get chords</h4><p class="hint">' + (micOK() ? 'Hum or sing your tune for the ' + esc(sec.name.toLowerCase()) + ' while it plays. The studio listens and picks a chord for each bar. Wear headphones.' : 'Hum your tune for the ' + esc(sec.name.toLowerCase()) + ' into your phone\'s voice memo app, starting right away, then add the file. The studio picks a chord for each bar.') + '</p><div class="row"><button class="btn small primary" data-hum>' + (micOK() ? 'Hum to find chords' : 'Add a hum recording') + '</button><label class="chk"><input type="checkbox" data-hummel checked> Also put my tune in the piano roll</label></div></div>' +
       '<div class="esec"><h4>Chords in the ' + esc(sec.name.toLowerCase()) + ' <span>one per bar</span></h4><div class="cbars">' + sec.chords.map((c, i) => '<div class="cbar" data-cb="' + i + '"><small><span>bar ' + (i + 1) + '</span><span>' + romanOf(c) + '</span></small><select data-cbar="' + i + '" aria-label="Chord for bar ' + (i + 1) + '">' + chordOptions(c) + '</select></div>').join('') + '</div>' +
       '<div class="row"><button class="btn small" data-cact="addbar"' + (sec.chords.length >= 16 ? ' disabled' : '') + '>+ Bar</button><button class="btn small" data-cact="rmbar"' + (sec.chords.length <= 1 ? ' disabled' : '') + '>− Bar</button></div></div>' +
       '<div class="esec"><h4>Chord ideas <span>tap to use in the ' + esc(sec.name.toLowerCase()) + '</span></h4><div class="chips" data-prog>' + PRESETS[S.mode].map((pr, i) => '<button data-p="' + i + '" title="' + pr[1].map(x => chordName(chordFrom(x, S.mode))).join(' – ') + '">' + esc(pr[0]) + '</button>').join('') + '</div></div>' +
@@ -2596,7 +2623,7 @@ function renderEasy() {
   $('#ezTitle').value = S.title;
   $('#ezVibes').innerHTML = VIBES.map(v => '<button class="vibe' + (S.vibe === v.id ? ' on' : '') + '" data-vibe="' + v.id + '" aria-pressed="' + (S.vibe === v.id) + '"><b>' + v.name + '</b><span>' + v.desc + '</span></button>').join('');
   $('#ezKey').textContent = keyLabel(); $('#ezBpm').textContent = S.bpm + ' BPM';
-  $('#ezLyrics').innerHTML = songParts().map(x => '<div class="ez-part"><h3>' + esc(x.name) + ' ' + x.chords.map(c => '<span class="chip">' + chordName(c) + '</span>').join('') + '<button class="btn small" data-ezhum="' + x.id + '" title="Hum your tune and get chords that fit">Hum to find chords</button></h3>' +
+  $('#ezLyrics').innerHTML = songParts().map(x => '<div class="ez-part"><h3>' + esc(x.name) + ' ' + x.chords.map(c => '<span class="chip">' + chordName(c) + '</span>').join('') + '<button class="btn small" data-ezhum="' + x.id + '" title="' + (micOK() ? 'Hum your tune and get chords that fit' : 'Hum your tune into a voice memo from the start of the part, then add it to get chords that fit') + '">' + (micOK() ? 'Hum to find chords' : 'Add a hum recording') + '</button></h3>' +
     '<textarea class="lyr" data-ezsec="' + x.id + '" placeholder="Type the words for the ' + esc(x.name.toLowerCase()) + ' here…" aria-label="Lyrics for ' + esc(x.name) + '">' + esc(x.lyrics || '') + '</textarea></div>').join('');
   $('#ezAuto').checked = !!S.autoTuneNew; $('#ezAutoStyle').value = TUNE_PRESETS[S.autoTuneStyle] ? S.autoTuneStyle : 'pop'; $('#ezAutoStyle').disabled = !S.autoTuneNew;
   $('#ezVoice').value = S.mix.vocals; $('#ezMusic').value = S.mix.music == null ? 1 : S.mix.music; $('#ezEcho').value = S.mix.reverb;
@@ -2737,15 +2764,24 @@ async function recordRegion(ai) {
 }
 
 /* hum to chords */
+let humPending = null;
 async function startHum(secId, toMelody) {
   if (T.recording) return;
   let ai = S.arr.indexOf(secId); if (ai < 0) { S.arr.push(secId); ai = S.arr.length - 1; save(); renderArr(); }
   refreshTL();
   const ch = S.channels.find(c => !isBassy(c.inst)) || S.channels[0];
-  M.hum = {secId, ai, barStart: blockStartBar(ai), toMelody, chId: ch && ch.id};
+  const h = {secId, ai, barStart: blockStartBar(ai), toMelody, chId: ch && ch.id};
+  if (!micOK()) { humPending = h; $('#humFile').value = ''; $('#humFile').click(); return; }
+  M.hum = h;
   toast('Hum or sing your tune for the ' + secById(secId).name.toLowerCase() + '. It stops by itself at the end of the part.');
   await recordRegion(ai);
 }
+$('#humFile').onchange = async e => {
+  const f = e.target.files[0], h = humPending; humPending = null; if (!f || !h) return;
+  ensureCtx();
+  try { const buf = await ctx.decodeAudioData(await f.arrayBuffer()); analyzeHum(h, monoOf(buf), buf.sampleRate, h.barStart * 16 * stepDur()); }
+  catch (err) { toast('That file could not be read. Try an MP3, M4A or WAV.'); }
+};
 async function analyzeHum(h, x, sr, start) {
   const sec = secById(h.secId); if (!sec) return;
   toast('Listening to your tune…');
@@ -2797,7 +2833,7 @@ function vocalTools(tk) {
   refreshTL(); const sd = stepDur(), end = tk.start + tk.buffer.duration;
   const parts = S.arr.map((id, ai) => ({ai, sec: secById(id), a: blockStartBar(ai) * 16 * sd, b: blockEndBar(ai) * 16 * sd})).filter(x => x.sec && x.b > tk.start && x.a < end);
   return '<div class="row vtools"><span class="tl">Voice tools</span><button class="btn small" data-tact="harm" data-d="2" title="A second voice above yours that follows your melody in the key">+ Harmony above</button><button class="btn small" data-tact="harm" data-d="-2" title="A second voice below yours">+ Harmony below</button><button class="btn small" data-tact="double" title="A slightly shifted copy that makes the voice sound fuller">Double</button>' +
-    (parts.length ? '<span class="tl">Redo a part</span><select class="sel" data-punch aria-label="Part to re-record" style="height:30px">' + parts.map(x => '<option value="' + x.ai + '">' + esc(x.sec.name) + ' (bar ' + (blockStartBar(x.ai) + 1) + ')</option>').join('') + '</select><button class="btn small" data-tact="punch" title="Sing just this part again; the rest of the take stays">Re-record</button>' : '') + '</div>';
+    (parts.length && micOK() ? '<span class="tl">Redo a part</span><select class="sel" data-punch aria-label="Part to re-record" style="height:30px">' + parts.map(x => '<option value="' + x.ai + '">' + esc(x.sec.name) + ' (bar ' + (blockStartBar(x.ai) + 1) + ')</option>').join('') + '</select><button class="btn small" data-tact="punch" title="Sing just this part again; the rest of the take stays">Re-record</button>' : '') + '</div>';
 }
 async function shiftedCopy(tk, ratioOf, label, startOffset, vol) {
   toast('Making ' + label + ' for ' + tk.name + '…');
@@ -2936,6 +2972,9 @@ function wav(buf) {
 }
 // The claude.ai preview frame blocks file saves, so say so instead of failing silently.
 const inPreview = () => !!window.claude;
+// the claude.ai preview never grants the microphone, so offer voice memos there instead
+function micOK() { return !inPreview() && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia); }
+document.addEventListener('click', e => { if (e.target.closest('[data-memo]')) $('#fileIn').click(); });
 let downloadsCap;
 const LIBS = {jszip: ['vendor/jszip.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', 'JSZip'], lame: ['vendor/lame.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js', 'lamejs'], rhymes: ['vendor/rhymes.js', null, 'SS_RHYMES']};
 const libP = {};
@@ -3022,6 +3061,7 @@ $('#expInst').onclick = e => exportSong(false, e.target);
 window.__studio = {renderSong, wav, retune, detectPitch, get takes() { return takes; }, get S() { return S; }, T};
 
 /* ---------- boot ---------- */
+document.body.classList.toggle('nomic', !micOK());
 renderAll();
 let view = 'easy';
 try { view = localStorage.getItem(STORE + '.view') || 'easy'; } catch (e) {}
