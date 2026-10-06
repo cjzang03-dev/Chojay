@@ -11,6 +11,7 @@ class Itinerary {
     this.indicativePrice,
     this.includesFlight = false,
     this.coverPhotoUrl,
+    this.category,
     required this.status,
   });
 
@@ -21,6 +22,7 @@ class Itinerary {
   final String? indicativePrice;
   final bool includesFlight;
   final String? coverPhotoUrl;
+  final String? category;
   final String status;
 
   /// e.g. "7 Days / 6 Nights" — the common trip-length phrasing for Bhutan
@@ -41,6 +43,7 @@ class Itinerary {
       indicativePrice: json['indicative_price'] as String?,
       includesFlight: json['includes_flight'] as bool? ?? false,
       coverPhotoUrl: json['cover_photo_url'] as String?,
+      category: json['category'] as String?,
       status: json['status'] as String? ?? 'draft',
     );
   }

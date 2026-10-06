@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/error_state.dart';
+import '../../../core/widgets/favorite_button.dart';
 import '../../bookings/presentation/booking_request_screen.dart';
+import '../../favorites/data/favorites_providers.dart';
 import '../data/itineraries_providers.dart';
 import '../domain/itinerary.dart';
 
@@ -29,25 +31,40 @@ class ItineraryDetailScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(itineraryDetailProvider(itineraryId)),
         ),
       ),
-      data: (detail) => Scaffold(body: _DetailBody(detail: detail)),
+      data: (detail) => Scaffold(
+        body: _DetailBody(detail: detail, itineraryId: itineraryId),
+      ),
     );
   }
 }
 
-class _DetailBody extends StatelessWidget {
-  const _DetailBody({required this.detail});
+class _DetailBody extends ConsumerWidget {
+  const _DetailBody({required this.detail, required this.itineraryId});
 
   final ItineraryDetail detail;
+  final String itineraryId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final itinerary = detail.itinerary;
+    final favoriteIds = ref.watch(favoriteIdsProvider).valueOrNull ?? const {};
+    final isFavorite = favoriteIds.contains(itineraryId);
 
     return CustomScrollView(
       slivers: [
         SliverAppBar(
-          expandedHeight: 220,
+          expandedHeight: 240,
           pinned: true,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: FavoriteButton(
+                isFavorite: isFavorite,
+                onPressed: () =>
+                    ref.read(favoriteIdsProvider.notifier).toggle(itineraryId),
+              ),
+            ),
+          ],
           flexibleSpace: FlexibleSpaceBar(
             background: _HeroImage(url: itinerary.coverPhotoUrl),
           ),

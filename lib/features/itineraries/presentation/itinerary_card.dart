@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/favorite_button.dart';
 import '../domain/itinerary.dart';
 
 class ItineraryCard extends StatelessWidget {
-  const ItineraryCard({super.key, required this.itinerary, this.onTap});
+  const ItineraryCard({
+    super.key,
+    required this.itinerary,
+    this.onTap,
+    this.isFavorite = false,
+    this.onFavoriteToggle,
+  });
 
   final Itinerary itinerary;
   final VoidCallback? onTap;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +29,43 @@ class ItineraryCard extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 16 / 10,
-              child: _CoverImage(url: itinerary.coverPhotoUrl),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _CoverImage(url: itinerary.coverPhotoUrl),
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.center,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.35),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (itinerary.category != null &&
+                      itinerary.category!.isNotEmpty)
+                    Positioned(
+                      left: 10,
+                      bottom: 10,
+                      child: _Badge(label: itinerary.category!, dark: true),
+                    ),
+                  if (onFavoriteToggle != null)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: FavoriteButton(
+                        isFavorite: isFavorite,
+                        onPressed: onFavoriteToggle!,
+                        compact: true,
+                      ),
+                    ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(14),
@@ -35,9 +80,16 @@ class ItineraryCard extends StatelessWidget {
                   ),
                   if (itinerary.durationLabel.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    Text(
-                      itinerary.durationLabel,
-                      style: TextStyle(color: AppColors.stoneGrey),
+                    Row(
+                      children: [
+                        const Icon(Icons.schedule_rounded,
+                            size: 14, color: AppColors.stoneGrey),
+                        const SizedBox(width: 4),
+                        Text(
+                          itinerary.durationLabel,
+                          style: const TextStyle(color: AppColors.stoneGrey),
+                        ),
+                      ],
                     ),
                   ],
                   const SizedBox(height: 10),
@@ -45,12 +97,24 @@ class ItineraryCard extends StatelessWidget {
                     children: [
                       if (itinerary.indicativePrice != null)
                         Expanded(
-                          child: Text(
-                            itinerary.indicativePrice!,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.himalayanGreenDark,
-                              fontSize: 16,
+                          child: RichText(
+                            text: TextSpan(
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.himalayanGreenDark,
+                                fontSize: 17,
+                              ),
+                              children: [
+                                TextSpan(text: itinerary.indicativePrice!),
+                                const TextSpan(
+                                  text: '  per person',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 11,
+                                    color: AppColors.stoneGrey,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -108,24 +172,27 @@ class _CoverImage extends StatelessWidget {
 }
 
 class _Badge extends StatelessWidget {
-  const _Badge({required this.label});
+  const _Badge({required this.label, this.dark = false});
 
   final String label;
+  final bool dark;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: AppColors.saffron.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
+        color: dark
+            ? Colors.black.withValues(alpha: 0.45)
+            : AppColors.saffron.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: AppColors.saffron,
+          color: dark ? Colors.white : AppColors.saffron,
         ),
       ),
     );
