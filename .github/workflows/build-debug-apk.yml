@@ -49,7 +49,7 @@ jobs:
         run: |
           echo "GOOGLE_WEB_CLIENT_ID length: ${#GOOGLE_WEB_CLIENT_ID}"
           echo "GOOGLE_WEB_CLIENT_ID sha256: $(printf '%s' "$GOOGLE_WEB_CLIENT_ID" | sha256sum | cut -d' ' -f1)"
-          echo "Expected sha256 (of 1021329552949-c8giqurmmqk0rmu9fa1ubrg3o3e3090v.apps.googleusercontent.com): $(printf '%s' '1021329552949-c8giqurmmqk0rmu9fa1ubrg3o3e3090v.apps.googleusercontent.com' | sha256sum | cut -d' ' -f1)"
+          echo "Expected sha256 (of 1021329552949-vlk04qlhiqsrhmqvu2pldkthttdhajq9.apps.googleusercontent.com, the client ID actually registered in Supabase's Google provider): $(printf '%s' '1021329552949-vlk04qlhiqsrhmqvu2pldkthttdhajq9.apps.googleusercontent.com' | sha256sum | cut -d' ' -f1)"
           echo "SUPABASE_URL length: ${#SUPABASE_URL}"
           echo "SUPABASE_ANON_KEY length: ${#SUPABASE_ANON_KEY}"
 
@@ -75,6 +75,15 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           grep "SHA1:" debug-keystore-info.txt >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+          actual_sha1=$(grep "SHA1:" debug-keystore-info.txt | awk '{print $2}')
+          # Must match the SHA-1 registered against the Android OAuth client
+          # (package com.journeyinbhutan.chojay) in Google Cloud Console —
+          # otherwise native Google Sign-In fails with ApiException: 10
+          # (DEVELOPER_ERROR) before it ever reaches Supabase.
+          expected_sha1="77:3F:46:62:B7:C9:A6:38:B3:0A:67:4F:03:DA:A1:BF:8A:31:BA:A5"
+          if [ "$actual_sha1" != "$expected_sha1" ]; then
+            echo "::warning::Debug keystore SHA-1 ($actual_sha1) no longer matches the last-known-good Android OAuth client SHA-1 ($expected_sha1). If you intentionally rotated the debug keystore, update the Android OAuth client's SHA-1 in Google Cloud Console AND this workflow's expected_sha1 to match."
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
