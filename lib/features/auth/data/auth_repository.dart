@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -102,11 +103,25 @@ class AuthRepository {
       return;
     }
 
-    await _ensureInitialized();
+    await _ensureInitialized().timeout(
+      const Duration(seconds: 20),
+      onTimeout: () => throw TimeoutException(
+        'Google Sign-In setup (initialize) did not respond within 20s.',
+      ),
+    );
 
     final GoogleSignInAccount googleUser;
     try {
-      googleUser = await _googleSignIn.authenticate();
+      // After the account picker closes, this call can hang indefinitely
+      // on some devices instead of returning or throwing — the timeout
+      // turns that into a visible error instead of the app looking frozen.
+      googleUser = await _googleSignIn.authenticate().timeout(
+        const Duration(seconds: 20),
+        onTimeout: () => throw TimeoutException(
+          'Google sign-in did not respond within 20s after the account '
+          'picker closed (authenticate() hung).',
+        ),
+      );
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) {
         throw const SignInCancelledException();
@@ -119,11 +134,18 @@ class AuthRepository {
       throw StateError('Google sign-in did not return an ID token.');
     }
 
-    await supabase.auth.signInWithIdToken(
-      provider: OAuthProvider.google,
-      idToken: idToken,
-      nonce: _rawNonce,
-    );
+    await supabase.auth
+        .signInWithIdToken(
+          provider: OAuthProvider.google,
+          idToken: idToken,
+          nonce: _rawNonce,
+        )
+        .timeout(
+          const Duration(seconds: 20),
+          onTimeout: () => throw TimeoutException(
+            'Supabase did not respond to signInWithIdToken within 20s.',
+          ),
+        );
 
     await ensureProfile(intent);
   }
