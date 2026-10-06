@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/config/env.dart';
@@ -17,6 +18,11 @@ class AuthRepository {
 
   final GoogleSignIn _googleSignIn;
   Future<void>? _initFuture;
+
+  /// Survives the full-page reload that web's OAuth redirect causes, so
+  /// [AuthBootstrap] can tell which role a brand-new web sign-in was for
+  /// once the session lands back in a fresh app instance.
+  static const _pendingIntentKey = 'pending_signup_intent';
 
   /// `GoogleSignIn.instance` must be initialized exactly once before use.
   /// Deferred to first sign-in (rather than the constructor) since
@@ -44,9 +50,24 @@ class AuthRepository {
   /// value is owned by admin approval / the website's identity checks.
   Future<void> signInWithGoogle(SignupIntent intent) async {
     if (kIsWeb) {
-      await supabase.auth.signInWithOAuth(OAuthProvider.google);
-      // Web uses a redirect; profile bootstrap happens in the auth-state
-      // listener once the session lands back in the app (see AuthController).
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_pendingIntentKey, intent.name);
+      await supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        // Without this, Supabase redirects back to the project's Site URL
+        // instead of wherever this app is actually running — on a dev
+        // build (flutter run -d chrome, a random port each run) that sends
+        // the browser to the marketing site, not back to the app, so
+        // sign-in silently never completes. Uri.base is the real running
+        // origin in both dev and a deployed build. It must also be added
+        // to Supabase's Authentication > URL Configuration > Redirect URLs
+        // allow-list, or Supabase will reject it and fall back anyway.
+        redirectTo: Uri.base.toString(),
+      );
+      // Web uses a full-page redirect, which tears this app instance down
+      // before signInWithOAuth's future even resolves. Profile bootstrap
+      // happens in AuthBootstrap's signed-in listener once the session
+      // lands back in the fresh app instance after the round trip.
       return;
     }
 
@@ -73,6 +94,20 @@ class AuthRepository {
     );
 
     await ensureProfile(intent);
+  }
+
+  /// Reads back the intent recorded before the most recent web sign-in
+  /// attempt and clears it, so a later sign-in never reuses a stale value.
+  /// Defaults to [SignupIntent.tourist] if nothing was recorded (e.g. an
+  /// existing session restored on app start, not a fresh sign-in).
+  Future<SignupIntent> consumePendingWebIntent() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_pendingIntentKey);
+    await prefs.remove(_pendingIntentKey);
+    return SignupIntent.values.firstWhere(
+      (value) => value.name == raw,
+      orElse: () => SignupIntent.tourist,
+    );
   }
 
   /// Creates a `profiles` row for a first-time sign-in. No-ops if one

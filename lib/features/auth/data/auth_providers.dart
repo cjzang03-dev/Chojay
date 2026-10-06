@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -7,6 +8,24 @@ import 'auth_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
+});
+
+/// Bootstraps a `profiles` row the moment a web sign-in's session lands,
+/// since web's OAuth redirect tears down and reloads the whole app before
+/// [AuthRepository.signInWithGoogle] can call `ensureProfile` itself (that
+/// still happens directly, synchronously, on native). Watched once from
+/// `ChojayApp` so it lives for the app's lifetime.
+final authBootstrapProvider = Provider<void>((ref) {
+  if (!kIsWeb) return;
+
+  final repo = ref.watch(authRepositoryProvider);
+  final subscription = repo.authStateChanges.listen((state) async {
+    if (state.event == AuthChangeEvent.signedIn) {
+      final intent = await repo.consumePendingWebIntent();
+      await repo.ensureProfile(intent);
+    }
+  });
+  ref.onDispose(subscription.cancel);
 });
 
 /// The live Supabase auth state; the router redirect and sign-in screen

@@ -48,6 +48,9 @@ dependencies:
   # Iterable helpers (firstOrNull) — already a transitive dep, declared
   # directly since we use it explicitly
   collection: ^1.19.0
+  # Persists the sign-up intent (tourist/guide/operator) across the web
+  # OAuth redirect, which tears down and reloads the whole app.
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:

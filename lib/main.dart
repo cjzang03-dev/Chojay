@@ -5,6 +5,7 @@ import 'core/config/env.dart';
 import 'core/config/supabase_client.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/auth/data/auth_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,7 @@ class ChojayApp extends ConsumerWidget {
       return const MaterialApp(home: _MissingConfigScreen());
     }
 
+    ref.watch(authBootstrapProvider);
     final router = ref.watch(routerProvider);
     return MaterialApp.router(
       title: 'Journey in Bhutan',
