@@ -38,9 +38,11 @@ dependencies:
   # Backend: shared Supabase project (same DB/auth/storage as the website)
   supabase_flutter: ^2.8.0
   # Google sign-in (the only auth method for this phase, per product decisions).
-  # v7 uses Android's Credential Manager / iOS's newer sign-in flow instead of
-  # the deprecated legacy GoogleSignInClient API.
-  google_sign_in: ^7.0.0
+  # Pinned to v6 (the legacy Play Services Auth flow) rather than v7's
+  # Credential Manager-based API, which hangs indefinitely after the account
+  # picker closes on a range of real Android devices — a known, unresolved
+  # upstream bug (e.g. flutter/flutter#187395), not something fixable here.
+  google_sign_in: ^6.3.0
   # State management
   flutter_riverpod: ^2.6.1
   # Declarative routing with auth-aware redirects
@@ -51,9 +53,6 @@ dependencies:
   # Persists the sign-up intent (tourist/guide/operator) across the web
   # OAuth redirect, which tears down and reloads the whole app.
   shared_preferences: ^2.5.5
-  # Hashes the nonce sent to native Google Sign-In (Supabase needs the raw
-  # nonce; Google needs its SHA-256 hash).
-  crypto: ^3.0.0
 
 dev_dependencies:
   flutter_test:

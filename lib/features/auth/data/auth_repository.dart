@@ -1,8 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 
-import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,56 +15,25 @@ import '../../../core/config/supabase_client.dart';
 enum SignupIntent { tourist, guide, operator }
 
 class AuthRepository {
+  // Pinned to the pre-Credential-Manager v6 API (not the newer
+  // GoogleSignIn.instance/.authenticate() v7 flow) — v7's Android
+  // implementation hangs indefinitely after the account picker closes on
+  // a range of real devices, a known, unresolved upstream bug (e.g.
+  // flutter/flutter#187395). v6 uses the older, still-supported
+  // Play Services Auth sign-in path, which doesn't have this failure mode.
   AuthRepository({GoogleSignIn? googleSignIn})
-      : _googleSignIn = googleSignIn ?? GoogleSignIn.instance;
+      : _googleSignIn = googleSignIn ??
+            GoogleSignIn(
+              serverClientId:
+                  Env.googleWebClientId.isEmpty ? null : Env.googleWebClientId,
+            );
 
   final GoogleSignIn _googleSignIn;
-  Future<void>? _initFuture;
 
   /// Survives the full-page reload that web's OAuth redirect causes, so
   /// [AuthBootstrap] can tell which role a brand-new web sign-in was for
   /// once the session lands back in a fresh app instance.
   static const _pendingIntentKey = 'pending_signup_intent';
-
-  /// The raw nonce for the current app session, generated once alongside
-  /// Google Sign-In's one-time initialize(). Supabase's signInWithIdToken
-  /// needs the raw value; Google needs its SHA-256 hash (below) — without
-  /// this, newer Android sign-in (Credential Manager) embeds its own nonce
-  /// in the ID token that Supabase then can't match, and silently rejects
-  /// the token (visible as a generic "token verification" failure, with no
-  /// indication it's a nonce problem).
-  String? _rawNonce;
-
-  /// `GoogleSignIn.instance` must be initialized exactly once before use.
-  /// Deferred to first sign-in (rather than the constructor) since
-  /// initialize() is async.
-  Future<void> _ensureInitialized() {
-    return _initFuture ??= () {
-      _rawNonce = _generateNonce();
-      return _googleSignIn.initialize(
-        // Required on Android/iOS so Supabase can verify the Google ID
-        // token server-side; unused on web (Supabase's OAuth redirect flow
-        // is used there instead).
-        serverClientId:
-            Env.googleWebClientId.isEmpty ? null : Env.googleWebClientId,
-        nonce: _sha256ofString(_rawNonce!),
-      );
-    }();
-  }
-
-  static String _generateNonce([int length = 32]) {
-    const charset =
-        '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._';
-    final random = Random.secure();
-    return List.generate(
-      length,
-      (_) => charset[random.nextInt(charset.length)],
-    ).join();
-  }
-
-  static String _sha256ofString(String input) {
-    return sha256.convert(utf8.encode(input)).toString();
-  }
 
   Stream<AuthState> get authStateChanges => supabase.auth.onAuthStateChange;
 
@@ -103,42 +69,32 @@ class AuthRepository {
       return;
     }
 
-    await _ensureInitialized().timeout(
+    // signIn() returns null on user-cancel rather than throwing — kept as
+    // a timeout too, as a safety net against the same class of plugin hang
+    // (less likely on this older API, but cheap insurance).
+    final googleUser = await _googleSignIn.signIn().timeout(
       const Duration(seconds: 20),
       onTimeout: () => throw TimeoutException(
-        'Google Sign-In setup (initialize) did not respond within 20s.',
+        'Google sign-in did not respond within 20s.',
       ),
     );
-
-    final GoogleSignInAccount googleUser;
-    try {
-      // After the account picker closes, this call can hang indefinitely
-      // on some devices instead of returning or throwing — the timeout
-      // turns that into a visible error instead of the app looking frozen.
-      googleUser = await _googleSignIn.authenticate().timeout(
-        const Duration(seconds: 20),
-        onTimeout: () => throw TimeoutException(
-          'Google sign-in did not respond within 20s after the account '
-          'picker closed (authenticate() hung).',
-        ),
-      );
-    } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) {
-        throw const SignInCancelledException();
-      }
-      rethrow;
+    if (googleUser == null) {
+      throw const SignInCancelledException();
     }
 
-    final idToken = googleUser.authentication.idToken;
+    final googleAuth = await googleUser.authentication;
+    final idToken = googleAuth.idToken;
     if (idToken == null) {
       throw StateError('Google sign-in did not return an ID token.');
     }
 
+    // No nonce here: unlike v7's Credential Manager flow, this older API's
+    // ID token doesn't embed one, so passing one would make Supabase check
+    // a nonce the token was never issued with.
     await supabase.auth
         .signInWithIdToken(
           provider: OAuthProvider.google,
           idToken: idToken,
-          nonce: _rawNonce,
         )
         .timeout(
           const Duration(seconds: 20),
@@ -200,7 +156,7 @@ class AuthRepository {
   }
 
   Future<void> signOut() async {
-    if (!kIsWeb && _initFuture != null) {
+    if (!kIsWeb) {
       await _googleSignIn.signOut();
     }
     await supabase.auth.signOut();
