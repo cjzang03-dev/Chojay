@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,17 +28,44 @@ class AuthRepository {
   /// once the session lands back in a fresh app instance.
   static const _pendingIntentKey = 'pending_signup_intent';
 
+  /// The raw nonce for the current app session, generated once alongside
+  /// Google Sign-In's one-time initialize(). Supabase's signInWithIdToken
+  /// needs the raw value; Google needs its SHA-256 hash (below) — without
+  /// this, newer Android sign-in (Credential Manager) embeds its own nonce
+  /// in the ID token that Supabase then can't match, and silently rejects
+  /// the token (visible as a generic "token verification" failure, with no
+  /// indication it's a nonce problem).
+  String? _rawNonce;
+
   /// `GoogleSignIn.instance` must be initialized exactly once before use.
   /// Deferred to first sign-in (rather than the constructor) since
   /// initialize() is async.
   Future<void> _ensureInitialized() {
-    return _initFuture ??= _googleSignIn.initialize(
-      // Required on Android/iOS so Supabase can verify the Google ID token
-      // server-side; unused on web (Supabase's OAuth redirect flow is used
-      // there instead).
-      serverClientId:
-          Env.googleWebClientId.isEmpty ? null : Env.googleWebClientId,
-    );
+    return _initFuture ??= () {
+      _rawNonce = _generateNonce();
+      return _googleSignIn.initialize(
+        // Required on Android/iOS so Supabase can verify the Google ID
+        // token server-side; unused on web (Supabase's OAuth redirect flow
+        // is used there instead).
+        serverClientId:
+            Env.googleWebClientId.isEmpty ? null : Env.googleWebClientId,
+        nonce: _sha256ofString(_rawNonce!),
+      );
+    }();
+  }
+
+  static String _generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(
+      length,
+      (_) => charset[random.nextInt(charset.length)],
+    ).join();
+  }
+
+  static String _sha256ofString(String input) {
+    return sha256.convert(utf8.encode(input)).toString();
   }
 
   Stream<AuthState> get authStateChanges => supabase.auth.onAuthStateChange;
@@ -91,6 +122,7 @@ class AuthRepository {
     await supabase.auth.signInWithIdToken(
       provider: OAuthProvider.google,
       idToken: idToken,
+      nonce: _rawNonce,
     );
 
     await ensureProfile(intent);

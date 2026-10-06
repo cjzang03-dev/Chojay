@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/error_dialog.dart';
 import '../data/auth_providers.dart';
 import '../data/auth_repository.dart';
 import 'partner_entry_screen.dart';
@@ -32,9 +33,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       // User backed out of the Google chooser; nothing to show.
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Sign-in failed: $e')),
-      );
+      await showErrorDialog(context, title: 'Sign-in failed', error: e);
     } finally {
       if (mounted) setState(() => _isSigningIn = false);
     }

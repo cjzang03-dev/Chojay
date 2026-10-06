@@ -51,6 +51,9 @@ dependencies:
   # Persists the sign-up intent (tourist/guide/operator) across the web
   # OAuth redirect, which tears down and reloads the whole app.
   shared_preferences: ^2.5.5
+  # Hashes the nonce sent to native Google Sign-In (Supabase needs the raw
+  # nonce; Google needs its SHA-256 hash).
+  crypto: ^3.0.0
 
 dev_dependencies:
   flutter_test:
