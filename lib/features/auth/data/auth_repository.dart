@@ -1,11 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/config/supabase_client.dart';
 
 /// The two ways someone can complete Google sign-in in this app: the
@@ -15,102 +11,66 @@ import '../../../core/config/supabase_client.dart';
 enum SignupIntent { tourist, guide, operator }
 
 class AuthRepository {
-  // Pinned to the pre-Credential-Manager v6 API (not the newer
-  // GoogleSignIn.instance/.authenticate() v7 flow) — v7's Android
-  // implementation hangs indefinitely after the account picker closes on
-  // a range of real devices, a known, unresolved upstream bug (e.g.
-  // flutter/flutter#187395). v6 uses the older, still-supported
-  // Play Services Auth sign-in path, which doesn't have this failure mode.
-  AuthRepository({GoogleSignIn? googleSignIn})
-      : _googleSignIn = googleSignIn ??
-            GoogleSignIn(
-              serverClientId:
-                  Env.googleWebClientId.isEmpty ? null : Env.googleWebClientId,
-            );
+  /// The whole app now signs in through the browser-based OAuth redirect
+  /// (the same flow the website uses) rather than the native
+  /// google_sign_in plugin. The plugin requires Play Services to validate
+  /// this app's package name + signing certificate against an "Android"
+  /// OAuth client in Google Cloud Console, and that check kept failing
+  /// with ApiException: 10 (DEVELOPER_ERROR) on real devices even with a
+  /// byte-for-byte confirmed-correct package name, SHA-1 and client ID —
+  /// across two different phone brands, ruling out device-specific causes.
+  /// The browser redirect flow never touches that Android-client
+  /// validation at all, so this entire failure class doesn't apply to it.
+  static const _nativeRedirectUri = 'com.journeyinbhutan.chojay://login-callback';
 
-  final GoogleSignIn _googleSignIn;
-
-  /// Survives the full-page reload that web's OAuth redirect causes, so
-  /// [AuthBootstrap] can tell which role a brand-new web sign-in was for
-  /// once the session lands back in a fresh app instance.
+  /// Survives the external-browser round trip (a full-page reload on web,
+  /// an app backgrounding on native) so [AuthBootstrap] can tell which role
+  /// a brand-new sign-in was for once the session lands back in the app.
   static const _pendingIntentKey = 'pending_signup_intent';
 
   Stream<AuthState> get authStateChanges => supabase.auth.onAuthStateChange;
 
   User? get currentUser => supabase.auth.currentUser;
 
-  /// Signs in with Google and ensures a matching `profiles` row exists.
+  /// Starts Google sign-in via Supabase's hosted browser-redirect OAuth
+  /// flow, on every platform.
   ///
   /// [intent] controls the `user_type` written for a brand-new profile only.
   /// Tourist is the invisible default for the main app flow; guide/operator
   /// is only reachable from the separate "Partner with us" entry point.
   /// An existing profile's `user_type` is never overwritten here — that
   /// value is owned by admin approval / the website's identity checks.
+  ///
+  /// This only launches the browser round trip; it does not wait for
+  /// sign-in to actually complete. Web tears this app instance down with a
+  /// full-page redirect before the returned future would resolve anyway;
+  /// native backgrounds the app and comes back via [_nativeRedirectUri]'s
+  /// deep link. Either way, profile bootstrap happens in
+  /// [AuthBootstrap]'s signed-in listener once the session lands back.
   Future<void> signInWithGoogle(SignupIntent intent) async {
-    if (kIsWeb) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_pendingIntentKey, intent.name);
-      await supabase.auth.signInWithOAuth(
-        OAuthProvider.google,
-        // Without this, Supabase redirects back to the project's Site URL
-        // instead of wherever this app is actually running — on a dev
-        // build (flutter run -d chrome, a random port each run) that sends
-        // the browser to the marketing site, not back to the app, so
-        // sign-in silently never completes. Uri.base is the real running
-        // origin in both dev and a deployed build. It must also be added
-        // to Supabase's Authentication > URL Configuration > Redirect URLs
-        // allow-list, or Supabase will reject it and fall back anyway.
-        redirectTo: Uri.base.toString(),
-      );
-      // Web uses a full-page redirect, which tears this app instance down
-      // before signInWithOAuth's future even resolves. Profile bootstrap
-      // happens in AuthBootstrap's signed-in listener once the session
-      // lands back in the fresh app instance after the round trip.
-      return;
-    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_pendingIntentKey, intent.name);
 
-    // signIn() returns null on user-cancel rather than throwing — kept as
-    // a timeout too, as a safety net against the same class of plugin hang
-    // (less likely on this older API, but cheap insurance).
-    final googleUser = await _googleSignIn.signIn().timeout(
-      const Duration(seconds: 20),
-      onTimeout: () => throw TimeoutException(
-        'Google sign-in did not respond within 20s.',
-      ),
+    await supabase.auth.signInWithOAuth(
+      OAuthProvider.google,
+      // Without this, Supabase redirects back to the project's Site URL
+      // instead of wherever this app is actually running. On web, a dev
+      // build (flutter run -d chrome, a random port each run) would
+      // otherwise send the browser to the marketing site, not back to the
+      // app. On native, it must be this app's own registered deep link
+      // scheme, or the browser has nowhere to hand the session back to.
+      // Both values must also be added to Supabase's Authentication > URL
+      // Configuration > Redirect URLs allow-list, or Supabase rejects the
+      // redirect and falls back anyway.
+      redirectTo: kIsWeb ? Uri.base.toString() : _nativeRedirectUri,
     );
-    if (googleUser == null) {
-      throw const SignInCancelledException();
-    }
-
-    final googleAuth = await googleUser.authentication;
-    final idToken = googleAuth.idToken;
-    if (idToken == null) {
-      throw StateError('Google sign-in did not return an ID token.');
-    }
-
-    // No nonce here: unlike v7's Credential Manager flow, this older API's
-    // ID token doesn't embed one, so passing one would make Supabase check
-    // a nonce the token was never issued with.
-    await supabase.auth
-        .signInWithIdToken(
-          provider: OAuthProvider.google,
-          idToken: idToken,
-        )
-        .timeout(
-          const Duration(seconds: 20),
-          onTimeout: () => throw TimeoutException(
-            'Supabase did not respond to signInWithIdToken within 20s.',
-          ),
-        );
-
-    await ensureProfile(intent);
   }
 
-  /// Reads back the intent recorded before the most recent web sign-in
-  /// attempt and clears it, so a later sign-in never reuses a stale value.
-  /// Defaults to [SignupIntent.tourist] if nothing was recorded (e.g. an
-  /// existing session restored on app start, not a fresh sign-in).
-  Future<SignupIntent> consumePendingWebIntent() async {
+  /// Reads back the intent recorded before the most recent sign-in attempt
+  /// and clears it, so a later sign-in never reuses a stale value. Defaults
+  /// to [SignupIntent.tourist] if nothing was recorded (e.g. an existing
+  /// session restored on app start, not a fresh sign-in).
+  Future<SignupIntent> consumePendingIntent() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_pendingIntentKey);
     await prefs.remove(_pendingIntentKey);
@@ -156,13 +116,6 @@ class AuthRepository {
   }
 
   Future<void> signOut() async {
-    if (!kIsWeb) {
-      await _googleSignIn.signOut();
-    }
     await supabase.auth.signOut();
   }
-}
-
-class SignInCancelledException implements Exception {
-  const SignInCancelledException();
 }

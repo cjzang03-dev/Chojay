@@ -29,8 +29,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       await ref
           .read(authRepositoryProvider)
           .signInWithGoogle(SignupIntent.tourist);
-    } on SignInCancelledException {
-      // User backed out of the Google chooser; nothing to show.
     } catch (e) {
       if (!mounted) return;
       await showErrorDialog(context, title: 'Sign-in failed', error: e);

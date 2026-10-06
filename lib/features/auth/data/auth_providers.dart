@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -10,18 +9,17 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
 });
 
-/// Bootstraps a `profiles` row the moment a web sign-in's session lands,
-/// since web's OAuth redirect tears down and reloads the whole app before
-/// [AuthRepository.signInWithGoogle] can call `ensureProfile` itself (that
-/// still happens directly, synchronously, on native). Watched once from
-/// `ChojayApp` so it lives for the app's lifetime.
+/// Bootstraps a `profiles` row the moment a sign-in's session lands. Every
+/// platform now signs in through the same external-browser OAuth redirect
+/// (see [AuthRepository.signInWithGoogle]), which returns before sign-in
+/// actually completes, so this listener — not the call site — is what
+/// actually creates the profile. Watched once from `ChojayApp` so it lives
+/// for the app's lifetime.
 final authBootstrapProvider = Provider<void>((ref) {
-  if (!kIsWeb) return;
-
   final repo = ref.watch(authRepositoryProvider);
   final subscription = repo.authStateChanges.listen((state) async {
     if (state.event == AuthChangeEvent.signedIn) {
-      final intent = await repo.consumePendingWebIntent();
+      final intent = await repo.consumePendingIntent();
       await repo.ensureProfile(intent);
     }
   });

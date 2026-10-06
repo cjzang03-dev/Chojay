@@ -37,12 +37,15 @@ dependencies:
 
   # Backend: shared Supabase project (same DB/auth/storage as the website)
   supabase_flutter: ^2.8.0
-  # Google sign-in (the only auth method for this phase, per product decisions).
-  # Pinned to v6 (the legacy Play Services Auth flow) rather than v7's
-  # Credential Manager-based API, which hangs indefinitely after the account
-  # picker closes on a range of real Android devices — a known, unresolved
-  # upstream bug (e.g. flutter/flutter#187395), not something fixable here.
-  google_sign_in: ^6.3.0
+  # Google sign-in (the only auth method for this phase, per product
+  # decisions) goes through Supabase's hosted browser-redirect OAuth flow —
+  # the same one the website uses — rather than the native google_sign_in
+  # plugin. That plugin requires Google Play Services to validate this app's
+  # package name + signing certificate against an "Android" OAuth client in
+  # Google Cloud Console, and that check failed with ApiException: 10
+  # (DEVELOPER_ERROR) on real devices across two different phone brands even
+  # with a byte-for-byte confirmed-correct package name, SHA-1 and client
+  # ID. The browser redirect flow doesn't depend on that validation at all.
   # State management
   flutter_riverpod: ^2.6.1
   # Declarative routing with auth-aware redirects
