@@ -24,15 +24,28 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Catches the browser's redirect back into the app after
-                 Google sign-in completes (see AuthRepository.signInWithGoogle).
-                 This exact scheme+host must also be in Supabase's
-                 Authentication > URL Configuration > Redirect URLs allow-list. -->
-            <intent-filter android:autoVerify="false">
+        </activity>
+        <!-- flutter_web_auth_2's dedicated callback activity: catches the
+             Custom Tab's redirect after Google sign-in completes (see
+             AuthRepository.signInWithGoogle) and hands control straight back
+             to the authenticate() call that launched it, in the SAME task as
+             MainActivity. This replaces an earlier approach that caught the
+             redirect directly on MainActivity via Supabase's own
+             signInWithOAuth + an external-browser handoff — on at least one
+             real device, returning from that external browser left the app
+             on a black screen that never recovered, a known class of
+             Android task/activity bug with that pattern. This scheme must
+             still be in Supabase's Authentication > URL Configuration >
+             Redirect URLs allow-list (unchanged from before). -->
+        <activity
+            android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
+            android:exported="true"
+            android:taskAffinity="">
+            <intent-filter android:label="flutter_web_auth_2">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="com.journeyinbhutan.chojay" android:host="login-callback"/>
+                <data android:scheme="com.journeyinbhutan.chojay"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

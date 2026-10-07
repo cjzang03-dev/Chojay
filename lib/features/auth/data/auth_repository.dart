@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,59 +12,68 @@ import '../../../core/config/supabase_client.dart';
 enum SignupIntent { tourist, guide, operator }
 
 class AuthRepository {
-  /// The whole app now signs in through the browser-based OAuth redirect
-  /// (the same flow the website uses) rather than the native
-  /// google_sign_in plugin. The plugin requires Play Services to validate
-  /// this app's package name + signing certificate against an "Android"
-  /// OAuth client in Google Cloud Console, and that check kept failing
-  /// with ApiException: 10 (DEVELOPER_ERROR) on real devices even with a
-  /// byte-for-byte confirmed-correct package name, SHA-1 and client ID —
-  /// across two different phone brands, ruling out device-specific causes.
-  /// The browser redirect flow never touches that Android-client
-  /// validation at all, so this entire failure class doesn't apply to it.
+  /// Native sign-in uses this exact redirect URI with Supabase, and only
+  /// the scheme portion (below) with flutter_web_auth_2 — both must still
+  /// be in Supabase's Authentication > URL Configuration > Redirect URLs
+  /// allow-list, same as before.
   static const _nativeRedirectUri = 'com.journeyinbhutan.chojay://login-callback';
+  static const _nativeCallbackScheme = 'com.journeyinbhutan.chojay';
 
-  /// Survives the external-browser round trip (a full-page reload on web,
-  /// an app backgrounding on native) so [AuthBootstrap] can tell which role
-  /// a brand-new sign-in was for once the session lands back in the app.
+  /// Survives the full-page reload that web's OAuth redirect causes, so
+  /// [AuthBootstrap] can tell which role a brand-new web sign-in was for
+  /// once the session lands back in a fresh app instance. Native doesn't
+  /// need this to survive anything — signInWithGoogle awaits the whole
+  /// flow — but reads it back the same way for one code path.
   static const _pendingIntentKey = 'pending_signup_intent';
 
   Stream<AuthState> get authStateChanges => supabase.auth.onAuthStateChange;
 
   User? get currentUser => supabase.auth.currentUser;
 
-  /// Starts Google sign-in via Supabase's hosted browser-redirect OAuth
-  /// flow, on every platform.
+  /// Signs in with Google.
   ///
   /// [intent] controls the `user_type` written for a brand-new profile only.
   /// Tourist is the invisible default for the main app flow; guide/operator
   /// is only reachable from the separate "Partner with us" entry point.
   /// An existing profile's `user_type` is never overwritten here — that
   /// value is owned by admin approval / the website's identity checks.
-  ///
-  /// This only launches the browser round trip; it does not wait for
-  /// sign-in to actually complete. Web tears this app instance down with a
-  /// full-page redirect before the returned future would resolve anyway;
-  /// native backgrounds the app and comes back via [_nativeRedirectUri]'s
-  /// deep link. Either way, profile bootstrap happens in
-  /// [AuthBootstrap]'s signed-in listener once the session lands back.
   Future<void> signInWithGoogle(SignupIntent intent) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_pendingIntentKey, intent.name);
 
-    await supabase.auth.signInWithOAuth(
-      OAuthProvider.google,
-      // Without this, Supabase redirects back to the project's Site URL
-      // instead of wherever this app is actually running. On web, a dev
-      // build (flutter run -d chrome, a random port each run) would
-      // otherwise send the browser to the marketing site, not back to the
-      // app. On native, it must be this app's own registered deep link
-      // scheme, or the browser has nowhere to hand the session back to.
-      // Both values must also be added to Supabase's Authentication > URL
-      // Configuration > Redirect URLs allow-list, or Supabase rejects the
-      // redirect and falls back anyway.
-      redirectTo: kIsWeb ? Uri.base.toString() : _nativeRedirectUri,
+    if (kIsWeb) {
+      await supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        // Without this, Supabase redirects back to the project's Site URL
+        // instead of wherever this app is actually running — on a dev
+        // build (flutter run -d chrome, a random port each run) that sends
+        // the browser to the marketing site, not back to the app. Web uses
+        // a full-page redirect, which tears this app instance down before
+        // this call's future even resolves — profile bootstrap happens in
+        // AuthBootstrap's signed-in listener once the session lands back
+        // in the fresh app instance after the round trip.
+        redirectTo: Uri.base.toString(),
+      );
+      return;
+    }
+
+    // Native: open the OAuth URL in a Custom Tab (Android) / ASWebAuthentication
+    // Session (iOS) via flutter_web_auth_2, rather than Supabase's own
+    // signInWithOAuth + an external-browser handoff. That approach left at
+    // least one real device stuck on a black screen after returning from
+    // the browser — a known class of Android task/activity bug with a
+    // separate deep-link Intent resolving back into the app. This way, the
+    // same call that opens the browser owns and closes it, with no
+    // separate Intent step to go wrong.
+    final oauthUrl = await supabase.auth.getOAuthSignInUrl(
+      provider: OAuthProvider.google,
+      redirectTo: _nativeRedirectUri,
     );
+    final result = await FlutterWebAuth2.authenticate(
+      url: oauthUrl.url,
+      callbackUrlScheme: _nativeCallbackScheme,
+    );
+    await supabase.auth.getSessionFromUrl(Uri.parse(result));
   }
 
   /// Reads back the intent recorded before the most recent sign-in attempt
