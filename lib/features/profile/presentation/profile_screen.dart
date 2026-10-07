@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../auth/data/auth_providers.dart';
 import '../../favorites/presentation/favorites_screen.dart';
 import '../../notifications/presentation/notifications_screen.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -14,11 +15,18 @@ class ProfileScreen extends ConsumerWidget {
     final user = ref.watch(authRepositoryProvider).currentUser;
     // Re-read on auth-state changes so sign-out reflects immediately.
     ref.watch(authStateProvider);
+    final profile = ref.watch(currentProfileProvider).valueOrNull;
 
-    final name = user?.userMetadata?['full_name'] as String? ??
-        user?.userMetadata?['name'] as String? ??
-        'Traveler';
-    final avatarUrl = user?.userMetadata?['avatar_url'] as String?;
+    // profiles.full_name/photo_url (editable in-app) win once set; Google's
+    // own metadata is just the fallback for a brand-new profile.
+    final name = profile?.fullName?.isNotEmpty == true
+        ? profile!.fullName!
+        : user?.userMetadata?['full_name'] as String? ??
+            user?.userMetadata?['name'] as String? ??
+            'Traveler';
+    final avatarUrl = profile?.photoUrl?.isNotEmpty == true
+        ? profile!.photoUrl
+        : user?.userMetadata?['avatar_url'] as String?;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
@@ -74,6 +82,15 @@ class ProfileScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => EditProfileScreen(profile: profile),
+                    ),
+                  ),
+                  icon: const Icon(Icons.edit_rounded, color: Colors.white),
+                  tooltip: 'Edit profile',
+                ),
               ],
             ),
           ),
@@ -81,6 +98,16 @@ class ProfileScreen extends ConsumerWidget {
           Card(
             child: Column(
               children: [
+                _MenuRow(
+                  icon: Icons.person_outline_rounded,
+                  label: 'Edit profile',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => EditProfileScreen(profile: profile),
+                    ),
+                  ),
+                ),
+                const Divider(height: 1, indent: 56),
                 _MenuRow(
                   icon: Icons.favorite_border_rounded,
                   label: 'Favorites',

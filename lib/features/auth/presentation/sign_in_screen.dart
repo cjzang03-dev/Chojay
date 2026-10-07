@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/error_dialog.dart';
+import '../../itineraries/data/itineraries_providers.dart';
 import '../data/auth_providers.dart';
 import '../data/auth_repository.dart';
 import 'partner_entry_screen.dart';
@@ -39,77 +40,155 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final heroPhoto = ref.watch(signInHeroPhotoProvider).valueOrNull;
+
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            children: [
-              const Spacer(flex: 3),
-              Container(
-                width: 88,
-                height: 88,
-                decoration: BoxDecoration(
-                  color: AppColors.himalayanGreen,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: const Icon(
-                  Icons.landscape_rounded,
-                  color: Colors.white,
-                  size: 44,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Journey in Bhutan',
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Curated Bhutan itineraries, matched with\nlicensed local guides and operators.',
-                style: TextStyle(color: AppColors.stoneGrey, height: 1.4),
-                textAlign: TextAlign.center,
-              ),
-              const Spacer(flex: 4),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isSigningIn ? null : _continueWithGoogle,
-                  icon: _isSigningIn
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.g_mobiledata, size: 26),
-                  label: Text(_isSigningIn ? 'Signing in…' : 'Continue with Google'),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'By continuing you agree to our Terms and Privacy Policy.',
-                style: TextStyle(fontSize: 12, color: AppColors.stoneGrey),
-                textAlign: TextAlign.center,
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: _isSigningIn
-                    ? null
-                    : () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const PartnerEntryScreen(),
-                          ),
-                        ),
-                child: const Text('Are you a guide or tour operator? Partner with us'),
-              ),
-              const SizedBox(height: 12),
-            ],
+      body: Column(
+        children: [
+          Expanded(
+            flex: 6,
+            child: _HeroPanel(photoUrl: heroPhoto),
           ),
+          Expanded(
+            flex: 5,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(28, 24, 28, 12),
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _isSigningIn ? null : _continueWithGoogle,
+                        icon: _isSigningIn
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.g_mobiledata, size: 26),
+                        label: Text(
+                            _isSigningIn ? 'Signing in…' : 'Continue with Google'),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'By continuing you agree to our Terms and Privacy Policy.',
+                      style: TextStyle(fontSize: 12, color: AppColors.stoneGrey),
+                      textAlign: TextAlign.center,
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: _isSigningIn
+                          ? null
+                          : () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const PartnerEntryScreen(),
+                                ),
+                              ),
+                      child: const Text(
+                          'Are you a guide or tour operator? Partner with us'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Full-bleed photo with the title/tagline overlaid on a gradient scrim —
+/// reuses a real, already-approved itinerary cover photo rather than the
+/// flat icon tile this screen used to show. Falls back to the icon tile
+/// while the photo loads, if there isn't one yet, or if it fails to load.
+class _HeroPanel extends StatelessWidget {
+  const _HeroPanel({required this.photoUrl});
+
+  final String? photoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(32),
+        bottomRight: Radius.circular(32),
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (photoUrl != null && photoUrl!.isNotEmpty)
+            Image.network(
+              photoUrl!,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, progress) =>
+                  progress == null ? child : const _FallbackBackdrop(),
+              errorBuilder: (context, error, stackTrace) =>
+                  const _FallbackBackdrop(),
+            )
+          else
+            const _FallbackBackdrop(),
+          // Scrim so white title text stays legible over any photo.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Colors.black54],
+                stops: [0.3, 1.0],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 28,
+            right: 28,
+            bottom: 28,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Journey in Bhutan',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Curated Bhutan itineraries, matched with licensed '
+                  'local guides and operators.',
+                  style: TextStyle(color: Colors.white70, height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FallbackBackdrop extends StatelessWidget {
+  const _FallbackBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.himalayanGreenLight, AppColors.himalayanGreenDark],
         ),
+      ),
+      child: const Center(
+        child: Icon(Icons.landscape_rounded, color: Colors.white54, size: 72),
       ),
     );
   }

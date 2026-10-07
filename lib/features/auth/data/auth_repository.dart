@@ -125,6 +125,26 @@ class AuthRepository {
     });
   }
 
+  /// Lets a tourist fill in the profile fields the website's own
+  /// setup-profile form already writes (full_name/phone/country/bio) —
+  /// only the ones relevant to a tourist, not the guide/operator-only ones
+  /// (license_number, agency_code, etc).
+  Future<void> updateProfile({
+    required String fullName,
+    String? phone,
+    String? country,
+    String? bio,
+  }) async {
+    final user = currentUser;
+    if (user == null) return;
+    await supabase.from('profiles').update({
+      'full_name': fullName,
+      'phone': phone,
+      'country': country,
+      'bio': bio,
+    }).eq('id', user.id);
+  }
+
   Future<void> signOut() async {
     await supabase.auth.signOut();
   }
