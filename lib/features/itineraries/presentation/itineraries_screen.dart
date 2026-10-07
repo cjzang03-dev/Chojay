@@ -72,8 +72,8 @@ class _ItinerariesScreenState extends ConsumerState<ItinerariesScreen> {
                           Expanded(
                             child: Text(
                               firstName == null || firstName.isEmpty
-                                  ? 'Where to next?'
-                                  : 'Hi $firstName, where to next?',
+                                  ? 'Where do you want to go?'
+                                  : 'Hi $firstName,\nWhere do you want to go?',
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                           ),
