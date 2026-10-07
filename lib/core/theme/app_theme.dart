@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 
-/// "Serene Himalayan Green" — the shared visual identity with the
-/// journeyinbhutan.com website. Keep this the single source of brand color
-/// so the app and site stay visually consistent as both evolve.
+/// Matches journeyinbhutan.com's own warm cream/terracotta/gold palette
+/// (see app/globals.css) instead of a separate app-only color scheme, so the
+/// app and site read as one brand. Names kept as-is (himalayanGreen etc.) to
+/// avoid a 20-file rename — only the color *values* moved to the website's
+/// palette.
 class AppColors {
   const AppColors._();
 
-  static const himalayanGreen = Color(0xFF1F5C4A);
-  static const himalayanGreenDark = Color(0xFF123B2F);
-  static const himalayanGreenLight = Color(0xFF2E7D63);
-  static const saffron = Color(0xFFD98E29); // accent, used sparingly
-  static const cloudWhite = Color(0xFFFAF9F5);
-  static const mist = Color(0xFFF0EFE9); // subtle fills, skeletons
-  static const stoneGrey = Color(0xFF6B7268);
-  static const stoneGreyLight = Color(0xFF9CA39A);
+  static const himalayanGreen = Color(0xFFC4622D); // primary / CTA (terracotta)
+  static const himalayanGreenDark = Color(0xFF2C1810); // headings / dark text
+  static const himalayanGreenLight = Color(0xFFD97D4E);
+  static const saffron = Color(0xFFD4A847); // accent, used sparingly
+  static const cloudWhite = Color(0xFFFEFCF8);
+  static const mist = Color(0xFFFDF3E7); // subtle fills, skeletons
+  static const stoneGrey = Color(0xFF8A7568);
+  static const stoneGreyLight = Color(0xFFC7B8A8);
   static const errorRed = Color(0xFFB3261E);
-  static const starGold = Color(0xFFF2B705);
+  static const starGold = Color(0xFFD4A847);
 }
 
 /// A small consistent spacing scale, so padding/gaps read as one system
