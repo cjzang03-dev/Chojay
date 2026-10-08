@@ -97,21 +97,78 @@ class ChojayApp extends ConsumerWidget {
       theme: AppTheme.light,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
-      // Diagnostic only, temporary: a self-contained ticking clock drawn on
-      // top of every screen, independent of any provider or route state.
-      // Earlier fixes (Impeller off, TextureView, rebuilding realtime
-      // channels on resume) didn't stop the black screen on resume, and it
-      // shows no red error either — which only rules out a Dart exception,
-      // not a genuine engine/renderer freeze vs. the UI isolate itself
-      // being stuck. If this clock is still ticking next time the screen
-      // goes black, Flutter is alive and something is painting solid black
-      // on purpose (a real bug to find in code); if it's frozen too, the
-      // problem is below Flutter entirely (the Android surface itself).
+      // The clock confirmed Flutter itself is alive and still painting when
+      // the screen goes black — so either something is deliberately
+      // covering the real page in solid black, or the real page's content
+      // is collapsing to near-zero size and the window's raw (black)
+      // clear color shows through everywhere nothing was painted.
+      // `Positioned.fill` forces the routed content to always take the
+      // full screen regardless of its own intrinsic size, which rules out
+      // (and fixes, if that's the cause) the second case. The small pill
+      // above the clock also reports exactly what size that content thinks
+      // it has — if it ever reads something tiny like "0×0" instead of the
+      // full screen size, that's hard proof of a collapsed-size bug to
+      // chase next, rather than another guess.
       builder: (context, child) => Stack(
+        fit: StackFit.expand,
         children: [
-          ?child,
-          const Positioned(bottom: 8, right: 8, child: _HeartbeatOverlay()),
+          if (child != null)
+            Positioned.fill(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _childSizeNotifier.value =
+                        '${constraints.maxWidth.toStringAsFixed(0)}×'
+                        '${constraints.maxHeight.toStringAsFixed(0)}';
+                  });
+                  return child;
+                },
+              ),
+            ),
+          Positioned(
+            bottom: 8,
+            right: 8,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                ValueListenableBuilder<String>(
+                  valueListenable: _childSizeNotifier,
+                  builder: (context, value, _) => _DebugPill(text: value),
+                ),
+                const SizedBox(height: 4),
+                const _HeartbeatOverlay(),
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// Diagnostic only, temporary — see the comment on [ChojayApp.build]'s
+/// `builder`.
+final _childSizeNotifier = ValueNotifier<String>('(measuring…)');
+
+class _DebugPill extends StatelessWidget {
+  const _DebugPill({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Material(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          child: Text(
+            text,
+            style: const TextStyle(color: Colors.white, fontSize: 11),
+          ),
+        ),
       ),
     );
   }
