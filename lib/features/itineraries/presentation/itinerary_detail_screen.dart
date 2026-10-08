@@ -106,6 +106,22 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
                     itinerary: itinerary,
                     operatorCount: detail.approvedOperators.length,
                   ),
+                  if (itinerary.indicativePrice != null &&
+                      itinerary.indicativePrice!.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    Text('Price',
+                        style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 6),
+                    Text(
+                      itinerary.indicativePrice!,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.himalayanGreenDark,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                   if (itinerary.description != null &&
                       itinerary.description!.isNotEmpty) ...[
                     const SizedBox(height: 24),
@@ -174,6 +190,20 @@ class _BottomPriceBar extends StatelessWidget {
   final bool hasOperators;
   final VoidCallback onPressed;
 
+  /// Some itineraries' price text is a full sentence with a parenthetical
+  /// regional-pricing note (e.g. "$300 – 700 per person (Nu. 2,000 – 5,000
+  /// for Indian/Regional tourists)") — fine in the scrollable body (added
+  /// above, under "Price"), but left unbounded here it wrapped across many
+  /// lines and inflated this sticky bar to take up most of the screen,
+  /// squeezing the entire page above it into a sliver and making "Book Now"
+  /// look broken (nothing visible to scroll to). Keep this bar's own copy
+  /// short and single-line; the full text always has room up in the body.
+  String get _shortPrice {
+    final parenIndex = price.indexOf('(');
+    final head = parenIndex == -1 ? price : price.substring(0, parenIndex);
+    return head.trim().isEmpty ? price : head.trim();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -196,7 +226,9 @@ class _BottomPriceBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    price,
+                    _shortPrice,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
