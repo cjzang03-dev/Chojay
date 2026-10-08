@@ -8,8 +8,6 @@ import 'core/config/supabase_client.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/data/auth_providers.dart';
-import 'features/chat/data/chat_providers.dart';
-import 'features/notifications/data/notifications_providers.dart';
 
 void main() {
   // Flutter's default release-mode ErrorWidget.builder renders nothing
@@ -83,44 +81,11 @@ class _StartupErrorApp extends StatelessWidget {
   }
 }
 
-class ChojayApp extends ConsumerStatefulWidget {
+class ChojayApp extends ConsumerWidget {
   const ChojayApp({super.key});
 
   @override
-  ConsumerState<ChojayApp> createState() => _ChojayAppState();
-}
-
-class _ChojayAppState extends ConsumerState<ChojayApp>
-    with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // The chat and notifications realtime subscriptions (open WebSocket
-    // channels) don't get any signal when Android suspends the app's
-    // network in the background — unlike Supabase's own auth token
-    // refresh, which supabase_flutter already pauses/resumes itself. A
-    // channel that went stale while backgrounded won't reliably recover on
-    // its own, so force both providers to tear down and rebuild their
-    // channel from scratch on resume rather than trust the stale one.
-    if (state == AppLifecycleState.resumed) {
-      ref.invalidate(notificationsProvider);
-      ref.invalidate(conversationsProvider);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (!Env.isConfigured) {
       return const MaterialApp(home: _MissingConfigScreen());
     }
@@ -132,6 +97,72 @@ class _ChojayAppState extends ConsumerState<ChojayApp>
       theme: AppTheme.light,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
+      // Diagnostic only, temporary: a self-contained ticking clock drawn on
+      // top of every screen, independent of any provider or route state.
+      // Earlier fixes (Impeller off, TextureView, rebuilding realtime
+      // channels on resume) didn't stop the black screen on resume, and it
+      // shows no red error either — which only rules out a Dart exception,
+      // not a genuine engine/renderer freeze vs. the UI isolate itself
+      // being stuck. If this clock is still ticking next time the screen
+      // goes black, Flutter is alive and something is painting solid black
+      // on purpose (a real bug to find in code); if it's frozen too, the
+      // problem is below Flutter entirely (the Android surface itself).
+      builder: (context, child) => Stack(
+        children: [
+          ?child,
+          const Positioned(bottom: 8, right: 8, child: _HeartbeatOverlay()),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeartbeatOverlay extends StatefulWidget {
+  const _HeartbeatOverlay();
+
+  @override
+  State<_HeartbeatOverlay> createState() => _HeartbeatOverlayState();
+}
+
+class _HeartbeatOverlayState extends State<_HeartbeatOverlay> {
+  late final Timer _timer;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _now = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = _now;
+    final label =
+        '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:${t.second.toString().padLeft(2, '0')}';
+    return IgnorePointer(
+      child: Material(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
