@@ -14,20 +14,22 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
     refreshListenable: refresh,
-    redirect: (context, state) async {
+    // Deliberately synchronous (no `async`/`await`). go_router doesn't
+    // paint anything — not even the '/' route's own builder — until
+    // `redirect` finishes, so an awaited network call in here (e.g. the
+    // profile fetch below, used to live here) left the screen fully black
+    // on a cold start for however long that call took. Role-based routing
+    // now happens inside `_LoadingGate`, which paints a spinner immediately
+    // and navigates onward itself once the profile fetch resolves.
+    redirect: (context, state) {
       final isSignedIn = ref.read(isSignedInProvider);
       final goingToSignIn = state.matchedLocation == '/sign-in';
 
       if (!isSignedIn) {
         return goingToSignIn ? null : '/sign-in';
       }
-
-      // Route by role: tourists get the booking-focused shell, guides and
-      // operators get the partner dashboard. Only decided at '/' or when
-      // leaving sign-in — an in-shell navigation never gets bounced.
-      if (goingToSignIn || state.matchedLocation == '/') {
-        final profile = await ref.read(currentProfileProvider.future);
-        return (profile?.isPartner ?? false) ? '/partner' : '/home';
+      if (goingToSignIn) {
+        return '/';
       }
       return null;
     },
@@ -52,13 +54,35 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Brief fallback shown at '/' while the redirect above resolves which
-/// shell to land in (waits on the signed-in user's profile fetch).
-class _LoadingGate extends StatelessWidget {
+/// Shown at '/' the moment a signed-in user lands there (straight from
+/// cold start, or bounced back from '/sign-in'). Paints its spinner
+/// immediately, then decides which shell to send them to itself once the
+/// profile fetch resolves — see the comment on `redirect` above for why
+/// that decision doesn't live in `redirect` itself.
+class _LoadingGate extends ConsumerWidget {
   const _LoadingGate();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(currentProfileProvider);
+
+    profileAsync.when(
+      data: (profile) {
+        final target = (profile?.isPartner ?? false) ? '/partner' : '/home';
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) context.go(target);
+        });
+      },
+      loading: () {},
+      // Fail open to the tourist shell rather than leaving the user stuck
+      // on a spinner forever if the profile fetch errors (e.g. no network).
+      error: (_, __) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) context.go('/home');
+        });
+      },
+    );
+
     return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
