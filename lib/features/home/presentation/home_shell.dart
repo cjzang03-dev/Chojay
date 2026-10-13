@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../../bookings/presentation/bookings_screen.dart';
+import '../../chat/presentation/chat_list_screen.dart';
 import '../../favorites/presentation/favorites_screen.dart';
 import '../../itineraries/presentation/itineraries_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
 
-/// The signed-in tourist's main shell: Explore, Saved, My trips, Profile —
-/// matching the product's four core destinations. Chat isn't its own tab;
-/// it's reached from a specific booking (My trips), since every
-/// conversation here is tied to a booking request, not a standalone inbox.
+/// The signed-in tourist's main shell: Explore, Saved, My trips, Chat,
+/// Profile. Chat was dropped as its own tab in an earlier pass (the
+/// assumption being every conversation here starts from a booking) but
+/// that made it undiscoverable as a standalone inbox — restored as a tab
+/// per explicit feedback.
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -23,6 +25,7 @@ class _HomeShellState extends State<HomeShell> {
     ItinerariesScreen(),
     FavoritesScreen(),
     BookingsScreen(),
+    ChatListScreen(),
     ProfileScreen(),
   ];
 
@@ -48,6 +51,11 @@ class _HomeShellState extends State<HomeShell> {
             icon: Icon(Icons.calendar_month_outlined),
             selectedIcon: Icon(Icons.calendar_month),
             label: 'My trips',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.chat_bubble_outline),
+            selectedIcon: Icon(Icons.chat_bubble),
+            label: 'Chat',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
