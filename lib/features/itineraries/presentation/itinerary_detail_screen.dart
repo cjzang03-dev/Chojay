@@ -9,8 +9,16 @@ import '../../favorites/data/favorites_providers.dart';
 import '../data/itineraries_providers.dart';
 import '../domain/itinerary.dart';
 
-/// Itinerary detail, including the approved-operators list a tourist picks
-/// from to request a booking (build order step 5).
+enum _DetailTab { overview, dayByDay, included, bookingTerms }
+
+/// Itinerary detail: Overview / Day-by-day / Included / Booking terms, then
+/// the approved-operators list a tourist picks from to request a quote.
+///
+/// Tab switching here is plain conditional rendering on a local enum
+/// (rather than Flutter's TabBarView, which needs a bounded height) so the
+/// whole page — hero, facts, tabs, and the operator list below them — stays
+/// one single scrollable column, same approach the website's equivalent
+/// panel uses.
 class ItineraryDetailScreen extends ConsumerWidget {
   const ItineraryDetailScreen({super.key, required this.itineraryId});
 
@@ -48,6 +56,7 @@ class _DetailBody extends ConsumerStatefulWidget {
 
 class _DetailBodyState extends ConsumerState<_DetailBody> {
   final _operatorsKey = GlobalKey();
+  _DetailTab _activeTab = _DetailTab.overview;
 
   void _scrollToOperators() {
     final context = _operatorsKey.currentContext;
@@ -90,7 +99,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -109,35 +118,20 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
                   if (itinerary.indicativePrice != null &&
                       itinerary.indicativePrice!.isNotEmpty) ...[
                     const SizedBox(height: 20),
-                    Text('Price',
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 6),
-                    Text(
-                      itinerary.indicativePrice!,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.himalayanGreenDark,
-                        height: 1.4,
-                      ),
-                    ),
+                    _PriceSection(price: itinerary.indicativePrice!),
                   ],
-                  if (itinerary.description != null &&
-                      itinerary.description!.isNotEmpty) ...[
-                    const SizedBox(height: 24),
-                    Text('About this trip',
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 8),
-                    Text(itinerary.description!,
-                        style: const TextStyle(height: 1.5)),
-                  ],
-                  if (detail.days.isNotEmpty) ...[
-                    const SizedBox(height: 28),
-                    Text('Day by day',
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 12),
-                    ...detail.days.map((day) => _DayTile(day: day)),
-                  ],
+                  const SizedBox(height: 24),
+                  _TabRow(
+                    active: _activeTab,
+                    onChanged: (tab) => setState(() => _activeTab = tab),
+                  ),
+                  const SizedBox(height: 16),
+                  switch (_activeTab) {
+                    _DetailTab.overview => _OverviewTab(itinerary: itinerary),
+                    _DetailTab.dayByDay => _DayByDayTab(days: detail.days),
+                    _DetailTab.included => const _IncludedTab(),
+                    _DetailTab.bookingTerms => const _BookingTermsTab(),
+                  },
                   SizedBox(height: 28, key: _operatorsKey),
                   Text('Choose your operator',
                       style: Theme.of(context).textTheme.titleLarge),
@@ -145,7 +139,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
                   Text(
                     detail.approvedOperators.isEmpty
                         ? 'No operators approved for this itinerary yet.'
-                        : 'Tap an operator to request a booking.',
+                        : 'Tap an operator to request a quote.',
                     style: TextStyle(color: AppColors.stoneGrey, height: 1.4),
                   ),
                   const SizedBox(height: 12),
@@ -162,6 +156,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
@@ -175,6 +170,276 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
               hasOperators: detail.approvedOperators.isNotEmpty,
               onPressed: _scrollToOperators,
             ),
+    );
+  }
+}
+
+class _PriceSection extends StatelessWidget {
+  const _PriceSection({required this.price});
+
+  final String price;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Sample price', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 6),
+        Text(
+          'from $price',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: AppColors.himalayanGreenDark,
+            height: 1.4,
+          ),
+        ),
+        const Text(
+          'Government fees & flights extra',
+          style: TextStyle(fontSize: 12, color: AppColors.stoneGrey),
+        ),
+        Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(bottom: 8),
+            title: const Text(
+              'Price details',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+            children: const [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'This is a sample price to help you compare trips, not a '
+                  'final charge. Government fees (the Sustainable '
+                  'Development Fee) vary by nationality and age, and '
+                  'flights aren\'t included. Request a quote and your '
+                  'operator will send an itemized price for your exact '
+                  'dates and group.',
+                  style: TextStyle(fontSize: 12, color: AppColors.stoneGrey, height: 1.5),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TabRow extends StatelessWidget {
+  const _TabRow({required this.active, required this.onChanged});
+
+  final _DetailTab active;
+  final ValueChanged<_DetailTab> onChanged;
+
+  static const _labels = {
+    _DetailTab.overview: 'Overview',
+    _DetailTab.dayByDay: 'Day-by-day',
+    _DetailTab.included: 'Included',
+    _DetailTab.bookingTerms: 'Booking terms',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 36,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: _DetailTab.values.length,
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+        itemBuilder: (context, index) {
+          final tab = _DetailTab.values[index];
+          final selected = tab == active;
+          return ChoiceChip(
+            label: Text(_labels[tab]!),
+            selected: selected,
+            onSelected: (_) => onChanged(tab),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _OverviewTab extends StatelessWidget {
+  const _OverviewTab({required this.itinerary});
+
+  final Itinerary itinerary;
+
+  @override
+  Widget build(BuildContext context) {
+    final description = itinerary.cleanDescription;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (description.isNotEmpty) ...[
+          Text(description, style: const TextStyle(height: 1.5)),
+          const SizedBox(height: 16),
+        ],
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppColors.mist,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+          ),
+          child: const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.verified_outlined, size: 18, color: AppColors.himalayanGreen),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Planned with local expertise — every operator below is a '
+                  'licensed Bhutanese operator or guide, verified before you '
+                  'commit to anything.',
+                  style: TextStyle(fontSize: 12.5, color: AppColors.himalayanGreenDark, height: 1.5),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DayByDayTab extends StatelessWidget {
+  const _DayByDayTab({required this.days});
+
+  final List<ItineraryDay> days;
+
+  @override
+  Widget build(BuildContext context) {
+    if (days.isEmpty) {
+      return const Text(
+        'A day-by-day plan hasn\'t been added for this journey yet.',
+        style: TextStyle(color: AppColors.stoneGrey),
+      );
+    }
+    return Column(
+      children: [for (final day in days) _DayTile(day: day)],
+    );
+  }
+}
+
+class _IncludedTab extends StatelessWidget {
+  const _IncludedTab();
+
+  static const _included = [
+    'Accommodation',
+    'Meals',
+    'Licensed guide',
+    'Private transport',
+    'Monument & park tickets',
+    'Airport transfers',
+  ];
+
+  static const _excluded = [
+    'Bhutan government fees (Sustainable Development Fee)',
+    'Visa',
+    'International flights',
+    'Travel insurance',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Confirm these with your operator in your quote:',
+          style: TextStyle(color: AppColors.stoneGrey, fontSize: 12.5),
+        ),
+        const SizedBox(height: 10),
+        for (final item in _included)
+          _ChecklistRow(label: item, icon: Icons.check_circle_rounded, color: AppColors.success),
+        const SizedBox(height: 18),
+        const Text(
+          'Not included:',
+          style: TextStyle(color: AppColors.stoneGrey, fontSize: 12.5),
+        ),
+        const SizedBox(height: 10),
+        for (final item in _excluded)
+          _ChecklistRow(label: item, icon: Icons.cancel_rounded, color: AppColors.stoneGreyLight),
+      ],
+    );
+  }
+}
+
+class _ChecklistRow extends StatelessWidget {
+  const _ChecklistRow({required this.label, required this.icon, required this.color});
+
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 10),
+          Expanded(child: Text(label, style: const TextStyle(height: 1.3))),
+        ],
+      ),
+    );
+  }
+}
+
+class _BookingTermsTab extends StatelessWidget {
+  const _BookingTermsTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        Text(
+          'A quote is not a booking.',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        SizedBox(height: 8),
+        Text(
+          'Requesting a quote starts a conversation with the operator — it '
+          'doesn\'t charge you or confirm anything. Before you pay a '
+          'deposit or final payment, review directly with the operator:',
+          style: TextStyle(height: 1.5, color: AppColors.stoneGrey),
+        ),
+        SizedBox(height: 10),
+        _TermBullet('Exact travel dates'),
+        _TermBullet('Total price for your group'),
+        _TermBullet('Deposit amount and when it\'s due'),
+        _TermBullet('Cancellation policy'),
+        _TermBullet('Refund terms'),
+      ],
+    );
+  }
+}
+
+class _TermBullet extends StatelessWidget {
+  const _TermBullet(this.label, {super.key});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('•  ', style: TextStyle(color: AppColors.stoneGrey)),
+          Expanded(
+            child: Text(label, style: const TextStyle(color: AppColors.stoneGrey, height: 1.4)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -193,11 +458,12 @@ class _BottomPriceBar extends StatelessWidget {
   /// Some itineraries' price text is a full sentence with a parenthetical
   /// regional-pricing note (e.g. "$300 – 700 per person (Nu. 2,000 – 5,000
   /// for Indian/Regional tourists)") — fine in the scrollable body (added
-  /// above, under "Price"), but left unbounded here it wrapped across many
-  /// lines and inflated this sticky bar to take up most of the screen,
-  /// squeezing the entire page above it into a sliver and making "Book Now"
-  /// look broken (nothing visible to scroll to). Keep this bar's own copy
-  /// short and single-line; the full text always has room up in the body.
+  /// above, under "Sample price"), but left unbounded here it wrapped
+  /// across many lines and inflated this sticky bar to take up most of the
+  /// screen, squeezing the entire page above it into a sliver and making
+  /// the CTA look broken (nothing visible to scroll to). Keep this bar's
+  /// own copy short and single-line; the full text always has room up in
+  /// the body.
   String get _shortPrice {
     final parenIndex = price.indexOf('(');
     final head = parenIndex == -1 ? price : price.substring(0, parenIndex);
@@ -226,17 +492,17 @@ class _BottomPriceBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _shortPrice,
+                    'Sample price · from $_shortPrice',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: AppColors.himalayanGreenDark,
                     ),
                   ),
                   const Text(
-                    'per person · indicative',
+                    'per person · fees & flights extra',
                     style: TextStyle(fontSize: 11, color: AppColors.stoneGrey),
                   ),
                 ],
@@ -247,7 +513,7 @@ class _BottomPriceBar extends StatelessWidget {
               width: 170,
               child: ElevatedButton(
                 onPressed: hasOperators ? onPressed : null,
-                child: Text(hasOperators ? 'Book Now' : 'Not yet bookable'),
+                child: Text(hasOperators ? 'Request a quote' : 'Not yet bookable'),
               ),
             ),
           ],
@@ -282,9 +548,9 @@ class _CategoryPill extends StatelessWidget {
   }
 }
 
-/// A row of quick facts (duration, flights, operator count) styled like a
-/// hotel-booking app's "facilities" row — adapted to what this product
-/// actually has data for.
+/// A row of quick facts (duration, difficulty, flights, operator count)
+/// styled like a hotel-booking app's "facilities" row — adapted to what
+/// this product actually has data for.
 class _FactsRow extends StatelessWidget {
   const _FactsRow({required this.itinerary, required this.operatorCount});
 
@@ -296,6 +562,9 @@ class _FactsRow extends StatelessWidget {
     final facts = <(IconData, String)>[
       if (itinerary.durationLabel.isNotEmpty)
         (Icons.schedule_rounded, itinerary.durationLabel),
+      if (itinerary.difficulty != null)
+        (Icons.landscape_rounded, itinerary.difficulty!),
+      (Icons.verified_user_outlined, 'Private journey'),
       if (itinerary.includesFlight) (Icons.flight_rounded, 'Flights included'),
       if (operatorCount > 0)
         (

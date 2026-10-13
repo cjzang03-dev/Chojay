@@ -19,7 +19,7 @@ class BookingsScreen extends ConsumerWidget {
     final reviewsAsync = ref.watch(myBookingReviewsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Bookings')),
+      appBar: AppBar(title: const Text('My trips')),
       body: RefreshIndicator(
         onRefresh: () {
           ref.invalidate(myBookingReviewsProvider);
@@ -46,9 +46,10 @@ class BookingsScreen extends ConsumerWidget {
                     height: 500,
                     child: ComingSoon(
                       icon: Icons.calendar_month_outlined,
-                      title: 'No bookings yet',
-                      message: 'Browse itineraries and request to book with '
-                          'an approved operator to see it here.',
+                      title: 'Your next chapter starts here',
+                      message: 'Find a journey that feels like you, and '
+                          'request a quote from an approved operator to '
+                          'see it here.',
                     ),
                   ),
                 ],

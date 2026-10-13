@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Blue and white — matches the blue (#1D4ED8/#1E3A8A) already used on the
 /// website's own booking widget. Names kept as-is (himalayanGreen etc.) to
@@ -16,6 +17,9 @@ class AppColors {
   static const stoneGreyLight = Color(0xFFCBD5E1);
   static const errorRed = Color(0xFFB3261E);
   static const starGold = Color(0xFFF2B705);
+  // Muted green success accent (confirmed bookings, success states) — used
+  // selectively, same role as the design brief's oklch(0.44 0.095 158).
+  static const success = Color(0xFF2F8F5B);
 }
 
 /// A small consistent spacing scale, so padding/gaps read as one system
@@ -57,6 +61,11 @@ class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.cloudWhite,
       splashFactory: InkSparkle.splashFactory,
+      // DM Sans throughout, per the design system brief. Setting it here
+      // (rather than per-widget) means every ad-hoc TextStyle(...) already
+      // scattered across the screens — most of which don't set their own
+      // fontFamily — picks it up automatically via DefaultTextStyle.
+      fontFamily: GoogleFonts.dmSans().fontFamily,
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.cloudWhite,
         foregroundColor: AppColors.himalayanGreenDark,

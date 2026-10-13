@@ -58,6 +58,13 @@ dependencies:
   shared_preferences: ^2.5.5
   flutter_web_auth_2: ^5.1.0
   image_picker: ^1.2.4
+  # DM Sans throughout, per the design system brief. Fetches and caches the
+  # font file on first use; if that fetch fails (no network), it falls back
+  # to the platform default font rather than blocking or erroring — safe to
+  # use from app startup.
+  google_fonts: ^6.2.1
+  # Opens the website's Bhutan-travel-info page from Profile > Help & support.
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
@@ -81,10 +88,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/images/tigers_nest.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

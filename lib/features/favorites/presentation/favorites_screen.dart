@@ -8,9 +8,9 @@ import '../../itineraries/presentation/itinerary_card.dart';
 import '../../itineraries/presentation/itinerary_detail_screen.dart';
 import '../data/favorites_providers.dart';
 
-/// The tourist's saved itineraries — reachable from the heart icon on the
-/// home screen. Reuses the same published-itineraries list rather than a
-/// separate query, filtered down to the favorited IDs.
+/// The tourist's saved itineraries — the Saved tab. Reuses the same
+/// published-itineraries list rather than a separate query, filtered down
+/// to the favorited IDs.
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
 
@@ -20,7 +20,7 @@ class FavoritesScreen extends ConsumerWidget {
     final favoriteIdsAsync = ref.watch(favoriteIdsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Favorites')),
+      appBar: AppBar(title: const Text('Saved')),
       body: itinerariesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => ErrorState(
@@ -35,8 +35,8 @@ class FavoritesScreen extends ConsumerWidget {
           if (favorites.isEmpty) {
             return const ComingSoon(
               icon: Icons.favorite_border_rounded,
-              title: 'No favorites yet',
-              message: 'Tap the heart on an itinerary to save it here.',
+              title: 'No saved journeys yet',
+              message: 'Tap the heart on a journey to find it here.',
             );
           }
 
@@ -48,9 +48,6 @@ class FavoritesScreen extends ConsumerWidget {
               final itinerary = favorites[index];
               return ItineraryCard(
                 itinerary: itinerary,
-                isFavorite: true,
-                onFavoriteToggle: () =>
-                    ref.read(favoriteIdsProvider.notifier).toggle(itinerary.id),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) =>

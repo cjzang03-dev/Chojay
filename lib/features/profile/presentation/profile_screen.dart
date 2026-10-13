@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../auth/data/auth_providers.dart';
-import '../../favorites/presentation/favorites_screen.dart';
 import '../../notifications/presentation/notifications_screen.dart';
 import 'edit_profile_screen.dart';
+import 'privacy_account_screen.dart';
+import 'travel_preferences_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
+
+  Future<void> _openHelpAndSupport(BuildContext context) async {
+    final uri = Uri.parse('https://journeyinbhutan.com/bhutan-travel-info');
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Couldn\'t open the travel guide.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,6 +45,11 @@ class ProfileScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
         children: [
+          const Text(
+            'A journey that\'s uniquely yours',
+            style: TextStyle(color: AppColors.stoneGrey),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
@@ -67,6 +84,10 @@ class ProfileScreen extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      const Text(
+                        'Traveler',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
                     ],
                   ),
                 ),
@@ -83,12 +104,23 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
+          const Text(
+            'ACCOUNT & PREFERENCES',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
+              color: AppColors.stoneGrey,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           Card(
             child: Column(
               children: [
                 _MenuRow(
                   icon: Icons.person_outline_rounded,
-                  label: 'Edit profile',
+                  label: 'Personal information',
+                  subtitle: 'Your traveler details',
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => EditProfileScreen(profile: profile),
@@ -97,10 +129,11 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 _MenuRow(
-                  icon: Icons.favorite_border_rounded,
-                  label: 'Favorites',
+                  icon: Icons.public_rounded,
+                  label: 'Travel preferences',
+                  subtitle: 'USD · English',
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const FavoritesScreen()),
+                    MaterialPageRoute(builder: (_) => const TravelPreferencesScreen()),
                   ),
                 ),
                 const Divider(height: 1, indent: 56),
@@ -110,6 +143,22 @@ class ProfileScreen extends ConsumerWidget {
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                         builder: (_) => const NotificationsScreen()),
+                  ),
+                ),
+                const Divider(height: 1, indent: 56),
+                _MenuRow(
+                  icon: Icons.help_outline_rounded,
+                  label: 'Help & support',
+                  subtitle: 'Bhutan travel essentials',
+                  onTap: () => _openHelpAndSupport(context),
+                ),
+                const Divider(height: 1, indent: 56),
+                _MenuRow(
+                  icon: Icons.shield_outlined,
+                  label: 'Privacy & account',
+                  subtitle: 'Your information, your choice',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const PrivacyAccountScreen()),
                   ),
                 ),
               ],
@@ -128,10 +177,16 @@ class ProfileScreen extends ConsumerWidget {
 }
 
 class _MenuRow extends StatelessWidget {
-  const _MenuRow({required this.icon, required this.label, required this.onTap});
+  const _MenuRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.subtitle,
+  });
 
   final IconData icon;
   final String label;
+  final String? subtitle;
   final VoidCallback onTap;
 
   @override
@@ -140,6 +195,7 @@ class _MenuRow extends StatelessWidget {
       onTap: onTap,
       leading: Icon(icon, color: AppColors.himalayanGreenDark),
       title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: subtitle == null ? null : Text(subtitle!),
       trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.stoneGrey),
     );
   }

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../bookings/presentation/bookings_screen.dart';
-import '../../chat/presentation/chat_list_screen.dart';
+import '../../favorites/presentation/favorites_screen.dart';
 import '../../itineraries/presentation/itineraries_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
 
-/// The signed-in tourist's main shell. Bottom-nav tabs are placeholders for
-/// now (build order: itinerary browsing lands next, then booking, then
-/// chat) — this session only wires up navigation + the real sign-out path.
+/// The signed-in tourist's main shell: Explore, Saved, My trips, Profile —
+/// matching the product's four core destinations. Chat isn't its own tab;
+/// it's reached from a specific booking (My trips), since every
+/// conversation here is tied to a booking request, not a standalone inbox.
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -20,8 +21,8 @@ class _HomeShellState extends State<HomeShell> {
 
   static const _tabs = [
     ItinerariesScreen(),
+    FavoritesScreen(),
     BookingsScreen(),
-    ChatListScreen(),
     ProfileScreen(),
   ];
 
@@ -36,17 +37,17 @@ class _HomeShellState extends State<HomeShell> {
           NavigationDestination(
             icon: Icon(Icons.explore_outlined),
             selectedIcon: Icon(Icons.explore),
-            label: 'Itineraries',
+            label: 'Explore',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.favorite_border_rounded),
+            selectedIcon: Icon(Icons.favorite_rounded),
+            label: 'Saved',
           ),
           NavigationDestination(
             icon: Icon(Icons.calendar_month_outlined),
             selectedIcon: Icon(Icons.calendar_month),
-            label: 'Bookings',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline),
-            selectedIcon: Icon(Icons.chat_bubble),
-            label: 'Chat',
+            label: 'My trips',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),

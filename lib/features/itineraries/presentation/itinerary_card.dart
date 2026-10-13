@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/favorite_button.dart';
+import '../../favorites/data/favorites_providers.dart';
 import '../domain/itinerary.dart';
 
-class ItineraryCard extends StatelessWidget {
-  const ItineraryCard({
-    super.key,
-    required this.itinerary,
-    this.onTap,
-    this.isFavorite = false,
-    this.onFavoriteToggle,
-  });
+/// A journey card: photo, category + save button, title, duration +
+/// difficulty, then a price row labeled as a sample price (never a final
+/// charge) with an arrow into the details. Watches its own favorite state
+/// via Riverpod rather than taking it as a prop, so every call site (the
+/// Explore list, the Saved tab) stays in sync without wiring it through.
+class ItineraryCard extends ConsumerWidget {
+  const ItineraryCard({super.key, required this.itinerary, this.onTap});
 
   final Itinerary itinerary;
   final VoidCallback? onTap;
-  final bool isFavorite;
-  final VoidCallback? onFavoriteToggle;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoriteIds = ref.watch(favoriteIdsProvider).valueOrNull ?? const {};
+    final isFavorite = favoriteIds.contains(itinerary.id);
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -54,16 +56,17 @@ class ItineraryCard extends StatelessWidget {
                       bottom: 10,
                       child: _Badge(label: itinerary.category!, dark: true),
                     ),
-                  if (onFavoriteToggle != null)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: FavoriteButton(
-                        isFavorite: isFavorite,
-                        onPressed: onFavoriteToggle!,
-                        compact: true,
-                      ),
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: FavoriteButton(
+                      isFavorite: isFavorite,
+                      onPressed: () => ref
+                          .read(favoriteIdsProvider.notifier)
+                          .toggle(itinerary.id),
+                      compact: true,
                     ),
+                  ),
                 ],
               ),
             ),
@@ -78,56 +81,105 @@ class ItineraryCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (itinerary.durationLabel.isNotEmpty) ...[
+                  if (itinerary.durationLabel.isNotEmpty ||
+                      itinerary.difficulty != null) ...[
                     const SizedBox(height: 4),
-                    Row(
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 2,
                       children: [
-                        const Icon(Icons.schedule_rounded,
-                            size: 14, color: AppColors.stoneGrey),
-                        const SizedBox(width: 4),
-                        Text(
-                          itinerary.durationLabel,
-                          style: const TextStyle(color: AppColors.stoneGrey),
-                        ),
+                        if (itinerary.durationLabel.isNotEmpty)
+                          _IconLabel(
+                            icon: Icons.schedule_rounded,
+                            label: itinerary.durationLabel,
+                          ),
+                        if (itinerary.difficulty != null)
+                          _IconLabel(
+                            icon: Icons.landscape_rounded,
+                            label: itinerary.difficulty!,
+                          ),
                       ],
                     ),
                   ],
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      if (itinerary.indicativePrice != null)
-                        Expanded(
-                          child: RichText(
-                            text: TextSpan(
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.himalayanGreenDark,
-                                fontSize: 17,
-                              ),
-                              children: [
-                                TextSpan(text: itinerary.indicativePrice!),
-                                const TextSpan(
-                                  text: '  per person',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 11,
-                                    color: AppColors.stoneGrey,
-                                  ),
-                                ),
-                              ],
+                  if (itinerary.indicativePrice != null) ...[
+                    RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.himalayanGreenDark,
+                          fontSize: 16,
+                        ),
+                        children: [
+                          const TextSpan(
+                            text: 'Sample price · from ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 11,
+                              color: AppColors.stoneGrey,
                             ),
                           ),
+                          TextSpan(text: itinerary.indicativePrice!),
+                          const TextSpan(
+                            text: ' / person',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 11,
+                              color: AppColors.stoneGrey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Government fees & flights extra',
+                            style: TextStyle(fontSize: 11, color: AppColors.stoneGrey),
+                          ),
                         ),
-                      if (itinerary.includesFlight)
-                        const _Badge(label: 'Flights included'),
-                    ],
-                  ),
+                        if (itinerary.includesFlight)
+                          const _Badge(label: 'Flights included'),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.chevron_right_rounded,
+                            size: 18, color: AppColors.stoneGrey),
+                      ],
+                    ),
+                  ] else
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: const [
+                        Icon(Icons.chevron_right_rounded,
+                            size: 18, color: AppColors.stoneGrey),
+                      ],
+                    ),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _IconLabel extends StatelessWidget {
+  const _IconLabel({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: AppColors.stoneGrey),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(color: AppColors.stoneGrey)),
+      ],
     );
   }
 }
