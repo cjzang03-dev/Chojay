@@ -129,7 +129,7 @@ class _DetailBodyState extends ConsumerState<_DetailBody> {
                   switch (_activeTab) {
                     _DetailTab.overview => _OverviewTab(itinerary: itinerary),
                     _DetailTab.dayByDay => _DayByDayTab(days: detail.days),
-                    _DetailTab.included => const _IncludedTab(),
+                    _DetailTab.included => _IncludedTab(itinerary: itinerary),
                     _DetailTab.bookingTerms => const _BookingTermsTab(),
                   },
                   SizedBox(height: 28, key: _operatorsKey),
@@ -326,43 +326,56 @@ class _DayByDayTab extends StatelessWidget {
 }
 
 class _IncludedTab extends StatelessWidget {
-  const _IncludedTab();
+  const _IncludedTab({required this.itinerary});
 
-  static const _included = [
-    'Accommodation',
-    'Meals',
-    'Licensed guide',
-    'Private transport',
-    'Monument & park tickets',
-    'Airport transfers',
-  ];
-
-  static const _excluded = [
-    'Bhutan government fees (Sustainable Development Fee)',
-    'Visa',
-    'International flights',
-    'Travel insurance',
-  ];
+  final Itinerary itinerary;
 
   @override
   Widget build(BuildContext context) {
+    final tracked = <String, bool>{
+      'Hotel / accommodation': itinerary.includesHotel,
+      'Meals': itinerary.includesMeals,
+      'Private transport': itinerary.includesTransport,
+      'Licensed guide': itinerary.includesGuide,
+      'International flights': itinerary.includesFlight,
+    };
+    final included = [
+      for (final entry in tracked.entries)
+        if (entry.value) entry.key,
+    ];
+    final notIncluded = [
+      for (final entry in tracked.entries)
+        if (!entry.value) entry.key,
+      'Bhutan government fees (Sustainable Development Fee)',
+      'Visa',
+      'Travel insurance',
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Confirm these with your operator in your quote:',
+          'What this operator includes in the price shown:',
           style: TextStyle(color: AppColors.stoneGrey, fontSize: 12.5),
         ),
         const SizedBox(height: 10),
-        for (final item in _included)
-          _ChecklistRow(label: item, icon: Icons.check_circle_rounded, color: AppColors.success),
+        if (included.isEmpty)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Text(
+              'This operator hasn\'t specified any inclusions yet — confirm with them directly.',
+              style: TextStyle(color: AppColors.stoneGrey, height: 1.4),
+            ),
+          )
+        else
+          for (final item in included)
+            _ChecklistRow(label: item, icon: Icons.check_circle_rounded, color: AppColors.success),
         const SizedBox(height: 18),
         const Text(
           'Not included:',
           style: TextStyle(color: AppColors.stoneGrey, fontSize: 12.5),
         ),
         const SizedBox(height: 10),
-        for (final item in _excluded)
+        for (final item in notIncluded)
           _ChecklistRow(label: item, icon: Icons.cancel_rounded, color: AppColors.stoneGreyLight),
       ],
     );

@@ -21,6 +21,11 @@ class OperatorPackage {
     required this.singleSupplement,
     required this.status,
     required this.days,
+    this.includesFlight = false,
+    this.includesHotel = false,
+    this.includesMeals = false,
+    this.includesTransport = false,
+    this.includesGuide = false,
   });
 
   final String? id; // null until first saved
@@ -38,6 +43,11 @@ class OperatorPackage {
   final String singleSupplement;
   final String status; // draft / pending_review / published / archived
   final List<PackageDay> days;
+  final bool includesFlight;
+  final bool includesHotel;
+  final bool includesMeals;
+  final bool includesTransport;
+  final bool includesGuide;
 
   static const _metaMarker = '\n\n⚙ ';
 
@@ -55,6 +65,11 @@ class OperatorPackage {
     String? priceMaxIndian,
     String? singleSupplement,
     List<PackageDay>? days,
+    bool? includesFlight,
+    bool? includesHotel,
+    bool? includesMeals,
+    bool? includesTransport,
+    bool? includesGuide,
   }) {
     return OperatorPackage(
       id: id,
@@ -72,6 +87,11 @@ class OperatorPackage {
       singleSupplement: singleSupplement ?? this.singleSupplement,
       status: status,
       days: days ?? this.days,
+      includesFlight: includesFlight ?? this.includesFlight,
+      includesHotel: includesHotel ?? this.includesHotel,
+      includesMeals: includesMeals ?? this.includesMeals,
+      includesTransport: includesTransport ?? this.includesTransport,
+      includesGuide: includesGuide ?? this.includesGuide,
     );
   }
 
@@ -91,6 +111,11 @@ class OperatorPackage {
     singleSupplement: '',
     status: 'draft',
     days: [],
+    includesFlight: false,
+    includesHotel: false,
+    includesMeals: false,
+    includesTransport: false,
+    includesGuide: false,
   );
 
   bool get locked => id != null && status != 'draft';
@@ -165,6 +190,11 @@ class OperatorPackage {
       singleSupplement: singleSupplement,
       status: row['status'] as String? ?? 'draft',
       days: days,
+      includesFlight: row['includes_flight'] as bool? ?? false,
+      includesHotel: row['includes_hotel'] as bool? ?? false,
+      includesMeals: row['includes_meals'] as bool? ?? false,
+      includesTransport: row['includes_transport'] as bool? ?? false,
+      includesGuide: row['includes_guide'] as bool? ?? false,
     );
   }
 

@@ -10,6 +10,10 @@ class Itinerary {
     this.durationDays,
     this.indicativePrice,
     this.includesFlight = false,
+    this.includesHotel = false,
+    this.includesMeals = false,
+    this.includesTransport = false,
+    this.includesGuide = false,
     this.coverPhotoUrl,
     this.category,
     required this.status,
@@ -21,6 +25,10 @@ class Itinerary {
   final int? durationDays;
   final String? indicativePrice;
   final bool includesFlight;
+  final bool includesHotel;
+  final bool includesMeals;
+  final bool includesTransport;
+  final bool includesGuide;
   final String? coverPhotoUrl;
   final String? category;
   final String status;
@@ -69,6 +77,10 @@ class Itinerary {
       durationDays: json['duration_days'] as int?,
       indicativePrice: json['indicative_price'] as String?,
       includesFlight: json['includes_flight'] as bool? ?? false,
+      includesHotel: json['includes_hotel'] as bool? ?? false,
+      includesMeals: json['includes_meals'] as bool? ?? false,
+      includesTransport: json['includes_transport'] as bool? ?? false,
+      includesGuide: json['includes_guide'] as bool? ?? false,
       coverPhotoUrl: json['cover_photo_url'] as String?,
       category: json['category'] as String?,
       status: json['status'] as String? ?? 'draft',

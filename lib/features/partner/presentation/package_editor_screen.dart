@@ -356,6 +356,48 @@ class _PackageEditorScreenState extends ConsumerState<PackageEditorScreen> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(hintText: 'e.g. 150'),
               ),
+              const SizedBox(height: AppSpacing.md),
+              const _FieldLabel("WHAT'S INCLUDED IN THE PRICE"),
+              _InclusionCheckbox(
+                label: 'Flights',
+                value: _package.includesFlight,
+                onChanged: locked
+                    ? null
+                    : (v) => setState(
+                        () => _package = _package.copyWith(includesFlight: v)),
+              ),
+              _InclusionCheckbox(
+                label: 'Hotel / accommodation',
+                value: _package.includesHotel,
+                onChanged: locked
+                    ? null
+                    : (v) => setState(
+                        () => _package = _package.copyWith(includesHotel: v)),
+              ),
+              _InclusionCheckbox(
+                label: 'Meals',
+                value: _package.includesMeals,
+                onChanged: locked
+                    ? null
+                    : (v) => setState(
+                        () => _package = _package.copyWith(includesMeals: v)),
+              ),
+              _InclusionCheckbox(
+                label: 'Transport',
+                value: _package.includesTransport,
+                onChanged: locked
+                    ? null
+                    : (v) => setState(() =>
+                        _package = _package.copyWith(includesTransport: v)),
+              ),
+              _InclusionCheckbox(
+                label: 'Licensed guide',
+                value: _package.includesGuide,
+                onChanged: locked
+                    ? null
+                    : (v) => setState(
+                        () => _package = _package.copyWith(includesGuide: v)),
+              ),
               const SizedBox(height: AppSpacing.lg),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -544,6 +586,39 @@ class _DayCardState extends State<_DayCard> {
                   const InputDecoration(hintText: 'Activities and locations'),
               onChanged: (v) => widget.onChanged(null, v),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InclusionCheckbox extends StatelessWidget {
+  const _InclusionCheckbox({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool value;
+  final void Function(bool value)? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onChanged == null ? null : () => onChanged!(!value),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Checkbox(
+              value: value,
+              onChanged: onChanged == null
+                  ? null
+                  : (v) => onChanged!(v ?? false),
+            ),
+            Text(label),
           ],
         ),
       ),

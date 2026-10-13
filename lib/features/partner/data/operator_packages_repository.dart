@@ -18,9 +18,7 @@ class OperatorPackagesRepository {
   Future<List<OperatorPackage>> fetchMine() async {
     final rows = await supabase
         .from('itineraries')
-        .select(
-          'id, title, description, duration_days, indicative_price, cover_photo_url, category, status, created_at',
-        )
+        .select()
         .eq('created_by', _currentUserId)
         .eq('source', 'operator_proposed')
         .order('created_at', ascending: false);
@@ -44,9 +42,7 @@ class OperatorPackagesRepository {
   Future<OperatorPackage> fetchOne(String id) async {
     final row = await supabase
         .from('itineraries')
-        .select(
-          'id, title, description, duration_days, indicative_price, cover_photo_url, category, status',
-        )
+        .select()
         .eq('id', id)
         .single();
     final dayRows = await supabase
@@ -82,6 +78,11 @@ class OperatorPackagesRepository {
       'cover_photo_url':
           package.coverPhotoUrl.trim().isEmpty ? null : package.coverPhotoUrl.trim(),
       'status': 'draft',
+      'includes_flight': package.includesFlight,
+      'includes_hotel': package.includesHotel,
+      'includes_meals': package.includesMeals,
+      'includes_transport': package.includesTransport,
+      'includes_guide': package.includesGuide,
     };
 
     String id;
