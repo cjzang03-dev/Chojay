@@ -8,6 +8,10 @@ class Profile {
     this.email,
     this.status,
     this.verificationStatus,
+    this.phone,
+    this.country,
+    this.bio,
+    this.photoUrl,
   });
 
   final String id;
@@ -16,6 +20,10 @@ class Profile {
   final String? email;
   final String? status; // active / pending (guides/operators until approved)
   final String? verificationStatus; // pending / approved / rejected
+  final String? phone;
+  final String? country;
+  final String? bio;
+  final String? photoUrl;
 
   bool get isPartner => userType == 'guide' || userType == 'operator';
 
@@ -27,6 +35,10 @@ class Profile {
       email: json['email'] as String?,
       status: json['status'] as String?,
       verificationStatus: json['verification_status'] as String?,
+      phone: json['phone'] as String?,
+      country: json['country'] as String?,
+      bio: json['bio'] as String?,
+      photoUrl: json['photo_url'] as String?,
     );
   }
 }

@@ -10,7 +10,12 @@ class Itinerary {
     this.durationDays,
     this.indicativePrice,
     this.includesFlight = false,
+    this.includesHotel = false,
+    this.includesMeals = false,
+    this.includesTransport = false,
+    this.includesGuide = false,
     this.coverPhotoUrl,
+    this.category,
     required this.status,
   });
 
@@ -20,7 +25,12 @@ class Itinerary {
   final int? durationDays;
   final String? indicativePrice;
   final bool includesFlight;
+  final bool includesHotel;
+  final bool includesMeals;
+  final bool includesTransport;
+  final bool includesGuide;
   final String? coverPhotoUrl;
+  final String? category;
   final String status;
 
   /// e.g. "7 Days / 6 Nights" — the common trip-length phrasing for Bhutan
@@ -32,6 +42,33 @@ class Itinerary {
     return '$days Days / ${days - 1} Nights';
   }
 
+  // The website's admin form folds "Group size" / "Difficulty" into this
+  // same `description` column, after this marker, rather than separate
+  // columns (see app/lib/itineraryMeta.ts there) — mirrored here so this
+  // app reads the same data operator_package.dart already parses the same
+  // way for operator-authored packages.
+  static const _metaMarker = '\n\n⚙ ';
+
+  /// [description] with the trailing metadata line (if present) stripped,
+  /// for display as the actual trip description.
+  String get cleanDescription {
+    final desc = description;
+    if (desc == null) return '';
+    final idx = desc.indexOf(_metaMarker);
+    return idx == -1 ? desc : desc.substring(0, idx);
+  }
+
+  /// Parsed out of [description]'s metadata line, if present.
+  String? get difficulty {
+    final desc = description;
+    if (desc == null) return null;
+    final idx = desc.indexOf(_metaMarker);
+    if (idx == -1) return null;
+    final metaLine = desc.substring(idx + _metaMarker.length);
+    final match = RegExp(r'Difficulty:\s*(.+)$').firstMatch(metaLine);
+    return match?.group(1)?.trim();
+  }
+
   factory Itinerary.fromJson(Map<String, dynamic> json) {
     return Itinerary(
       id: json['id'] as String,
@@ -40,7 +77,12 @@ class Itinerary {
       durationDays: json['duration_days'] as int?,
       indicativePrice: json['indicative_price'] as String?,
       includesFlight: json['includes_flight'] as bool? ?? false,
+      includesHotel: json['includes_hotel'] as bool? ?? false,
+      includesMeals: json['includes_meals'] as bool? ?? false,
+      includesTransport: json['includes_transport'] as bool? ?? false,
+      includesGuide: json['includes_guide'] as bool? ?? false,
       coverPhotoUrl: json['cover_photo_url'] as String?,
+      category: json['category'] as String?,
       status: json['status'] as String? ?? 'draft',
     );
   }

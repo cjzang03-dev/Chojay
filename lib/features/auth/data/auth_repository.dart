@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/config/supabase_client.dart';
 
 /// The two ways someone can complete Google sign-in in this app: the
@@ -12,25 +12,25 @@ import '../../../core/config/supabase_client.dart';
 enum SignupIntent { tourist, guide, operator }
 
 class AuthRepository {
-  AuthRepository({GoogleSignIn? googleSignIn})
-      : _googleSignIn = googleSignIn ??
-            GoogleSignIn(
-              // Required on Android/iOS so Supabase can verify the Google ID
-              // token server-side; unused on web (Supabase's OAuth redirect
-              // flow is used there instead).
-              serverClientId: Env.googleWebClientId.isEmpty
-                  ? null
-                  : Env.googleWebClientId,
-              scopes: const ['email', 'profile'],
-            );
+  /// Native sign-in uses this exact redirect URI with Supabase, and only
+  /// the scheme portion (below) with flutter_web_auth_2 — both must still
+  /// be in Supabase's Authentication > URL Configuration > Redirect URLs
+  /// allow-list, same as before.
+  static const _nativeRedirectUri = 'com.journeyinbhutan.chojay://login-callback';
+  static const _nativeCallbackScheme = 'com.journeyinbhutan.chojay';
 
-  final GoogleSignIn _googleSignIn;
+  /// Survives the full-page reload that web's OAuth redirect causes, so
+  /// [AuthBootstrap] can tell which role a brand-new web sign-in was for
+  /// once the session lands back in a fresh app instance. Native doesn't
+  /// need this to survive anything — signInWithGoogle awaits the whole
+  /// flow — but reads it back the same way for one code path.
+  static const _pendingIntentKey = 'pending_signup_intent';
 
   Stream<AuthState> get authStateChanges => supabase.auth.onAuthStateChange;
 
   User? get currentUser => supabase.auth.currentUser;
 
-  /// Signs in with Google and ensures a matching `profiles` row exists.
+  /// Signs in with Google.
   ///
   /// [intent] controls the `user_type` written for a brand-new profile only.
   /// Tourist is the invisible default for the main app flow; guide/operator
@@ -38,30 +38,56 @@ class AuthRepository {
   /// An existing profile's `user_type` is never overwritten here — that
   /// value is owned by admin approval / the website's identity checks.
   Future<void> signInWithGoogle(SignupIntent intent) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_pendingIntentKey, intent.name);
+
     if (kIsWeb) {
-      await supabase.auth.signInWithOAuth(OAuthProvider.google);
-      // Web uses a redirect; profile bootstrap happens in the auth-state
-      // listener once the session lands back in the app (see AuthController).
+      await supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        // Without this, Supabase redirects back to the project's Site URL
+        // instead of wherever this app is actually running — on a dev
+        // build (flutter run -d chrome, a random port each run) that sends
+        // the browser to the marketing site, not back to the app. Web uses
+        // a full-page redirect, which tears this app instance down before
+        // this call's future even resolves — profile bootstrap happens in
+        // AuthBootstrap's signed-in listener once the session lands back
+        // in the fresh app instance after the round trip.
+        redirectTo: Uri.base.toString(),
+      );
       return;
     }
 
-    final googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) {
-      throw const SignInCancelledException();
-    }
-    final googleAuth = await googleUser.authentication;
-    final idToken = googleAuth.idToken;
-    if (idToken == null) {
-      throw StateError('Google sign-in did not return an ID token.');
-    }
-
-    await supabase.auth.signInWithIdToken(
+    // Native: open the OAuth URL in a Custom Tab (Android) / ASWebAuthentication
+    // Session (iOS) via flutter_web_auth_2, rather than Supabase's own
+    // signInWithOAuth + an external-browser handoff. That approach left at
+    // least one real device stuck on a black screen after returning from
+    // the browser — a known class of Android task/activity bug with a
+    // separate deep-link Intent resolving back into the app. This way, the
+    // same call that opens the browser owns and closes it, with no
+    // separate Intent step to go wrong.
+    final oauthUrl = await supabase.auth.getOAuthSignInUrl(
       provider: OAuthProvider.google,
-      idToken: idToken,
-      accessToken: googleAuth.accessToken,
+      redirectTo: _nativeRedirectUri,
     );
+    final result = await FlutterWebAuth2.authenticate(
+      url: oauthUrl.url,
+      callbackUrlScheme: _nativeCallbackScheme,
+    );
+    await supabase.auth.getSessionFromUrl(Uri.parse(result));
+  }
 
-    await ensureProfile(intent);
+  /// Reads back the intent recorded before the most recent sign-in attempt
+  /// and clears it, so a later sign-in never reuses a stale value. Defaults
+  /// to [SignupIntent.tourist] if nothing was recorded (e.g. an existing
+  /// session restored on app start, not a fresh sign-in).
+  Future<SignupIntent> consumePendingIntent() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_pendingIntentKey);
+    await prefs.remove(_pendingIntentKey);
+    return SignupIntent.values.firstWhere(
+      (value) => value.name == raw,
+      orElse: () => SignupIntent.tourist,
+    );
   }
 
   /// Creates a `profiles` row for a first-time sign-in. No-ops if one
@@ -99,14 +125,27 @@ class AuthRepository {
     });
   }
 
+  /// Lets a tourist fill in the profile fields the website's own
+  /// setup-profile form already writes (full_name/phone/country/bio) —
+  /// only the ones relevant to a tourist, not the guide/operator-only ones
+  /// (license_number, agency_code, etc).
+  Future<void> updateProfile({
+    required String fullName,
+    String? phone,
+    String? country,
+    String? bio,
+  }) async {
+    final user = currentUser;
+    if (user == null) return;
+    await supabase.from('profiles').update({
+      'full_name': fullName,
+      'phone': phone,
+      'country': country,
+      'bio': bio,
+    }).eq('id', user.id);
+  }
+
   Future<void> signOut() async {
-    if (!kIsWeb) {
-      await _googleSignIn.signOut();
-    }
     await supabase.auth.signOut();
   }
-}
-
-class SignInCancelledException implements Exception {
-  const SignInCancelledException();
 }

@@ -7,6 +7,7 @@ import '../../../core/widgets/coming_soon.dart';
 import '../../../core/widgets/error_state.dart';
 import '../../itineraries/data/itineraries_providers.dart';
 import '../../itineraries/domain/itinerary.dart';
+import '../../notifications/presentation/notification_bell.dart';
 import '../data/partner_providers.dart';
 import '../domain/itinerary_application.dart';
 
@@ -24,7 +25,10 @@ class PartnerItinerariesScreen extends ConsumerWidget {
     final applicationsAsync = ref.watch(myApplicationsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Itineraries')),
+      appBar: AppBar(
+        title: const Text('Itineraries'),
+        actions: const [NotificationBell()],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(publishedItinerariesProvider);

@@ -252,6 +252,18 @@ credentials exist:
 - **Supabase dashboard:** Google enabled as a provider under
   Authentication → Providers, with the same client ID/secret.
 
+### Web sign-in getting stuck on the sign-in screen
+
+If "Continue with Google" on web either does nothing after the Google
+consent screen, or lands you back on the website instead of the app: open
+Supabase dashboard → Authentication → URL Configuration → Redirect URLs,
+and add every origin you actually run/host this app from (e.g.
+`http://localhost:*` for `flutter run -d chrome`, plus your real deployed
+URL). The app now passes its own running origin as `redirectTo`
+(`auth_repository.dart`), but Supabase will silently fall back to the
+project's Site URL if that origin isn't on the allow-list — which looks
+exactly like sign-in "not working."
+
 ## Validating this scaffold
 
 No Android/iOS emulator was available in the environment this was built

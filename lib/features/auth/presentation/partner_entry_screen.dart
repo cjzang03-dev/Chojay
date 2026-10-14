@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/error_dialog.dart';
 import '../data/auth_providers.dart';
 import '../data/auth_repository.dart';
 
@@ -24,18 +26,21 @@ class _PartnerEntryScreenState extends ConsumerState<PartnerEntryScreen> {
   Future<void> _choose(SignupIntent intent) async {
     setState(() => _submitting = intent);
     try {
-      await ref.read(authRepositoryProvider).signInWithGoogle(intent);
+      final repo = ref.read(authRepositoryProvider);
+      await repo.signInWithGoogle(intent);
+      // signInWithGoogle only launches the external-browser round trip; it
+      // returns before sign-in actually completes. Wait for the session to
+      // actually land before moving on, rather than navigating early.
+      await repo.authStateChanges
+          .firstWhere((state) => state.event == AuthChangeEvent.signedIn)
+          .timeout(const Duration(minutes: 3));
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const _ApplicationPendingScreen()),
       );
-    } on SignInCancelledException {
-      // no-op
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Sign-in failed: $e')),
-      );
+      await showErrorDialog(context, title: 'Sign-in failed', error: e);
     } finally {
       if (mounted) setState(() => _submitting = null);
     }

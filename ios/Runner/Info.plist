@@ -66,5 +66,18 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Catches the browser's redirect back into the app after Google
+	     sign-in completes (see AuthRepository.signInWithGoogle). This exact
+	     scheme must also be in Supabase's Authentication > URL Configuration
+	     > Redirect URLs allow-list. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.journeyinbhutan.chojay</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

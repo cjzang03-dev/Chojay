@@ -157,4 +157,26 @@ class ChatRepository {
         .subscribe();
     return channel;
   }
+
+  /// Fires on any message addressed to the signed-in user, regardless of
+  /// which conversation it belongs to — used to keep the conversation list
+  /// live (new/updated conversations don't otherwise have a single-column
+  /// realtime filter to subscribe to directly).
+  RealtimeChannel subscribeToIncomingMessages(void Function() onInsert) {
+    final channel = supabase.channel('inbox-$_currentUserId');
+    channel
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'messages',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'receiver_id',
+            value: _currentUserId,
+          ),
+          callback: (payload) => onInsert(),
+        )
+        .subscribe();
+    return channel;
+  }
 }

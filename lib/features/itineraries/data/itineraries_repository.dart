@@ -12,6 +12,23 @@ class ItinerariesRepository {
     return rows.map(Itinerary.fromJson).toList();
   }
 
+  /// A single real cover photo for the sign-in screen's hero background —
+  /// reuses already-approved itinerary photography instead of introducing
+  /// a new (untrusted) external image source. Works pre-auth: this table's
+  /// published rows are publicly readable, same as the website's own
+  /// unauthenticated /explore browsing.
+  Future<String?> fetchFeaturedCoverPhoto() async {
+    final rows = await supabase
+        .from('itineraries')
+        .select('cover_photo_url')
+        .eq('status', 'published')
+        .not('cover_photo_url', 'is', null)
+        .order('created_at', ascending: false)
+        .limit(1);
+    if (rows.isEmpty) return null;
+    return rows.first['cover_photo_url'] as String?;
+  }
+
   Future<Itinerary> fetchById(String id) async {
     final row =
         await supabase.from('itineraries').select().eq('id', id).single();

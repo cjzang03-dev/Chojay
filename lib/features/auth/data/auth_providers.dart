@@ -9,6 +9,23 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
 });
 
+/// Bootstraps a `profiles` row the moment a sign-in's session lands. Every
+/// platform now signs in through the same external-browser OAuth redirect
+/// (see [AuthRepository.signInWithGoogle]), which returns before sign-in
+/// actually completes, so this listener — not the call site — is what
+/// actually creates the profile. Watched once from `ChojayApp` so it lives
+/// for the app's lifetime.
+final authBootstrapProvider = Provider<void>((ref) {
+  final repo = ref.watch(authRepositoryProvider);
+  final subscription = repo.authStateChanges.listen((state) async {
+    if (state.event == AuthChangeEvent.signedIn) {
+      final intent = await repo.consumePendingIntent();
+      await repo.ensureProfile(intent);
+    }
+  });
+  ref.onDispose(subscription.cancel);
+});
+
 /// The live Supabase auth state; the router redirect and sign-in screen
 /// both key off this rather than polling `currentUser` directly.
 final authStateProvider = StreamProvider<AuthState>((ref) {

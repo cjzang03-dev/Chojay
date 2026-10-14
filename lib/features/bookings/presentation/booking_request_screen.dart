@@ -7,12 +7,32 @@ import '../../chat/presentation/chat_thread_screen.dart';
 import '../../itineraries/domain/itinerary.dart';
 import '../data/bookings_providers.dart';
 
+/// A short, curated list rather than every country on earth — covers the
+/// nationalities Bhutan's government fee (SDF) actually distinguishes
+/// (India, Bangladesh, Maldives pay a different rate from everyone else)
+/// plus the countries Bhutan's tourists most commonly come from.
+const _nationalities = [
+  'India',
+  'Bangladesh',
+  'Maldives',
+  'United States',
+  'United Kingdom',
+  'Australia',
+  'Canada',
+  'Germany',
+  'France',
+  'Japan',
+  'Singapore',
+  'Other',
+];
+
 /// Build order step 5: pick an operator from the approved list (already
 /// done on the detail screen), show the itinerary's indicative price as-is
-/// (never recalculated here), and submit a booking *request*. Submitting
-/// also starts (or reuses) a chat thread with the operator and drops in a
-/// summary message — per product decision, exact terms including
-/// group/room pricing are confirmed there, not auto-calculated here.
+/// (never recalculated here), and submit a quote *request* — not a
+/// booking. Submitting also starts (or reuses) a chat thread with the
+/// operator and drops in a summary message — per product decision, exact
+/// terms including group/room pricing are confirmed there, not
+/// auto-calculated here.
 class BookingRequestScreen extends ConsumerStatefulWidget {
   const BookingRequestScreen({
     super.key,
@@ -31,6 +51,7 @@ class BookingRequestScreen extends ConsumerStatefulWidget {
 class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
   DateTime? _travelStartDate;
   int _travelerCount = 2;
+  String? _nationality;
   final _notesController = TextEditingController();
   bool _isSubmitting = false;
 
@@ -59,23 +80,33 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
       );
       return;
     }
+    if (_nationality == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Select your passport nationality first.')),
+      );
+      return;
+    }
 
     setState(() => _isSubmitting = true);
     try {
+      final userNotes = _notesController.text.trim();
+      final notes = [
+        'Passport nationality: $_nationality.',
+        if (userNotes.isNotEmpty) userNotes,
+      ].join(' ');
+
       await ref.read(bookingsRepositoryProvider).createBookingRequest(
             itineraryId: widget.itinerary.id,
             operatorId: widget.operator.profileId,
             travelStartDate: travelStartDate,
             travelerCount: _travelerCount,
             indicativePriceSnapshot: widget.itinerary.indicativePrice,
-            notes: _notesController.text.trim().isEmpty
-                ? null
-                : _notesController.text.trim(),
+            notes: notes,
           );
       ref.invalidate(myBookingsProvider);
       if (!mounted) return;
 
-      // Best-effort: the booking request itself already succeeded above, so
+      // Best-effort: the quote request itself already succeeded above, so
       // a hiccup here shouldn't block the user — fall back to a plain
       // confirmation instead of opening the thread.
       try {
@@ -87,9 +118,9 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
         await chatRepository.sendMessage(
           conversationId: conversationId,
           receiverId: widget.operator.profileId,
-          content: 'New booking request: "${widget.itinerary.title}" — '
-              '$dateLabel, $_travelerCount traveler(s). '
-              '${widget.itinerary.indicativePrice ?? ''} indicative price — '
+          content: 'New quote request: "${widget.itinerary.title}" — '
+              '$dateLabel, $_travelerCount traveler(s), $_nationality passport. '
+              '${widget.itinerary.indicativePrice ?? ''} sample price — '
               'let\'s confirm exact details here.',
         );
         if (!mounted) return;
@@ -108,8 +139,8 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Request sent to ${widget.operator.displayName}. '
-              'Track it in the Bookings tab.',
+              'Quote request sent to ${widget.operator.displayName}. '
+              'Track it in the My trips tab.',
             ),
           ),
         );
@@ -132,7 +163,7 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
         : '${_travelStartDate!.year}-${_travelStartDate!.month.toString().padLeft(2, '0')}-${_travelStartDate!.day.toString().padLeft(2, '0')}';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Request to book')),
+      appBar: AppBar(title: const Text('Request a quote')),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -150,7 +181,7 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
                   if (itinerary.indicativePrice != null) ...[
                     const SizedBox(height: 12),
                     Text(
-                      itinerary.indicativePrice!,
+                      'Sample price · from ${itinerary.indicativePrice!}',
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -158,10 +189,9 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
                       ),
                     ),
                     Text(
-                      'Indicative price, same for every approved operator. '
-                      'Exact pricing for your group (e.g. shared rooms) is '
-                      'confirmed directly with the operator — this isn\'t a '
-                      'final charge.',
+                      'Government fees depend on nationality and age — '
+                      'confirm current rates with your operator. This isn\'t '
+                      'a final charge; a quote request is not a booking.',
                       style: TextStyle(fontSize: 12, color: AppColors.stoneGrey, height: 1.4),
                     ),
                   ],
@@ -205,6 +235,26 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
             ],
           ),
           const SizedBox(height: 24),
+          Text('Passport nationality', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text(
+            'Government fees depend on nationality and age.',
+            style: TextStyle(fontSize: 12, color: AppColors.stoneGrey),
+          ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            value: _nationality,
+            isExpanded: true,
+            decoration: const InputDecoration(hintText: 'Select nationality'),
+            items: [
+              for (final nationality in _nationalities)
+                DropdownMenuItem(value: nationality, child: Text(nationality)),
+            ],
+            onChanged: _isSubmitting
+                ? null
+                : (value) => setState(() => _nationality = value),
+          ),
+          const SizedBox(height: 24),
           Text('Anything the operator should know? (optional)',
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
@@ -226,7 +276,7 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
-                : const Text('Send booking request'),
+                : const Text('Send quote request'),
           ),
         ],
       ),
